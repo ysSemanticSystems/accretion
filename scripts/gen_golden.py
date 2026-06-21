@@ -33,6 +33,15 @@ def disk_t(r: float, m: float, md: float) -> float:
 
 
 cases: list[dict] = []
+
+# Derived constants: pin the Rust derivation against astropy's tabulated value.
+# sigma_sb is exact (2019 SI); sigma_T is consistent to CODATA's internal
+# precision (the Rust value uses alpha; astropy uses e/eps0/m_e).
+cases.append(
+    {"fn": "sigma_sb", "args": {}, "expected": float(c.sigma_sb.cgs.value)}
+)
+cases.append({"fn": "sigma_t", "args": {}, "expected": float(c.sigma_T.cgs.value)})
+
 for m in (10.0, 1.0e6, 6.5e9):
     cases.append({"fn": "l_eddington", "args": {"m_bh_msun": m}, "expected": l_edd(m)})
 

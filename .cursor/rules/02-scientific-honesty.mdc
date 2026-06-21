@@ -49,9 +49,13 @@ in its doc comment is rejected. Use the original paper where possible:
 
 ## 4. Constants are single-sourced and cited
 
-Physical constants live once, as `pub const` in `accretion-core`, each tagged
-with its source (CODATA 2018 / IAU). Do not redefine `G`, `c`, `M_sun`, etc.
-anywhere else (not in `godot-ext`, not in a shader, not in GDScript).
+Physical constants live once, in `accretion-core`, each tagged with its source.
+Fundamentals (`G`, `c`, `M_sun`, `m_p`, `m_e`, `h`, `k_B`, `alpha`, ...) are
+generated from astropy into `constants.rs` (CODATA / IAU). Composite constants
+that are exact functions of fundamentals (`sigma_sb`, `sigma_T`) are DERIVED in
+`derived.rs` with their formula + citation and pinned by a golden test — never
+tabulated as a second independent copy (see rule 11). Do not redefine any of
+them anywhere else (not in `godot-ext`, not in a shader, not in GDScript).
 
 ## 5. Hardcoded literature numbers are tech debt outside two places
 

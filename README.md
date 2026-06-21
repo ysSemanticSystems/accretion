@@ -61,12 +61,19 @@ cd accretion
 ./scripts/setup-hooks.sh          # once per clone — AI-attribution strip hooks
 pip install -r scripts/requirements.txt
 
-make check                        # generators, invariants, test, clippy, build
+make check                        # generators, invariants, test, clippy, build, Godot smoke
 # Open the project in Godot 4.7 and run scenes/Main.tscn (F5)
 ```
 
-If `make check` passes but Godot is not on your `PATH`, the headless load step
-is skipped with a warning — run the scene manually in the editor.
+**Before opening Godot**, run `make build` (or `make godot-smoke`). The native
+library is copied to `bin/libgodot_ext.dylib` (macOS) or `bin/libgodot_ext.so`
+(Linux) — that is what `accretion.gdextension` loads. Do not point Godot at a
+stale `target/debug/` artifact from an old build.
+
+`make godot-smoke` headlessly instantiates `BlackHole` and calls every Rust API
+used by the game (`salpeter_time_s`, `advance_mass`, …). On macOS the Makefile
+defaults to `/Applications/Godot.app/Contents/MacOS/Godot`; override with
+`GODOT_BIN=...` if needed.
 
 ---
 
@@ -85,7 +92,7 @@ pressure blowout that will become the game's loss condition.
 
 ---
 
-## Physics (honest scope)
+## Physics (verifiable scope)
 
 Every public function in `accretion-core` documents its primary source in the
 doc comment. Current Slice 0 coverage:

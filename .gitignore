@@ -4,3 +4,8 @@
 
 # Rust / Cargo build artifacts
 /target/
+rust_out
+
+# bin/ holds Godot-loaded native libs (must NOT be gitignored — Godot skips
+# ignored paths when resolving res://). Do not commit the binaries; make build
+# creates them locally.

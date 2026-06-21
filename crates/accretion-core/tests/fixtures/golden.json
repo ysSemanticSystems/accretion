@@ -2,6 +2,16 @@
   "source": "astropy 6.0.1",
   "cases": [
     {
+      "fn": "sigma_sb",
+      "args": {},
+      "expected": 5.6703744191844314e-05
+    },
+    {
+      "fn": "sigma_t",
+      "args": {},
+      "expected": 6.6524587321000005e-25
+    },
+    {
       "fn": "l_eddington",
       "args": {
         "m_bh_msun": 10.0

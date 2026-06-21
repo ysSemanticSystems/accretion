@@ -5,7 +5,7 @@
 > automatically.
 
 `accretion` is an accretion-disk survival/management game built like scientific
-software: the physics is honest, every formula cites a primary source, and the
+software: the physics is rigorous, every formula cites a primary source, and the
 core is independently testable. It is the game-side companion to
 [`ysSemanticSystems/BlackHoleResearch`](https://github.com/ysSemanticSystems/BlackHoleResearch),
 and inherits its discipline — relocated from Python/Streamlit to Rust/Godot.
@@ -52,6 +52,14 @@ accretion/                      # repo root (Godot 4.7 project lives here)
 ├── Cargo.toml                  # [workspace]
 ├── crates/
 │   ├── accretion-core/         # pure physics lib (CGS), cargo-testable
+│   │   └── src/
+│   │       ├── constants.rs    # fundamentals (generated)
+│   │       ├── derived.rs      # SIGMA_SB, SIGMA_T from fundamentals
+│   │       ├── eddington.rs    # L_Edd, lambda, mdot↔L
+│   │       ├── kerr.rs         # ISCO, efficiency, spin geometry
+│   │       ├── disk.rs         # Shakura–Sunyaev T(r)
+│   │       ├── evolution.rs    # mass/spin evolution, integrity
+│   │       └── colorimetry.rs  # Planck → CIE → sRGB
 │   └── godot-ext/              # cdylib gdext binding — presentation only
 ├── accretion.gdextension       # native lib wiring (api-4-6, loads under 4.7)
 ├── project.godot, icon.svg     # Godot project
@@ -85,7 +93,7 @@ accretion/                      # repo root (Godot 4.7 project lives here)
 
 When publishing the repository, set the **About** description to:
 
-> Accretion-disk survival game — honest Rust physics, Godot 4.7 HDR lensing. Companion to BlackHoleResearch.
+> Accretion-disk survival game — first-principles Rust physics, Godot 4.7 HDR lensing. Companion to BlackHoleResearch.
 
 Suggested **Topics:** `black-hole`, `accretion-disk`, `godot`, `rust`, `astrophysics`,
 `shakura-sunyaev`, `gravitational-lensing`, `game`, `scientific-software`.
@@ -94,7 +102,7 @@ Enable **Issues** and **Discussions** if you want community feedback. CI badge i
 README assumes the default branch is `main` and workflow file is
 `.github/workflows/ci.yml`.
 
-## Known deferred physics (be honest about it)
+## Known deferred physics (stated plainly)
 
 - `disk_temperature` uses the **bare** Shakura-Sunyaev form (`T ∝ r^(-3/4)`,
   no inner-boundary factor), so there is no temperature peak / dark inner gap

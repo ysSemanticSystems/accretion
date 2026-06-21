@@ -1,6 +1,5 @@
 ; GDExtension manifest for the accretion game.
-; The native library is built by `cargo build` (debug) / `cargo build --release`
-; from the workspace root into `target/{debug,release}/`.
+; Built by `make build` → scripts/build_godot_ext.sh copies the cdylib into bin/.
 ;
 ; entry_symbol is gdext's default init function.
 ; Built against the prebuilt api-4-6 bindings; loads under the Godot 4.7
@@ -9,17 +8,16 @@
 [configuration]
 entry_symbol = "gdext_rust_init"
 compatibility_minimum = 4.6
-reloadable = true
+reloadable = false
 
 [libraries]
-; Primary target: macOS (Apple Silicon / arm64).
-macos.debug = "res://target/debug/libgodot_ext.dylib"
-macos.release = "res://target/release/libgodot_ext.dylib"
-macos.debug.arm64 = "res://target/debug/libgodot_ext.dylib"
-macos.release.arm64 = "res://target/release/libgodot_ext.dylib"
+macos.debug = "res://bin/libgodot_ext.dylib"
+macos.release = "res://bin/libgodot_ext.dylib"
+macos.debug.arm64 = "res://bin/libgodot_ext.dylib"
+macos.release.arm64 = "res://bin/libgodot_ext.dylib"
 
-; Convenience entries for other hosts (build the matching target first).
-linux.debug.x86_64 = "res://target/debug/libgodot_ext.so"
-linux.release.x86_64 = "res://target/release/libgodot_ext.so"
-windows.debug.x86_64 = "res://target/debug/godot_ext.dll"
-windows.release.x86_64 = "res://target/release/godot_ext.dll"
+linux.debug.x86_64 = "res://bin/libgodot_ext.so"
+linux.release.x86_64 = "res://bin/libgodot_ext.so"
+
+windows.debug.x86_64 = "res://bin/godot_ext.dll"
+windows.release.x86_64 = "res://bin/godot_ext.dll"

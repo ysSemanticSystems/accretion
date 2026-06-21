@@ -1,11 +1,12 @@
 //! Oracle-driven golden tests: expected values from `scripts/gen_golden.py` (astropy).
 
+mod common;
+
 use std::path::PathBuf;
 
 use accretion_core as phys;
 
-/// Relative tolerance for oracle comparison (one part per billion).
-const ORACLE_TOL: f64 = 0.000000001;
+use common::{ORACLE_RTOL, assert_relative_eq};
 
 #[test]
 fn golden_matches_astropy_oracle() {
@@ -16,6 +17,8 @@ fn golden_matches_astropy_oracle() {
     for case in doc["cases"].as_array().expect("cases array") {
         let exp = case["expected"].as_f64().expect("expected f64");
         let got = match case["fn"].as_str().expect("fn name") {
+            "sigma_sb" => phys::SIGMA_SB,
+            "sigma_t" => phys::SIGMA_T,
             "l_eddington" => phys::l_eddington(case["args"]["m_bh_msun"].as_f64().unwrap()),
             "disk_temperature" => phys::disk_temperature(
                 case["args"]["r_cm"].as_f64().unwrap(),
@@ -24,10 +27,6 @@ fn golden_matches_astropy_oracle() {
             ),
             other => panic!("unknown fn {other}"),
         };
-        assert!(
-            (got - exp).abs() <= ORACLE_TOL * exp.abs(),
-            "fn={} got={got} exp={exp}",
-            case["fn"]
-        );
+        assert_relative_eq(got, exp, ORACLE_RTOL);
     }
 }

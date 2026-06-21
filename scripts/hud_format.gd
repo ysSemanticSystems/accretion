@@ -42,6 +42,29 @@ static func lambda_edd(lam: float) -> String:
 	return "%.3f× Edd" % lam
 
 
+static func years(seconds: float) -> String:
+	var yr := seconds / 31557600.0  # Julian year
+	if yr >= 1.0e9:
+		return "%.2f Gyr" % (yr / 1.0e9)
+	if yr >= 1.0e6:
+		return "%.2f Myr" % (yr / 1.0e6)
+	if yr >= 1.0e3:
+		return "%.2f kyr" % (yr / 1.0e3)
+	return "%.0f yr" % yr
+
+
+static func hertz(f: float) -> String:
+	if f >= 1.0e3:
+		return "%.2f kHz" % (f / 1.0e3)
+	if f >= 1.0:
+		return "%.2f Hz" % f
+	if f >= 1.0e-3:
+		return "%.2f mHz" % (f * 1.0e3)
+	if f >= 1.0e-6:
+		return "%.2f µHz" % (f * 1.0e6)
+	return "%s Hz" % sci(f, 2)
+
+
 static func sci(x: float, sig: int) -> String:
 	if x == 0.0:
 		return "0"

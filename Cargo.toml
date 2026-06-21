@@ -7,7 +7,7 @@ version = "0.1.0"
 edition = "2024"
 license = "MPL-2.0"
 repository = "https://github.com/ysSemanticSystems/accretion"
-description = "Accretion-disk survival game — honest Rust physics, Godot 4.7 HDR lensing"
+description = "Accretion-disk survival game — first-principles Rust physics, Godot 4.7 HDR lensing"
 
 [profile.dev]
 opt-level = 1
