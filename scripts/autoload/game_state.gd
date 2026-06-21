@@ -1,7 +1,7 @@
 extends Node
 ## Global game flow. Spec: wiki/architecture/game-shell.md
 
-enum State { BOOT, MENU, PLAYING, PAUSED, SUMMARY, LAB }
+enum State { BOOT, MENU, PLAYING, PAUSED, OPS, SUMMARY, LAB }
 
 signal state_changed(from: State, to: State)
 
@@ -13,7 +13,7 @@ func transition(to: State) -> void:
 		return
 	var from := state
 	state = to
-	get_tree().paused = (to == State.PAUSED)
+	get_tree().paused = (to == State.PAUSED or to == State.OPS)
 	state_changed.emit(from, to)
 
 

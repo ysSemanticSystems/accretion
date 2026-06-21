@@ -19,11 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   higher-quality raymarch when near, stylized infall view inside the capture sphere;
   debris/brackets/radar hidden inside that volume.
 
+- **Ops console menu (F014).** Tab opens an in-flight command board: M87* approach
+  star chart, arsenal loadout, run intel, and cmd links (Helldivers ops-board chrome).
+
 - **Explore world soul (F011).** Distant accretion black hole on the inward skyline,
   warm disk lighting, nebula/disk sky glow, parallax dust, debris brackets with
   600→400 km cross-fade, bus-scale clustered belts, BH-proximity audio tint.
 
 ### Changed
+
+- **UI sound feedback.** Replaced sharp 880 Hz menu beeps with soft procedural clicks,
+  warm confirm chimes, muted deny thuds, and gentler deposit clinks. Ops tab switches
+  use a quieter tick.
 
 - **Visual drama pass (F011).** Replaced flat ambient with intent-lit scene: hard warm
   BH-motivated key + cool rim, ambient dropped to 0.12 for contrast; ACES tonemap and

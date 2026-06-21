@@ -15,6 +15,7 @@ const SCENE_PATHS: Array[String] = [
 	"res://scenes/screens/PauseMenu.tscn",
 	"res://scenes/screens/SettingsMenu.tscn",
 	"res://scenes/screens/UpgradeScreen.tscn",
+	"res://scenes/screens/OpsConsole.tscn",
 	"res://scenes/screens/RunSummary.tscn",
 ]
 

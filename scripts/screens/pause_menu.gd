@@ -28,6 +28,12 @@ func _on_abandon_pressed() -> void:
 	GameState.transition(GameState.State.SUMMARY)
 
 
+func _on_ops_pressed() -> void:
+	AudioManager.play_ui_click()
+	GameState.transition(GameState.State.OPS)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
 func _on_menu_pressed() -> void:
 	AudioManager.play_ui_click()
 	var shell := get_tree().root.get_node_or_null("Main")

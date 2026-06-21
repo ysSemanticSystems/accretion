@@ -42,6 +42,9 @@ text = "Resume"
 [node name="Settings" type="Button" parent="Panel/Margin/VBox"]
 text = "Settings"
 
+[node name="OpsConsole" type="Button" parent="Panel/Margin/VBox"]
+text = "Ops Console"
+
 [node name="Abandon" type="Button" parent="Panel/Margin/VBox"]
 text = "Abandon Run"
 
@@ -50,5 +53,6 @@ text = "Quit to Menu"
 
 [connection signal="pressed" from="Panel/Margin/VBox/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="Panel/Margin/VBox/Settings" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="Panel/Margin/VBox/OpsConsole" to="." method="_on_ops_pressed"]
 [connection signal="pressed" from="Panel/Margin/VBox/Abandon" to="." method="_on_abandon_pressed"]
 [connection signal="pressed" from="Panel/Margin/VBox/Menu" to="." method="_on_menu_pressed"]

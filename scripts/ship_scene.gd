@@ -135,6 +135,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		GameState.transition(GameState.State.PAUSED)
 		return
+	if event.is_action_pressed("ops_console"):
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		GameState.transition(GameState.State.OPS)
+		return
 	if event.is_action_pressed("ship_auto_level_toggle"):
 		ship.toggle_auto_level()
 

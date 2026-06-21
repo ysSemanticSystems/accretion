@@ -40,6 +40,7 @@ bugs, add feel, then enable replay.
 | [F009](../features/F009-settings-audio.md) | Settings + audio buses | PR8 |
 | [F010](../features/F010-hud-component.md) | Event-driven HUD | PR8 |
 | [F012](../features/F012-milestone-ladder-victory.md) | Exploration milestones + Continue | PR9 |
+| [F014](../features/F014-ops-console-menu.md) | Ops console menu (chart + loadout) | PR10 |
 
 ## PR sequencing (continued)
 

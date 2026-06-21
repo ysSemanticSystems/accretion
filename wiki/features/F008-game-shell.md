@@ -6,8 +6,8 @@ layer: features
 depends_on: [game-shell, F004-home-depot-progression]
 blocks: [F009-settings-audio, F010-hud-component]
 acceptance:
-  - "main_scene is scenes/Main.tscn with BOOT→MENU→PLAYING→PAUSED→SUMMARY→LAB"
-  - "Esc in PLAYING opens pause menu; Esc in LAB returns to main menu"
+  - "main_scene is scenes/Main.tscn with BOOT→MENU→PLAYING→PAUSED→OPS→SUMMARY→LAB"
+  - "Esc in PLAYING opens pause menu; Tab opens Ops Console; Esc/Tab in OPS resumes flight"
   - "Main menu BH Lab opens BhSurvival.tscn; Esc returns to menu"
   - "Upgrade purchase gated to depot radius; docked UpgradeScreen replaces U/Y HUD shop"
   - "Run summary shows seed, banked mass, sectors, upgrades, max distance, time"
@@ -17,6 +17,8 @@ implements:
   - "scripts/app_shell.gd"
   - "scenes/Main.tscn"
   - "scenes/screens/"
+  - "scripts/screens/ops_console.gd"
+  - "scenes/screens/OpsConsole.tscn"
 last_reviewed: 2026-06-21
 ---
 

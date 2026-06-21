@@ -8,6 +8,7 @@ const MAIN_MENU_SCENE := preload("res://scenes/screens/MainMenu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/screens/PauseMenu.tscn")
 const SETTINGS_SCENE := preload("res://scenes/screens/SettingsMenu.tscn")
 const UPGRADE_SCENE := preload("res://scenes/screens/UpgradeScreen.tscn")
+const OPS_SCENE := preload("res://scenes/screens/OpsConsole.tscn")
 const SUMMARY_SCENE := preload("res://scenes/screens/RunSummary.tscn")
 
 @onready var backdrop_host: Node3D = $BackdropHost
@@ -39,7 +40,7 @@ func continue_run() -> void:
 
 
 func _on_state_changed(_from: GameState.State, to: GameState.State) -> void:
-	dimmer.visible = to == GameState.State.PAUSED
+	dimmer.visible = to == GameState.State.PAUSED or to == GameState.State.OPS
 	match to:
 		GameState.State.MENU:
 			_clear_gameplay()
@@ -56,6 +57,12 @@ func _on_state_changed(_from: GameState.State, to: GameState.State) -> void:
 			_start_bh_lab()
 		GameState.State.PAUSED:
 			_swap_screen(PAUSE_MENU_SCENE.instantiate())
+		GameState.State.OPS:
+			var ops: Node = OPS_SCENE.instantiate()
+			_swap_screen(ops)
+			if ops.has_method("bind_gameplay") and _gameplay != null:
+				ops.bind_gameplay(_gameplay)
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		GameState.State.SUMMARY:
 			_clear_gameplay()
 			_show_backdrop(true)
@@ -83,6 +90,11 @@ func show_upgrade_dock(progression: Node) -> void:
 			screen.bind_objectives(objectives)
 
 
+func show_settings_from_ops() -> void:
+	_settings_origin_state = GameState.State.OPS
+	show_settings()
+
+
 func close_settings() -> void:
 	_restore_after_settings(_settings_origin_state)
 
@@ -107,6 +119,13 @@ func _restore_after_settings(origin: GameState.State) -> void:
 		GameState.State.PAUSED:
 			get_tree().paused = true
 			_swap_screen(PAUSE_MENU_SCENE.instantiate())
+		GameState.State.OPS:
+			get_tree().paused = true
+			var ops: Node = OPS_SCENE.instantiate()
+			_swap_screen(ops)
+			if ops.has_method("bind_gameplay") and _gameplay != null:
+				ops.bind_gameplay(_gameplay)
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		_:
 			get_tree().paused = GameState.state == GameState.State.PAUSED
 			_clear_screen()

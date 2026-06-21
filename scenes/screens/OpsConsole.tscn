@@ -1,0 +1,192 @@
+[gd_scene format=3 uid="uid://c4kpwh1wvseqq"]
+
+[ext_resource type="Script" path="res://scripts/screens/ops_console.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/ops_star_chart.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/ops_loadout_panel.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/ops_intel_panel.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/ui/ops_cmd_panel.gd" id="5"]
+
+[node name="OpsConsole" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+script = ExtResource("1")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.03, 0.05, 0.88)
+
+[node name="Frame" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="HBox" type="HBoxContainer" parent="Frame"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Sidebar" type="PanelContainer" parent="Frame/HBox"]
+custom_minimum_size = Vector2(148, 0)
+layout_mode = 2
+
+[node name="SidebarBody" type="VBoxContainer" parent="Frame/HBox/Sidebar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Brand" type="Label" parent="Frame/HBox/Sidebar/SidebarBody"]
+theme_override_colors/font_color = Color(0.35, 0.82, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "ACCRETION OPS"
+
+[node name="Sub" type="Label" parent="Frame/HBox/Sidebar/SidebarBody"]
+theme_override_colors/font_color = Color(0.45, 0.52, 0.58, 1)
+theme_override_font_sizes/font_size = 10
+text = "COMMAND CONSOLE"
+
+[node name="Sep" type="HSeparator" parent="Frame/HBox/Sidebar/SidebarBody"]
+layout_mode = 2
+
+[node name="Tabs" type="VBoxContainer" parent="Frame/HBox/Sidebar/SidebarBody"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Spacer" type="Control" parent="Frame/HBox/Sidebar/SidebarBody"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Footer" type="Label" parent="Frame/HBox/Sidebar/SidebarBody"]
+theme_override_colors/font_color = Color(0.45, 0.52, 0.58, 1)
+theme_override_font_sizes/font_size = 10
+text = "Tab · toggle
+Esc · resume"
+
+[node name="Main" type="PanelContainer" parent="Frame/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MainBody" type="VBoxContainer" parent="Frame/HBox/Main"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="VBoxContainer" parent="Frame/HBox/Main/MainBody"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TabTitle" type="Label" parent="Frame/HBox/Main/MainBody/Header"]
+theme_override_colors/font_color = Color(0.98, 0.72, 0.28, 1)
+theme_override_font_sizes/font_size = 20
+text = "CHART"
+
+[node name="TabHint" type="Label" parent="Frame/HBox/Main/MainBody/Header"]
+theme_override_colors/font_color = Color(0.45, 0.52, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "M87* approach ladder"
+
+[node name="Content" type="Control" parent="Frame/HBox/Main/MainBody"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChartPanel" type="Control" parent="Frame/HBox/Main/MainBody/Content"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("2")
+
+[node name="LoadoutPanel" type="Control" parent="Frame/HBox/Main/MainBody/Content"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("3")
+
+[node name="VBox" type="VBoxContainer" parent="Frame/HBox/Main/MainBody/Content/LoadoutPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 8
+
+[node name="StatusLabel" type="Label" parent="Frame/HBox/Main/MainBody/Content/LoadoutPanel/VBox"]
+theme_override_font_sizes/font_size = 12
+text = "DOCK STATUS · AWAY"
+
+[node name="BankLabel" type="Label" parent="Frame/HBox/Main/MainBody/Content/LoadoutPanel/VBox"]
+theme_override_font_sizes/font_size = 14
+text = "BANKED MASS · 0 u"
+
+[node name="Rows" type="VBoxContainer" parent="Frame/HBox/Main/MainBody/Content/LoadoutPanel/VBox"]
+theme_override_constants/separation = 6
+
+[node name="HintLabel" type="Label" parent="Frame/HBox/Main/MainBody/Content/LoadoutPanel/VBox"]
+theme_override_colors/font_color = Color(0.45, 0.52, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "Dock at home to buy"
+
+[node name="IntelPanel" type="Control" parent="Frame/HBox/Main/MainBody/Content"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("4")
+
+[node name="VBox" type="VBoxContainer" parent="Frame/HBox/Main/MainBody/Content/IntelPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Body" type="RichTextLabel" parent="Frame/HBox/Main/MainBody/Content/IntelPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = true
+theme_override_colors/default_color = Color(0.78, 0.86, 0.92, 1)
+theme_override_font_sizes/normal_font_size = 13
+
+[node name="CmdPanel" type="Control" parent="Frame/HBox/Main/MainBody/Content"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("5")
+
+[node name="VBox" type="VBoxContainer" parent="Frame/HBox/Main/MainBody/Content/CmdPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -120.0
+offset_right = 160.0
+offset_bottom = 120.0
+theme_override_constants/separation = 10
+
+[node name="ResumeBtn" type="Button" parent="Frame/HBox/Main/MainBody/Content/CmdPanel/VBox"]
+text = "Resume flight"
+
+[node name="SettingsBtn" type="Button" parent="Frame/HBox/Main/MainBody/Content/CmdPanel/VBox"]
+text = "Settings"
+
+[node name="PauseBtn" type="Button" parent="Frame/HBox/Main/MainBody/Content/CmdPanel/VBox"]
+text = "Pause menu"
+
+[node name="AbandonBtn" type="Button" parent="Frame/HBox/Main/MainBody/Content/CmdPanel/VBox"]
+text = "Abandon run"

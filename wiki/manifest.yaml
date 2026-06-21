@@ -101,6 +101,9 @@ pages:
   - id: F013-black-hole-visual-physics
     path: features/F013-black-hole-visual-physics.md
     status: draft
+  - id: F014-ops-console-menu
+    path: features/F014-ops-console-menu.md
+    status: implemented
   - id: concept-to-implementation
     path: workflow/concept-to-implementation.md
     status: active

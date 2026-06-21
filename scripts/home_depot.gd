@@ -62,7 +62,7 @@ func _try_deposit(mass: float) -> void:
 	GameEvents.mass_banked.emit(_progression.banked_mass, mass)
 	GameEvents.toast.emit("Deposited %.0f u" % mass)
 	if AudioManager:
-		AudioManager.play_sfx(_deposit_chunk())
+		AudioManager.play_deposit_chunk()
 	RunTracker.note_banked(_progression.banked_mass, mass)
 	var root := get_parent()
 	if root != null and root.has_method("persist_run"):
@@ -71,7 +71,3 @@ func _try_deposit(mass: float) -> void:
 		_upgrade_shown_this_dock = true
 		if root != null and root.has_method("open_upgrade_dock"):
 			root.call_deferred("open_upgrade_dock")
-
-
-func _deposit_chunk() -> AudioStream:
-	return AudioManager.make_tone(196.0, 0.12, 0.14)

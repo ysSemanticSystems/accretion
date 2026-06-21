@@ -10,6 +10,7 @@ acceptance:
   - "Settings menu exposes sensitivity, invert-Y, auto-level default, FOV rest/max, volumes, HUD scale, vsync"
   - "ship_controller and chase_camera read Settings on change (live preview in settings menu)"
   - "Master/SFX/Music buses; ambient loop in PLAYING; thrust and tractor procedural loops"
+  - "UI feedback uses soft click/confirm/deny/deposit procedural SFX — no piercing menu beeps"
   - "Settings shows read-only control reference from InputMap"
 implements:
   - "scripts/autoload/settings.gd"

@@ -118,11 +118,11 @@ func _try_buy() -> void:
 	if _progression == null:
 		return
 	if _progression.try_purchase_track(_selected):
-		AudioManager.play_sfx(AudioManager.make_tone(523.25, 0.15, 0.12))
+		AudioManager.play_ui_confirm()
 		GameEvents.toast.emit("%s upgraded" % TRACK_NAMES[_selected])
 		_refresh()
 	else:
-		AudioManager.play_ui_click()
+		AudioManager.play_ui_deny()
 
 
 func _close() -> void:
