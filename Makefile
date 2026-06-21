@@ -38,9 +38,11 @@ godot-smoke: build
 	  Linux)  test -f bin/libgodot_ext.so || { echo "ERROR: bin/libgodot_ext.so missing"; exit 1; } ;; \
 	esac; \
 	echo "Godot smoke test ($$GODOT)…"; \
-	"$$GODOT" --headless --verbose --path . res://scenes/GodotSmoke.tscn 2>&1 | tail -20; \
-	status=$${PIPESTATUS[0]}; \
-	if [ $$status -ne 0 ]; then exit $$status; fi
+	if [ ! -f .godot/extension_list.cfg ]; then \
+	  echo "Bootstrapping .godot/ (fresh clone — verifying GDExtensions)…"; \
+	  "$$GODOT" --headless --path . -e --quit-after 1 >/dev/null 2>&1 || true; \
+	fi; \
+	"$$GODOT" --headless --path . res://scenes/GodotSmoke.tscn
 
 check: gen hooks
 	git diff --exit-code crates/accretion-core/src/constants.rs
