@@ -29,6 +29,15 @@ func play_at(world_pos: Vector3, mass: float, cargo_bar: ProgressBar = null) -> 
 		_play_soft_chime()
 
 
+func _world_fx_parent() -> Node:
+	var node: Node = self
+	while node != null:
+		if node.is_in_group("gameplay_root"):
+			return node
+		node = node.get_parent()
+	return get_tree().root
+
+
 func _spawn_burst(world_pos: Vector3, mass: float) -> void:
 	var particles := GPUParticles3D.new()
 	particles.one_shot = true
@@ -49,7 +58,7 @@ func _spawn_burst(world_pos: Vector3, mass: float) -> void:
 	var quad := QuadMesh.new()
 	quad.size = Vector2(0.1, 0.1)
 	particles.draw_pass_1 = quad
-	get_tree().current_scene.add_child(particles)
+	_world_fx_parent().add_child(particles)
 	particles.emitting = true
 	var timer := get_tree().create_timer(particles.lifetime + 0.1)
 	timer.timeout.connect(particles.queue_free)
@@ -70,7 +79,7 @@ func _spawn_floater(world_pos: Vector3, mass: float) -> void:
 	label.modulate = Color(1.0, 0.88, 0.5, 0.85)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.global_position = world_pos + Vector3(0, 1.5, 0)
-	get_tree().current_scene.add_child(label)
+	_world_fx_parent().add_child(label)
 	var tween := create_tween()
 	tween.tween_property(label, "global_position", label.global_position + Vector3(0, 5, 0), 0.65)
 	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.65)

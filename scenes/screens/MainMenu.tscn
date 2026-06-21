@@ -18,9 +18,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -180.0
-offset_top = -160.0
+offset_top = -190.0
 offset_right = 180.0
-offset_bottom = 160.0
+offset_bottom = 190.0
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
 theme_override_constants/margin_left = 20
@@ -45,6 +45,9 @@ horizontal_alignment = 1
 [node name="NewRun" type="Button" parent="Panel/Margin/VBox"]
 text = "New Run"
 
+[node name="BhLab" type="Button" parent="Panel/Margin/VBox"]
+text = "BH Lab"
+
 [node name="Settings" type="Button" parent="Panel/Margin/VBox"]
 text = "Settings"
 
@@ -52,5 +55,6 @@ text = "Settings"
 text = "Quit"
 
 [connection signal="pressed" from="Panel/Margin/VBox/NewRun" to="." method="_on_new_run_pressed"]
+[connection signal="pressed" from="Panel/Margin/VBox/BhLab" to="." method="_on_bh_lab_pressed"]
 [connection signal="pressed" from="Panel/Margin/VBox/Settings" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="Panel/Margin/VBox/Quit" to="." method="_on_quit_pressed"]

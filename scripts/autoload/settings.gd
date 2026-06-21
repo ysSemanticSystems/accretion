@@ -53,6 +53,11 @@ func save_settings() -> void:
 	_apply_all()
 
 
+func apply_runtime() -> void:
+	settings_changed.emit()
+	_apply_all()
+
+
 func set_setting(key: StringName, value: Variant) -> void:
 	match key:
 		"mouse_sensitivity":

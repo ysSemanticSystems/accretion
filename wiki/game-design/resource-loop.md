@@ -39,6 +39,12 @@ flowchart LR
   Refine --> Upgrade
 ```
 
+## Outward pressure (v1)
+
+Each run tracks a **sector ring goal** (Chebyshev distance from origin). Clearing a
+sector's harvestables triggers a toast; reaching a ring advances the HUD mission to
+the next ring. Richer debris density/mass scales with distance per [F005](../features/F005-seeded-sector-debris.md).
+
 ## v1 upgrade axes (F004)
 
 | Axis | Gameplay | Levels |

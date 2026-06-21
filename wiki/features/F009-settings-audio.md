@@ -8,9 +8,9 @@ blocks: []
 acceptance:
   - "Settings autoload persists user://settings.cfg"
   - "Settings menu exposes sensitivity, invert-Y, auto-level default, FOV rest/max, volumes, HUD scale, vsync"
-  - "ship_controller and chase_camera read Settings on change"
-  - "Master/SFX/Music buses; default volumes 50%"
-  - "Collection chime enabled; thrust/tractor/deposit procedural SFX"
+  - "ship_controller and chase_camera read Settings on change (live preview in settings menu)"
+  - "Master/SFX/Music buses; ambient loop in PLAYING; thrust and tractor procedural loops"
+  - "Settings shows read-only control reference from InputMap"
 implements:
   - "scripts/autoload/settings.gd"
   - "scripts/autoload/audio_manager.gd"

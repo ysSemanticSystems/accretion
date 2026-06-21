@@ -12,11 +12,13 @@ const GAME_HUD := preload("res://scenes/ui/GameHud.tscn")
 @onready var home_depot: Node = $HomeDepot
 @onready var collect_feedback: Node = $CollectFeedback
 @onready var run_state: Node = $RunState
+@onready var run_objectives: Node = $RunObjectives
 
 var _hud: CanvasLayer
 
 
 func _ready() -> void:
+	add_to_group("gameplay_root")
 	ship.add_to_group("player_ship")
 	if Settings:
 		ship.auto_level_enabled = Settings.auto_level_default
@@ -37,6 +39,8 @@ func _ready() -> void:
 func configure_run(seed: int) -> void:
 	if run_state.has_method("set_run_seed"):
 		run_state.set_run_seed(seed)
+	if run_objectives.has_method("reset"):
+		run_objectives.reset()
 
 
 func _apply_settings_to_ship() -> void:

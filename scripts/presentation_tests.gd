@@ -36,8 +36,11 @@ func _run() -> int:
 	failures.append_array(_test_settings_api())
 	failures.append_array(await _test_shell_settings_navigation())
 	failures.append_array(await _test_new_run_flow())
+	failures.append_array(_test_shader_qpo_fix())
+	failures.append_array(_test_settings_apply_runtime())
+	failures.append_array(await _test_bh_lab_flow())
 	if failures.is_empty():
-		print("[presentation_tests] OK (%d scenes, shell navigation)" % SCENE_PATHS.size())
+		print("[presentation_tests] OK (%d scenes, shell + gameplay regressions)" % SCENE_PATHS.size())
 		return 0
 	for msg in failures:
 		push_error("[presentation_tests] %s" % msg)
@@ -197,8 +200,79 @@ func _test_new_run_flow() -> Array[String]:
 		failures.append("Ship scene missing GameHud after New Run")
 	elif gameplay_node.get_node_or_null("ChaseCamera") == null:
 		failures.append("Ship scene missing ChaseCamera after New Run")
+	elif gameplay_node.get_node_or_null("RunObjectives") == null:
+		failures.append("Ship scene missing RunObjectives after New Run")
 
 	shell.queue_free()
 	GameState.state = prior_state
 	get_tree().paused = prior_state == GameState.State.PAUSED
+	return failures
+
+
+func _test_shader_qpo_fix() -> Array[String]:
+	var failures: Array[String] = []
+	var path := "res://shaders/blackhole.gdshader"
+	if not FileAccess.file_exists(path):
+		failures.append("blackhole.gdshader missing")
+		return failures
+	var text := FileAccess.get_file_as_string(path)
+	if "uv.y * PI * 2.0 + TIME * qpo_phase_rate" in text:
+		failures.append("blackhole.gdshader still uses invalid uv.y in calc_disc_color")
+	return failures
+
+
+func _test_settings_apply_runtime() -> Array[String]:
+	var failures: Array[String] = []
+	if not Settings.has_method("apply_runtime"):
+		failures.append("Settings missing apply_runtime()")
+		return failures
+	_settings_test_fired = false
+	Settings.settings_changed.connect(_on_settings_test_fired)
+	Settings.apply_runtime()
+	Settings.settings_changed.disconnect(_on_settings_test_fired)
+	if not _settings_test_fired:
+		failures.append("Settings.apply_runtime() did not emit settings_changed")
+	return failures
+
+
+var _settings_test_fired := false
+
+
+func _on_settings_test_fired() -> void:
+	_settings_test_fired = true
+
+
+func _test_bh_lab_flow() -> Array[String]:
+	var failures: Array[String] = []
+	var prior_state := GameState.state
+	get_tree().paused = false
+
+	var shell: Node = MAIN_SHELL.instantiate()
+	get_tree().root.add_child.call_deferred(shell)
+	for _i in 120:
+		if GameState.state != GameState.State.BOOT and is_instance_valid(shell.get_parent()):
+			break
+		await get_tree().process_frame
+
+	GameState.transition(GameState.State.LAB)
+	for _i in 120:
+		var gameplay: Variant = shell.get("_gameplay")
+		if gameplay != null and is_instance_valid(gameplay):
+			break
+		await get_tree().process_frame
+
+	var lab: Node = shell.get("_gameplay")
+	if lab == null or not is_instance_valid(lab):
+		failures.append("BH Lab did not spawn BhSurvival scene")
+	elif lab.name != "BhSurvival":
+		failures.append("BH Lab root should be named BhSurvival, got %s" % lab.name)
+
+	GameState.transition(GameState.State.MENU)
+	await get_tree().process_frame
+	if GameState.state != GameState.State.MENU:
+		failures.append("LAB→MENU transition failed")
+
+	shell.queue_free()
+	GameState.state = prior_state
+	get_tree().paused = false
 	return failures

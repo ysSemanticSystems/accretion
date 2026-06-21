@@ -257,7 +257,7 @@ vec3 calc_disc_color(vec3 base_color, vec3 planar_disc_pos, vec3 disc_dir, vec3 
 
     float hot_spot = pow(max(0.0, combined_turb - 0.6) * 2.5, 2.0) * turbulence_intensity;
     // Keplerian hotspot orbiting at the ISCO (QPO-scale flicker; phase rate from Rust).
-    float qpo_angle = uv.y * PI * 2.0 + TIME * qpo_phase_rate;
+    float qpo_angle = v * PI * 2.0 + TIME * qpo_phase_rate;
     float qpo_spot = pow(max(0.0, cos(qpo_angle) * 0.5 + 0.5), 6.0) * (1.0 - radial_t);
     hot_spot += qpo_spot * 0.35;
 

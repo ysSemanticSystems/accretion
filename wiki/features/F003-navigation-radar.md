@@ -9,6 +9,8 @@ acceptance:
   - "HUD shows sector grid coordinates and ship position in km updating while flying"
   - "Compass tracks navigation objective: depot when cargo loaded, nearest debris when empty"
   - "Tactical radar displays harvestable blips with sqrt-scaled layout to 2500 km"
+  - "Cyan depot beacon on radar; objective blip highlighted (depot when loaded, debris when empty)"
+  - "Range rings at 33%, 66%, and 100% of radar radius"
   - "Radar blips show altitude stalks (signed Y offset from ship)"
   - "Radar disc is heading-up (ship local XZ projection rotated with ship yaw)"
   - "Debris shows mesh within 500 km and emissive beacon marker beyond until 8000 km"

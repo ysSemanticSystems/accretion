@@ -1,5 +1,5 @@
 extends Control
-## Main menu — New Run, Settings, Quit. Spec: wiki/features/F008-game-shell.md
+## Main menu — New Run, BH Lab, Settings, Quit. Spec: wiki/features/F008-game-shell.md
 
 @onready var seed_label: Label = $Panel/Margin/VBox/SeedLabel
 
@@ -14,6 +14,11 @@ func _ready() -> void:
 func _on_new_run_pressed() -> void:
 	AudioManager.play_ui_click()
 	GameState.transition(GameState.State.PLAYING)
+
+
+func _on_bh_lab_pressed() -> void:
+	AudioManager.play_ui_click()
+	GameState.transition(GameState.State.LAB)
 
 
 func _on_settings_pressed() -> void:

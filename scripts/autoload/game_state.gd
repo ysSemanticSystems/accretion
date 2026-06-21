@@ -1,7 +1,7 @@
 extends Node
 ## Global game flow. Spec: wiki/architecture/game-shell.md
 
-enum State { BOOT, MENU, PLAYING, PAUSED, SUMMARY }
+enum State { BOOT, MENU, PLAYING, PAUSED, SUMMARY, LAB }
 
 signal state_changed(from: State, to: State)
 

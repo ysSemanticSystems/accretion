@@ -19,6 +19,8 @@ var _banked: float = 0.0
 var _compass_kind := ""
 var _compass_dist: float = INF
 var _compass_pos := Vector3.ZERO
+var _at_depot := false
+var _sector_goal: int = 1
 
 
 func _ready() -> void:
@@ -31,6 +33,8 @@ func _ready() -> void:
 	GameEvents.compass_target.connect(_on_compass_target)
 	GameEvents.toast.connect(_on_toast)
 	GameEvents.tractor_state_changed.connect(_on_tractor_state)
+	GameEvents.depot_docked.connect(_on_depot_docked)
+	GameEvents.sector_goal_changed.connect(_on_sector_goal_changed)
 	_on_cargo_changed(0.0, _cargo_max)
 	_update_mission()
 
@@ -96,13 +100,28 @@ func _on_tractor_state(state: String) -> void:
 		reticle.set_state(state)
 
 
+func _on_depot_docked(at: bool) -> void:
+	_at_depot = at
+	_update_mission()
+
+
+func _on_sector_goal_changed(goal: int) -> void:
+	_sector_goal = goal
+	_update_mission()
+
+
 func _update_mission() -> void:
-	if _cargo_current > 0.01:
+	if _at_depot and _banked > 0.01 and _cargo_current <= 0.01:
+		mission_label.text = "Docked at home — upgrade screen open, or fly out for more debris"
+	elif _cargo_current > 0.01:
 		mission_label.text = "Head home — fly to the cyan beacon and unload"
 	elif _cargo_max > 0.0 and _cargo_current >= _cargo_max - 0.01:
 		mission_label.text = "Hold is full — return to the cyan beacon"
 	else:
-		mission_label.text = "Hold F near orange debris — it pulls into your hold"
+		mission_label.text = (
+			"Hold F near orange debris — explore to sector ring %d for richer fields"
+			% _sector_goal
+		)
 
 
 func _fmt_dist(units: float) -> String:

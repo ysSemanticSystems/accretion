@@ -119,6 +119,11 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed:
 		return
+	if event.keycode == KEY_ESCAPE:
+		if GameState.state == GameState.State.LAB:
+			GameState.transition(GameState.State.MENU)
+			get_viewport().set_input_as_handled()
+		return
 	if event.keycode == KEY_R or event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
 		_start_run(_current_preset_dict())
 		return

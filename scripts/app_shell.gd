@@ -2,6 +2,7 @@ extends Node
 ## Root shell — screen stack and gameplay host. Spec: wiki/features/F008-game-shell.md
 
 const SHIP_SCENE := preload("res://scenes/Ship.tscn")
+const BH_LAB_SCENE := preload("res://scenes/BhSurvival.tscn")
 const BACKDROP_SCENE := preload("res://scenes/BhMenuBackdrop.tscn")
 const MAIN_MENU_SCENE := preload("res://scenes/screens/MainMenu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/screens/PauseMenu.tscn")
@@ -39,7 +40,11 @@ func _on_state_changed(_from: GameState.State, to: GameState.State) -> void:
 		GameState.State.PLAYING:
 			_show_backdrop(false)
 			_clear_screen()
-			_start_gameplay()
+			_start_ship_run()
+		GameState.State.LAB:
+			_show_backdrop(false)
+			_clear_screen()
+			_start_bh_lab()
 		GameState.State.PAUSED:
 			_swap_screen(PAUSE_MENU_SCENE.instantiate())
 		GameState.State.SUMMARY:
@@ -87,10 +92,11 @@ func _restore_after_settings(origin: GameState.State) -> void:
 			_clear_screen()
 
 
-func _start_gameplay() -> void:
+func _start_ship_run() -> void:
 	if _gameplay != null:
 		if is_instance_valid(_gameplay):
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			AudioManager.start_gameplay_audio()
 			return
 		_gameplay = null
 	var seed: int = int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
@@ -102,9 +108,18 @@ func _start_gameplay() -> void:
 	if _gameplay.has_method("configure_run"):
 		_gameplay.configure_run(seed)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	AudioManager.start_gameplay_audio()
+
+
+func _start_bh_lab() -> void:
+	_clear_gameplay()
+	_gameplay = BH_LAB_SCENE.instantiate()
+	gameplay_host.add_child(_gameplay)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _clear_gameplay() -> void:
+	AudioManager.stop_gameplay_audio()
 	if _gameplay != null:
 		_gameplay.queue_free()
 		_gameplay = null
@@ -124,10 +139,6 @@ func _swap_screen(screen: Node) -> void:
 	_clear_screen()
 	_active_screen = screen
 	screen_root.add_child(screen)
-
-
-func _swap_overlay(screen: Node) -> void:
-	_swap_screen(screen)
 
 
 func _clear_screen() -> void:

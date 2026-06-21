@@ -9,18 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Game shell polish.** BH Lab menu entry (`LAB` state → `BhSurvival.tscn`, Esc back),
+  sector ring objectives with depletion toasts, live settings preview with revert on Back,
+  read-only controls reference, procedural ambient/thrust/tractor audio loops.
+- **Presentation test gate.** Headless checks for shader QPO fix, New Run spawn,
+  settings navigation, BH Lab flow, and scene/script type pairs (`make godot-presentation`).
+
+### Changed
+
+- **Black hole shader.** QPO hotspot uses cylinder `v` coordinate (fixes invalid `uv` in vertex-stage helper).
+- **Collection feedback.** Particles/floaters parent to `gameplay_root`, not `current_scene`.
+- **Radar v3.** Cyan depot blip, range rings, objective highlight ring on heading-up disc.
 - **Game shell (F008–F010).** `Main.tscn` state machine (BOOT/MENU/PLAYING/PAUSED/SUMMARY),
   BH menu backdrop, pause/settings/upgrade/summary screens, `GameEvents` bus, event-driven
   `GameHud` with waypoint chevron, tractor reticle, and toast queue. Settings autoload at
   50% default volume. Legacy BH survival moved to `BhSurvival.tscn`.
-
-### Changed
-
 - **Ship slice visuals and motion.** Procedural starfield replaces ground HDRI; camera
   follows on render frames (fixes 100 Hz jitter); TAA/FSR disabled for clean fast flight.
-### Added
 
-- **F007 graphics pipeline (ship slice).** PBR ship/debris meshes, procedural starfield
+### Added (prior slices)
   environment, SSAO/glow tuning. See
   [wiki/features/F007-graphics-pipeline.md](wiki/features/F007-graphics-pipeline.md).
 - **Playability integration (F004–F006).** Home depot at origin banks cargo mass;

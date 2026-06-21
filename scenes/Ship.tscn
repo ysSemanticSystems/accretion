@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://bqx7shipf00101"]
+[gd_scene load_steps=18 format=3 uid="uid://bqx7shipf00101"]
 
 [ext_resource type="Script" path="res://scripts/ship_scene.gd" id="1_root"]
 [ext_resource type="Script" path="res://scripts/ship_controller.gd" id="2_ship"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/tractor_beam.gd" id="6_tractor"]
 [ext_resource type="Script" path="res://scripts/sector_debris.gd" id="7_field"]
 [ext_resource type="Script" path="res://scripts/run_state.gd" id="7b_run"]
+[ext_resource type="Script" path="res://scripts/run_objectives.gd" id="7c_objectives"]
 [ext_resource type="Script" path="res://scripts/navigation_system.gd" id="8_nav"]
 [ext_resource type="Script" path="res://scripts/home_depot.gd" id="10_depot"]
 [ext_resource type="Script" path="res://scripts/progression.gd" id="11_progress"]
@@ -84,6 +85,9 @@ script = ExtResource("5_cargo")
 
 [node name="RunState" type="Node" parent="."]
 script = ExtResource("7b_run")
+
+[node name="RunObjectives" type="Node" parent="."]
+script = ExtResource("7c_objectives")
 
 [node name="SectorDebris" type="Node3D" parent="."]
 script = ExtResource("7_field")

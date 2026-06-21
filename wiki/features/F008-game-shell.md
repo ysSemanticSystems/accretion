@@ -6,9 +6,9 @@ layer: features
 depends_on: [game-shell, F004-home-depot-progression]
 blocks: [F009-settings-audio, F010-hud-component]
 acceptance:
-  - "main_scene is scenes/Main.tscn with BOOT→MENU→PLAYING→PAUSED→SUMMARY"
-  - "Esc in PLAYING opens pause menu; does not only toggle mouse capture"
-  - "Main menu shows BH shader backdrop; New Run seeds run and enters Ship.tscn"
+  - "main_scene is scenes/Main.tscn with BOOT→MENU→PLAYING→PAUSED→SUMMARY→LAB"
+  - "Esc in PLAYING opens pause menu; Esc in LAB returns to main menu"
+  - "Main menu BH Lab opens BhSurvival.tscn; Esc returns to menu"
   - "Upgrade purchase gated to depot radius; docked UpgradeScreen replaces U/Y HUD shop"
   - "Run summary shows seed, banked mass, sectors, upgrades, max distance, time"
 implements:

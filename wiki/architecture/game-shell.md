@@ -17,7 +17,7 @@ the scene root.
 
 | Autoload | Role |
 |---|---|
-| `GameState` | `BOOT → MENU → PLAYING → PAUSED → SUMMARY`; sets `get_tree().paused` |
+| `GameState` | `BOOT → MENU → PLAYING → PAUSED → SUMMARY → LAB`; sets `get_tree().paused` |
 | `GameEvents` | Decouples cargo, bank, compass, toasts, upgrades from UI |
 | `Settings` | `user://settings.cfg`; sensitivity, invert-Y, FOV, volumes, HUD scale |
 
@@ -41,6 +41,8 @@ stateDiagram-v2
   [*] --> BOOT
   BOOT --> MENU
   MENU --> PLAYING: New Run
+  MENU --> LAB: BH Lab
+  LAB --> MENU: Esc
   PLAYING --> PAUSED: Esc
   PAUSED --> PLAYING: Resume
   PAUSED --> SUMMARY: Abandon Run

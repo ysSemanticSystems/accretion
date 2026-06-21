@@ -80,10 +80,13 @@ func _apply_thrust(delta: float) -> void:
 		_axis("ship_thrust_up", KEY_SPACE) - _axis("ship_thrust_down", KEY_C),
 		_axis("ship_thrust_back", KEY_S) - _axis("ship_thrust_forward", KEY_W),
 	)
-	if input_dir.length_squared() < 1.0e-6:
+	var thrust_strength: float = clampf(input_dir.length() / 1.732, 0.0, 1.0)
+	if thrust_strength <= 0.01:
+		AudioManager.set_thrust_level(0.0)
 		return
 	input_dir = input_dir.normalized()
 	velocity += global_transform.basis * input_dir * _band_accel() * delta
+	AudioManager.set_thrust_level(thrust_strength)
 
 
 func _apply_drag(delta: float) -> void:

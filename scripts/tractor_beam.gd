@@ -38,6 +38,7 @@ func _process(delta: float) -> void:
 	if cargo != null and cargo.is_full():
 		_clear_target()
 		_hide_beam()
+		AudioManager.set_tractor_active(false)
 		GameEvents.tractor_state_changed.emit("full")
 		return
 	if tractoring:
@@ -45,6 +46,7 @@ func _process(delta: float) -> void:
 	else:
 		_clear_target()
 		_hide_beam()
+		AudioManager.set_tractor_active(false)
 		GameEvents.tractor_state_changed.emit("idle")
 
 
@@ -53,10 +55,12 @@ func _tractor_tick(delta: float) -> void:
 	_set_target(target)
 	if target == null:
 		_hide_beam()
+		AudioManager.set_tractor_active(false)
 		GameEvents.tractor_state_changed.emit("idle")
 		return
 	target.apply_tractor_pull(ship_body.global_position, pull_accel, collect_radius, delta)
 	_update_beam(target.global_position)
+	AudioManager.set_tractor_active(true)
 	GameEvents.tractor_state_changed.emit("pulling")
 	var mat: String = target.material_id
 	var amount: float = target.mass
