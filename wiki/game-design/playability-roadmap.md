@@ -36,8 +36,15 @@ bugs, add feel, then enable replay.
 | [F002](../features/F002-tractor-cargo.md) | Collection feedback | PR4 |
 | [F003](../features/F003-navigation-radar.md) | Heading-up radar + stalks | PR5 |
 | [F005](../features/F005-seeded-sector-debris.md) | Seeded sector debris (lite) | PR6 |
+| [F008](../features/F008-game-shell.md) | Game shell + menus | PR8 |
+| [F009](../features/F009-settings-audio.md) | Settings + audio buses | PR8 |
+| [F010](../features/F010-hud-component.md) | Event-driven HUD | PR8 |
 
-## PR sequencing
+## PR sequencing (continued)
+
+| PR | Scope |
+|---|---|
+| PR8 | F008–F010 shell, settings, HUD decouple, depot-gated upgrades |
 
 | PR | Scope | Blocks |
 |---|---|---|

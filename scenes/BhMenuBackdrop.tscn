@@ -1,0 +1,64 @@
+[gd_scene format=3 uid="uid://c7wnt5bj4i0ye"]
+
+[ext_resource type="Shader" path="res://shaders/blackhole.gdshader" id="1_shader"]
+[ext_resource type="Script" path="res://scripts/bh_menu_backdrop.gd" id="2_script"]
+[ext_resource type="Shader" path="res://shaders/starfield_sky.gdshader" id="3_sky"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_disc"]
+noise_type = 1
+frequency = 0.015
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_disc"]
+seamless = true
+noise = SubResource("FastNoiseLite_disc")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_disc"]
+shader = ExtResource("1_shader")
+shader_parameter/disc_texture = SubResource("NoiseTexture2D_disc")
+shader_parameter/disc_outer_radius = 0.9
+shader_parameter/disc_inner_radius = 0.2
+shader_parameter/disc_speed = 1.2
+shader_parameter/disc_color = Color(0.8, 0.18, 0.05, 1)
+shader_parameter/inner_color = Color(1, 1, 0.95, 1)
+shader_parameter/emission_strength = 1.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_1"]
+radius = 0.5
+height = 1.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sky"]
+shader = ExtResource("3_sky")
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ShaderMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 1.1
+glow_bloom = 0.2
+
+[node name="BhMenuBackdrop" type="Node3D"]
+script = ExtResource("2_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+current = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 9)
+
+[node name="DiskMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
+mesh = SubResource("SphereMesh_1")
+surface_material_override/0 = SubResource("ShaderMaterial_disc")
+
+[node name="BlackHole" type="BlackHole" parent="."]
+mass_solar = 21.0
+mdot_gs = 8e+17
+spin = 0.0
+efficiency = 0.057
+disk_material = SubResource("ShaderMaterial_disc")
+color_uniform = "inner_color"

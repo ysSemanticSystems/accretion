@@ -15,6 +15,15 @@ func _ready() -> void:
 	_nav = get_node_or_null(nav_path)
 
 
+func set_nav(nav: Node) -> void:
+	_nav = nav
+
+
+func set_nav_path(path: NodePath) -> void:
+	nav_path = path
+	_nav = get_node_or_null(nav_path)
+
+
 func _draw() -> void:
 	if _nav == null:
 		return

@@ -45,6 +45,7 @@ func add_banked(mass: float) -> void:
 	if mass <= 0.0:
 		return
 	banked_mass += mass
+	GameEvents.mass_banked.emit(banked_mass, mass)
 	progression_changed.emit()
 
 
@@ -54,6 +55,14 @@ func cycle_upgrade_selection() -> void:
 
 
 func try_purchase() -> bool:
+	return try_purchase_at_depot(false)
+
+
+func try_purchase_at_depot(require_depot: bool) -> bool:
+	if require_depot:
+		var depot := get_parent().get_node_or_null("HomeDepot")
+		if depot == null or not depot.is_at_depot():
+			return false
 	var kind := selected_upgrade
 	var level := _level_for(kind)
 	if level >= MAX_LEVEL:
@@ -71,8 +80,30 @@ func try_purchase() -> bool:
 			cruise_level += 1
 	_apply_all()
 	upgrade_purchased.emit(kind, _level_for(kind))
+	GameEvents.upgrade_bought.emit(kind, _level_for(kind))
+	GameEvents.mass_banked.emit(banked_mass, -cost)
+	GameEvents.toast.emit("%s → Lv %d" % [track_name(kind), _level_for(kind)])
+	RunTracker.note_upgrade(kind, _level_for(kind))
 	progression_changed.emit()
 	return true
+
+
+func try_purchase_track(kind: int) -> bool:
+	selected_upgrade = kind as UpgradeKind
+	return try_purchase_at_depot(true)
+
+
+func track_level(kind: int) -> int:
+	return _level_for(kind as UpgradeKind)
+
+
+func track_cost(kind: int) -> float:
+	return _cost_for(kind as UpgradeKind, _level_for(kind as UpgradeKind))
+
+
+func track_name(kind: int) -> String:
+	var names := ["Cargo Hold", "Tractor", "Cruise Drive"]
+	return names[kind] if kind >= 0 and kind < names.size() else "Upgrade"
 
 
 func cargo_capacity() -> float:

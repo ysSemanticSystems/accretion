@@ -8,9 +8,11 @@ var _depleted: Dictionary = {}
 
 
 func _ready() -> void:
-	run_seed = int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
-	if run_seed == 0:
-		run_seed = 1
+	set_run_seed(int(Time.get_unix_time_from_system()) & 0x7FFFFFFF)
+
+
+func set_run_seed(seed: int) -> void:
+	run_seed = seed if seed != 0 else 1
 
 
 func is_depleted(sector: Vector3i) -> bool:

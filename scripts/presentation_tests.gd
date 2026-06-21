@@ -1,0 +1,204 @@
+extends Node
+## Headless presentation/shell tests — scene/script compatibility and navigation.
+##
+## Run: make godot-presentation  (or godot --headless --path . res://scenes/PresentationTests.tscn)
+
+const SCENE_PATHS: Array[String] = [
+	"res://scenes/Main.tscn",
+	"res://scenes/Ship.tscn",
+	"res://scenes/ui/GameHud.tscn",
+	"res://scenes/harvestable_debris.tscn",
+	"res://scenes/BhMenuBackdrop.tscn",
+	"res://scenes/BhSurvival.tscn",
+	"res://scenes/screens/MainMenu.tscn",
+	"res://scenes/screens/PauseMenu.tscn",
+	"res://scenes/screens/SettingsMenu.tscn",
+	"res://scenes/screens/UpgradeScreen.tscn",
+	"res://scenes/screens/RunSummary.tscn",
+]
+
+const MAIN_SHELL := preload("res://scenes/Main.tscn")
+
+
+func _ready() -> void:
+	for _i in 30:
+		if ClassDB.class_exists("BlackHole"):
+			break
+		await get_tree().process_frame
+	var exit_code := await _run()
+	get_tree().quit(exit_code)
+
+
+func _run() -> int:
+	var failures: Array[String] = []
+	failures.append_array(_test_scene_script_compat())
+	failures.append_array(_test_game_state_pause())
+	failures.append_array(_test_settings_api())
+	failures.append_array(await _test_shell_settings_navigation())
+	failures.append_array(await _test_new_run_flow())
+	if failures.is_empty():
+		print("[presentation_tests] OK (%d scenes, shell navigation)" % SCENE_PATHS.size())
+		return 0
+	for msg in failures:
+		push_error("[presentation_tests] %s" % msg)
+	return 1
+
+
+func _test_scene_script_compat() -> Array[String]:
+	var failures: Array[String] = []
+	for path in SCENE_PATHS:
+		var packed: PackedScene = load(path)
+		if packed == null:
+			failures.append("failed to load %s" % path)
+			continue
+		var root: Node = packed.instantiate()
+		_collect_script_mismatches(root, path, failures)
+		root.queue_free()
+	return failures
+
+
+func _collect_script_mismatches(node: Node, path: String, failures: Array[String]) -> void:
+	var script: Script = node.get_script()
+	if script != null:
+		var base_type: String = script.get_instance_base_type()
+		if base_type != "" and not node.is_class(base_type):
+			failures.append(
+				"%s: node '%s' (%s) cannot use script extending %s"
+				% [path, node.name, node.get_class(), base_type]
+			)
+	for child in node.get_children():
+		_collect_script_mismatches(child, path, failures)
+
+
+func _test_game_state_pause() -> Array[String]:
+	var failures: Array[String] = []
+	var prior := GameState.state
+	get_tree().paused = false
+	GameState.state = GameState.State.PLAYING
+	GameState.transition(GameState.State.PAUSED)
+	if GameState.state != GameState.State.PAUSED:
+		failures.append("GameState did not enter PAUSED")
+	if not get_tree().paused:
+		failures.append("tree.paused not set when GameState is PAUSED")
+	GameState.transition(GameState.State.PLAYING)
+	if get_tree().paused:
+		failures.append("tree.paused still true after resume")
+	GameState.state = prior
+	get_tree().paused = prior == GameState.State.PAUSED
+	return failures
+
+
+func _test_settings_api() -> Array[String]:
+	var failures: Array[String] = []
+	var prior_sens: float = Settings.mouse_sensitivity
+	Settings.set_setting("mouse_sensitivity", 0.0042)
+	if not is_equal_approx(Settings.get_setting("mouse_sensitivity"), 0.0042):
+		failures.append("Settings set/get round-trip failed for mouse_sensitivity")
+	Settings.set_setting("mouse_sensitivity", prior_sens)
+	return failures
+
+
+func _test_shell_settings_navigation() -> Array[String]:
+	var failures: Array[String] = []
+	var prior_state := GameState.state
+	get_tree().paused = false
+
+	var shell: Node = MAIN_SHELL.instantiate()
+	get_tree().root.add_child.call_deferred(shell)
+	for _i in 120:
+		if GameState.state != GameState.State.BOOT and is_instance_valid(shell.get_parent()):
+			break
+		await get_tree().process_frame
+
+	if GameState.state != GameState.State.MENU:
+		failures.append("shell boot did not reach MENU (state=%s)" % GameState.state)
+		if is_instance_valid(shell):
+			shell.queue_free()
+		GameState.state = prior_state
+		return failures
+
+	if not _active_screen_named(shell, "MainMenu"):
+		failures.append("expected MainMenu after boot, got %s" % _active_screen_name(shell))
+
+	shell.show_settings()
+	await get_tree().process_frame
+	if not _active_screen_named(shell, "SettingsMenu"):
+		failures.append("show_settings did not swap to SettingsMenu")
+
+	shell.close_settings()
+	await get_tree().process_frame
+	if not _active_screen_named(shell, "MainMenu"):
+		failures.append("close_settings from MENU did not restore MainMenu (blank-screen regression)")
+
+	shell.queue_free()
+	GameState.state = prior_state
+	get_tree().paused = prior_state == GameState.State.PAUSED
+	return failures
+
+
+func _active_screen_name(shell: Node) -> String:
+	var screen: Variant = shell.get("_active_screen")
+	if screen == null or not is_instance_valid(screen):
+		return "<none>"
+	return screen.name
+
+
+func _active_screen_named(shell: Node, expected: String) -> bool:
+	return _active_screen_name(shell) == expected
+
+
+func _test_game_hud_ready() -> Array[String]:
+	var failures: Array[String] = []
+	var packed: PackedScene = load("res://scenes/ui/GameHud.tscn")
+	var hud: Node = packed.instantiate()
+	add_child.call_deferred(hud)
+	for _i in 30:
+		if hud.is_inside_tree() and hud.get_node_or_null("HudPanel") != null:
+			break
+		await get_tree().process_frame
+	if hud.get_node_or_null("HudPanel") == null:
+		failures.append("GameHud failed to enter tree / build panel")
+	elif hud.has_method("cargo_bar_ref") and hud.cargo_bar_ref() == null:
+		failures.append("GameHud cargo_bar_ref null after ready (scale-on-CanvasLayer regression)")
+	hud.queue_free()
+	return failures
+
+
+func _test_new_run_flow() -> Array[String]:
+	var failures: Array[String] = []
+	failures.append_array(await _test_game_hud_ready())
+	var prior_state := GameState.state
+	get_tree().paused = false
+
+	var shell: Node = MAIN_SHELL.instantiate()
+	get_tree().root.add_child.call_deferred(shell)
+	for _i in 120:
+		if GameState.state != GameState.State.BOOT and is_instance_valid(shell.get_parent()):
+			break
+		await get_tree().process_frame
+
+	if GameState.state != GameState.State.MENU:
+		failures.append("new-run test: shell did not reach MENU")
+		shell.queue_free()
+		GameState.state = prior_state
+		return failures
+
+	GameState.transition(GameState.State.PLAYING)
+	for _i in 120:
+		var gameplay: Variant = shell.get("_gameplay")
+		if gameplay != null and is_instance_valid(gameplay):
+			break
+		await get_tree().process_frame
+
+	var gameplay_node: Node = shell.get("_gameplay")
+	if gameplay_node == null or not is_instance_valid(gameplay_node):
+		failures.append("New Run did not spawn Ship gameplay scene")
+	elif gameplay_node.get_node_or_null("GameHud") == null:
+		failures.append("Ship scene missing GameHud after New Run")
+	elif gameplay_node.get_node_or_null("ChaseCamera") == null:
+		failures.append("Ship scene missing ChaseCamera after New Run")
+
+	shell.queue_free()
+	GameState.state = prior_state
+	get_tree().paused = prior_state == GameState.State.PAUSED
+	return failures

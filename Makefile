@@ -1,4 +1,4 @@
-.PHONY: check gen build test clippy fmt hooks godot-smoke
+.PHONY: check gen build test clippy fmt hooks godot-smoke godot-presentation
 
 # Godot loads res://target/debug/libgodot_ext.dylib — always build there.
 CARGO_TARGET_DIR := $(CURDIR)/target
@@ -44,6 +44,23 @@ godot-smoke: build
 	fi; \
 	"$$GODOT" --headless --path . res://scenes/GodotSmoke.tscn
 
+godot-presentation: build
+	@set -e; \
+	GODOT=""; \
+	if [ -x "$(GODOT_BIN)" ]; then GODOT="$(GODOT_BIN)"; \
+	elif command -v $(GODOT_FALLBACK) >/dev/null 2>&1; then GODOT="$(GODOT_FALLBACK)"; \
+	else echo "ERROR: Godot not found. Install to /Applications/Godot.app or set GODOT_BIN."; exit 1; fi; \
+	case "$(uname -s)" in \
+	  Darwin) test -f bin/libgodot_ext.dylib || { echo "ERROR: bin/libgodot_ext.dylib missing"; exit 1; } ;; \
+	  Linux)  test -f bin/libgodot_ext.so || { echo "ERROR: bin/libgodot_ext.so missing"; exit 1; } ;; \
+	esac; \
+	echo "Godot presentation tests ($$GODOT)…"; \
+	if [ ! -f .godot/extension_list.cfg ]; then \
+	  echo "Bootstrapping .godot/ (fresh clone — verifying GDExtensions)…"; \
+	  "$$GODOT" --headless --path . -e --quit-after 1 >/dev/null 2>&1 || true; \
+	fi; \
+	"$$GODOT" --headless --path . res://scenes/PresentationTests.tscn
+
 check: gen hooks
 	git diff --exit-code crates/accretion-core/src/constants.rs
 	git diff --exit-code crates/accretion-core/tests/fixtures/golden.json
@@ -52,3 +69,4 @@ check: gen hooks
 	cargo test --workspace
 	cargo clippy --workspace --all-targets -- -D warnings
 	$(MAKE) godot-smoke
+	$(MAKE) godot-presentation

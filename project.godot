@@ -12,9 +12,17 @@ config_version=5
 
 config/name="accretion"
 config/description="Accretion-disk explore game — ship flight, navigation, tractor cargo; Rust physics core, Godot 4.7 presentation."
-run/main_scene="res://scenes/Ship.tscn"
+run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://scripts/autoload/game_state.gd"
+GameEvents="*res://scripts/autoload/game_events.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
+Settings="*res://scripts/autoload/settings.gd"
+RunTracker="*res://scripts/run_tracker.gd"
 
 [display]
 

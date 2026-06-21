@@ -15,6 +15,7 @@ func set_max_mass(maximum: float) -> void:
 	if current_mass > max_cargo_mass:
 		current_mass = max_cargo_mass
 	cargo_changed.emit(current_mass, max_cargo_mass)
+	GameEvents.cargo_changed.emit(current_mass, max_cargo_mass)
 
 
 func clear_all() -> void:
@@ -22,6 +23,7 @@ func clear_all() -> void:
 		return
 	current_mass = 0.0
 	cargo_changed.emit(current_mass, max_cargo_mass)
+	GameEvents.cargo_changed.emit(current_mass, max_cargo_mass)
 
 
 func free_mass() -> float:
@@ -50,4 +52,5 @@ func try_add(mass: float) -> float:
 		return 0.0
 	current_mass += taken
 	cargo_changed.emit(current_mass, max_cargo_mass)
+	GameEvents.cargo_changed.emit(current_mass, max_cargo_mass)
 	return taken

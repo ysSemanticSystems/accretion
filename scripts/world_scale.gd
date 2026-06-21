@@ -4,6 +4,8 @@ extends RefCounted
 
 ## One game unit is shown to the player as one kilometre.
 const UNITS_PER_KM := 1.0
+## Home depot deposit / upgrade dock radius (single source of truth).
+const DEPOT_RADIUS_UNITS := 80.0
 ## Sector cube edge length in game units (matches architecture sector-streaming placeholder).
 const SECTOR_EDGE_UNITS := 1000.0
 ## Tactical radar shows POIs within this true radius.

@@ -28,12 +28,15 @@ func _process(_delta: float) -> void:
 	var objective := navigation_objective()
 	if objective.is_empty():
 		nav_updated.emit("none", INF, 0.0)
+		GameEvents.compass_target.emit(Vector3.ZERO, INF, "none")
 		return
 	var offset: Vector3 = objective.pos - ship.global_position
 	var bearing: float = rad_to_deg(atan2(offset.x, -offset.z))
 	if bearing < 0.0:
 		bearing += 360.0
 	nav_updated.emit(objective.name, offset.length(), bearing)
+	GameEvents.compass_target.emit(objective.pos, offset.length(), objective.name)
+	RunTracker.note_position(ship.global_position)
 
 
 func navigation_objective() -> Dictionary:

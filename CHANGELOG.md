@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Game shell (F008–F010).** `Main.tscn` state machine (BOOT/MENU/PLAYING/PAUSED/SUMMARY),
+  BH menu backdrop, pause/settings/upgrade/summary screens, `GameEvents` bus, event-driven
+  `GameHud` with waypoint chevron, tractor reticle, and toast queue. Settings autoload at
+  50% default volume. Legacy BH survival moved to `BhSurvival.tscn`.
+
 ### Changed
 
 - **Ship slice visuals and motion.** Procedural starfield replaces ground HDRI; camera

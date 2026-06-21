@@ -1,0 +1,46 @@
+[gd_scene load_steps=2 format=3 uid="uid://upgradescreen1"]
+
+[ext_resource type="Script" path="res://scripts/screens/upgrade_screen.gd" id="1"]
+
+[node name="UpgradeScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -180.0
+offset_right = 260.0
+offset_bottom = 180.0
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox"]
+theme_override_font_sizes/font_size = 20
+text = "HOME DEPOT"
+
+[node name="BankLabel" type="Label" parent="Panel/Margin/VBox"]
+text = "Banked: 0 u"
+
+[node name="Rows" type="VBoxContainer" parent="Panel/Margin/VBox"]
+theme_override_constants/separation = 6
+
+[node name="Hint" type="Label" parent="Panel/Margin/VBox"]
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.65, 0.68, 0.72, 1)
+text = "↑↓ select · Enter buy · Esc undock"

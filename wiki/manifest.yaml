@@ -38,6 +38,9 @@ pages:
   - id: graphics-pipeline
     path: architecture/graphics-pipeline.md
     status: active
+  - id: game-shell
+    path: architecture/game-shell.md
+    status: active
   - id: sector-streaming
     path: architecture/sector-streaming.md
     status: deferred
@@ -79,6 +82,15 @@ pages:
     status: implemented
   - id: F007-graphics-pipeline
     path: features/F007-graphics-pipeline.md
+    status: implemented
+  - id: F008-game-shell
+    path: features/F008-game-shell.md
+    status: implemented
+  - id: F009-settings-audio
+    path: features/F009-settings-audio.md
+    status: implemented
+  - id: F010-hud-component
+    path: features/F010-hud-component.md
     status: implemented
   - id: concept-to-implementation
     path: workflow/concept-to-implementation.md

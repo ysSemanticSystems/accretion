@@ -3,7 +3,7 @@ id: testing-discipline
 title: Testing Discipline
 status: active
 layer: invariants
-applies_to: ["crates/accretion-core/**/*.rs"]
+applies_to: ["crates/accretion-core/**/*.rs", "scripts/**/*.gd", "scenes/**/*.tscn"]
 depends_on: [scientific-honesty]
 last_reviewed: 2026-06-21
 ---
@@ -12,7 +12,7 @@ last_reviewed: 2026-06-21
 
 A regression-test net is a precondition for scaling this codebase. No physics
 expands without its safety net. `cargo test` is the gate (the pytest of this
-project).
+project). Presentation/shell regressions are caught by `make godot-presentation`.
 
 ## Test taxonomy
 
@@ -21,6 +21,7 @@ project).
 | **Unit** | `#[cfg(test)] mod tests` in the module | One per public function; synthetic inputs, hand-computed outputs. |
 | **Golden / physics regression** | same | Reproduce a textbook value to a stated precision, with the citation in the test doc comment. |
 | **Property** | same | Invariants that must hold for all inputs (monotonicity, round-trips, conservation). |
+| **Presentation / shell** | `scripts/presentation_tests.gd` | Scene/script type pairs, autoload round-trips, shell navigation (settings back restores menu). |
 
 ## Required for every change
 
@@ -29,6 +30,8 @@ project).
 2. **A new physics formula** => a golden test reproducing a textbook value to a
    stated precision, *and* a citation of the source in the test doc comment.
 3. **A bug fix** => a failing test first, then the fix.
+4. **A presentation/shell bug** (scene type mismatch, menu navigation) => add or extend
+   `presentation_tests.gd` so CI cannot regress it.
 
 ## What a good golden test looks like
 
@@ -55,7 +58,7 @@ results (ISCO = 6 at spin 0) get tight tolerances.
 - Schwarzschild ISCO ratio `r_isco / R_g == 6` (exact analytic).
 - Shakura-Sunyaev scaling `T(2r)/T(r) == 2^(-3/4)` (exact analytic).
 
-The gate is `make check` (or `cargo test` + `scripts/check_invariants.sh`) green plus
+The gate is `make check` (or `cargo test` + `scripts/check_invariants.sh` + `make godot-presentation`) green plus
 `cargo clippy --workspace -- -D warnings` clean.
 
 ## Physics-test radii (invariant)

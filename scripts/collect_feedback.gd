@@ -2,23 +2,29 @@ extends Node
 ## Soft visual-only collection feedback. Spec: wiki/features/F002-tractor-cargo.md
 
 @export var flash_duration := 0.25
-@export var enable_sound := false
-@export var sound_volume_db := -28.0
+@export var enable_sound := true
+@export var sound_volume_db := -22.0
 
 var _audio: AudioStreamPlayer
+var _cargo_bar: ProgressBar
 
 
 func _ready() -> void:
 	_audio = AudioStreamPlayer.new()
-	_audio.bus = &"Master"
+	_audio.bus = &"SFX"
 	_audio.volume_db = sound_volume_db
 	add_child(_audio)
 
 
-func play_at(world_pos: Vector3, mass: float, cargo_bar: ProgressBar) -> void:
+func set_cargo_bar(bar: ProgressBar) -> void:
+	_cargo_bar = bar
+
+
+func play_at(world_pos: Vector3, mass: float, cargo_bar: ProgressBar = null) -> void:
+	var bar := cargo_bar if cargo_bar != null else _cargo_bar
 	_spawn_burst(world_pos, mass)
 	_spawn_floater(world_pos, mass)
-	_pulse_cargo_bar(cargo_bar)
+	_pulse_cargo_bar(bar)
 	if enable_sound:
 		_play_soft_chime()
 

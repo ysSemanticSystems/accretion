@@ -69,6 +69,6 @@ Player input → godot-ext (BlackHole) → accretion-core → numbers out → sh
 Game-system loops (ship flight, harvesting) live in GDScript for now; any formula
 that must be physically honest goes to `accretion-core` with citation + golden test.
 
-Ship-slice visuals: [graphics-pipeline.md](graphics-pipeline.md).
+App flow: [game-shell.md](game-shell.md). Ship slice visuals: [graphics-pipeline.md](graphics-pipeline.md).
 
 See [layers.md](layers.md) for layer responsibilities.

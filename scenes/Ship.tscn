@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://bqx7shipf00101"]
+[gd_scene load_steps=17 format=3 uid="uid://bqx7shipf00101"]
 
 [ext_resource type="Script" path="res://scripts/ship_scene.gd" id="1_root"]
 [ext_resource type="Script" path="res://scripts/ship_controller.gd" id="2_ship"]
@@ -9,7 +9,6 @@
 [ext_resource type="Script" path="res://scripts/sector_debris.gd" id="7_field"]
 [ext_resource type="Script" path="res://scripts/run_state.gd" id="7b_run"]
 [ext_resource type="Script" path="res://scripts/navigation_system.gd" id="8_nav"]
-[ext_resource type="Script" path="res://scripts/navigation_radar.gd" id="9_radar"]
 [ext_resource type="Script" path="res://scripts/home_depot.gd" id="10_depot"]
 [ext_resource type="Script" path="res://scripts/progression.gd" id="11_progress"]
 [ext_resource type="Script" path="res://scripts/collect_feedback.gd" id="12_feedback"]
@@ -118,85 +117,3 @@ visibility_aabb = AABB(-20, -20, -20, 40, 40, 40)
 process_material = SubResource("ParticleProcessMaterial_streak")
 draw_pass_1 = SubResource("QuadMesh_streak")
 material_override = SubResource("StandardMaterial3D_streak")
-
-[node name="UI" type="CanvasLayer" parent="."]
-
-[node name="HudPanel" type="PanelContainer" parent="UI"]
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 380.0
-offset_bottom = 200.0
-mouse_filter = 2
-
-[node name="Margin" type="MarginContainer" parent="UI/HudPanel"]
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
-
-[node name="VBox" type="VBoxContainer" parent="UI/HudPanel/Margin"]
-theme_override_constants/separation = 8
-
-[node name="MissionLabel" type="Label" parent="UI/HudPanel/Margin/VBox"]
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.95, 0.92, 0.86, 1)
-text = "Hold F near orange debris — it pulls into your hold"
-autowrap_mode = 3
-
-[node name="CompassLabel" type="Label" parent="UI/HudPanel/Margin/VBox"]
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.72, 0.82, 0.92, 1)
-text = "Scanning…"
-
-[node name="CargoRow" type="HBoxContainer" parent="UI/HudPanel/Margin/VBox"]
-theme_override_constants/separation = 10
-
-[node name="CargoBar" type="ProgressBar" parent="UI/HudPanel/Margin/VBox/CargoRow"]
-custom_minimum_size = Vector2(160, 14)
-size_flags_horizontal = 3
-max_value = 100.0
-show_percentage = false
-
-[node name="CargoText" type="Label" parent="UI/HudPanel/Margin/VBox/CargoRow"]
-theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.9, 0.82, 0.62, 1)
-text = "0 / 500 in hold"
-
-[node name="BankLabel" type="Label" parent="UI/HudPanel/Margin/VBox"]
-theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.65, 0.78, 0.72, 1)
-text = "Stored at home · 0 u"
-
-[node name="UpgradeLabel" type="Label" parent="UI/HudPanel/Margin/VBox"]
-visible = false
-theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.78, 0.72, 0.9, 1)
-text = "Cargo +100u · 150 u · Y to buy · U to change"
-
-[node name="HintLabel" type="Label" parent="UI/HudPanel/Margin/VBox"]
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.55, 0.58, 0.62, 0.85)
-text = "WASD fly · Shift boost · F collect · Esc frees cursor"
-
-[node name="RadarPanel" type="PanelContainer" parent="UI"]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -220.0
-offset_top = -220.0
-offset_right = -12.0
-offset_bottom = -12.0
-mouse_filter = 2
-
-[node name="Radar" type="Control" parent="UI/RadarPanel"]
-layout_mode = 2
-script = ExtResource("9_radar")
-nav_path = NodePath("../../NavigationSystem")
-
-[node name="RadarLabel" type="Label" parent="UI/RadarPanel"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.9)
-text = "Nearby contacts"

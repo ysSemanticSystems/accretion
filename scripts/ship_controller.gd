@@ -15,6 +15,7 @@ signal look_mode_changed(active: bool)
 @export var cruise_drag_mult := 0.4
 @export var cruise_spool_sec := 0.4
 @export var mouse_sensitivity := 0.0028
+@export var invert_y := false
 @export var auto_level_strength := 2.2
 @export var roll_speed := 1.6
 
@@ -38,7 +39,8 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseMotion and event.relative.length_squared() > 0.0:
 		rotate_object_local(Vector3.UP, -event.relative.x * mouse_sensitivity)
-		rotate_object_local(transform.basis.x, -event.relative.y * mouse_sensitivity)
+		var y_sign := -1.0 if invert_y else 1.0
+		rotate_object_local(transform.basis.x, y_sign * -event.relative.y * mouse_sensitivity)
 
 
 func _process(delta: float) -> void:

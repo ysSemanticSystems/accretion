@@ -1,7 +1,8 @@
 extends Node3D
-## Scene root — flight, tractor, depot loop with human-centric HUD.
+## Gameplay scene root — systems only; HUD is GameHud.tscn. Spec: wiki/features/F008-game-shell.md
 
 const WorldScale = preload("res://scripts/world_scale.gd")
+const GAME_HUD := preload("res://scenes/ui/GameHud.tscn")
 
 @onready var ship: Node3D = $ShipBody
 @onready var cargo: Node = $CargoHold
@@ -10,35 +11,43 @@ const WorldScale = preload("res://scripts/world_scale.gd")
 @onready var progression: Node = $Progression
 @onready var home_depot: Node = $HomeDepot
 @onready var collect_feedback: Node = $CollectFeedback
+@onready var run_state: Node = $RunState
 
-@onready var mission_label: Label = $UI/HudPanel/Margin/VBox/MissionLabel
-@onready var compass_label: Label = $UI/HudPanel/Margin/VBox/CompassLabel
-@onready var cargo_bar: ProgressBar = $UI/HudPanel/Margin/VBox/CargoRow/CargoBar
-@onready var cargo_text: Label = $UI/HudPanel/Margin/VBox/CargoRow/CargoText
-@onready var bank_label: Label = $UI/HudPanel/Margin/VBox/BankLabel
-@onready var upgrade_label: Label = $UI/HudPanel/Margin/VBox/UpgradeLabel
-@onready var hint_label: Label = $UI/HudPanel/Margin/VBox/HintLabel
-
-var _hint_visible_until: float = 0.0
+var _hud: CanvasLayer
 
 
 func _ready() -> void:
 	ship.add_to_group("player_ship")
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	_set_ui_mouse_ignore($UI)
-	_hint_visible_until = Time.get_ticks_msec() / 1000.0 + 45.0
-	if cargo.has_signal("cargo_changed"):
-		cargo.cargo_changed.connect(_on_cargo_changed)
+	if Settings:
+		ship.auto_level_enabled = Settings.auto_level_default
+	_apply_settings_to_ship()
+	if Settings:
+		Settings.settings_changed.connect(_apply_settings_to_ship)
+	_hud = GAME_HUD.instantiate()
+	add_child(_hud)
+	if _hud.has_method("bind_navigation"):
+		_hud.bind_navigation(navigation)
+	if collect_feedback.has_method("set_cargo_bar"):
+		collect_feedback.set_cargo_bar(_hud.cargo_bar_ref())
 	if tractor.has_signal("collected"):
-		tractor.collected.connect(_on_collected)
-	if navigation.has_signal("nav_updated"):
-		navigation.nav_updated.connect(_on_nav_updated)
-	if progression.has_signal("progression_changed"):
-		progression.progression_changed.connect(_on_progression_changed)
-	if home_depot.has_signal("deposited"):
-		home_depot.deposited.connect(_on_deposited)
-	_refresh_hud()
+		tractor.collected.connect(_on_tractor_collected)
 	call_deferred("_point_at_nearest_debris")
+
+
+func configure_run(seed: int) -> void:
+	if run_state.has_method("set_run_seed"):
+		run_state.set_run_seed(seed)
+
+
+func _apply_settings_to_ship() -> void:
+	if not Settings:
+		return
+	ship.mouse_sensitivity = Settings.mouse_sensitivity
+	ship.invert_y = Settings.invert_y
+	var cam: Camera3D = $ChaseCamera
+	if cam:
+		cam.fov_rest = Settings.fov_rest
+		cam.fov_max = Settings.fov_max
 
 
 func _point_at_nearest_debris() -> void:
@@ -56,107 +65,30 @@ func _point_at_nearest_debris() -> void:
 			nearest = poi
 	if best_dist >= INF:
 		return
-	var offset: Vector3 = nearest.pos
-	var flat := Vector2(offset.x, offset.z)
-	if flat.length_squared() < 1.0:
+	var target: Vector3 = ship.global_position + nearest.pos
+	var flat_target := Vector3(target.x, ship.global_position.y, target.z)
+	if ship.global_position.distance_squared_to(flat_target) < 0.01:
 		return
-	var yaw: float = atan2(flat.x, flat.y)
-	ship.rotation = Vector3(ship.rotation.x, yaw, ship.rotation.z)
-
-
-func _set_ui_mouse_ignore(node: Node) -> void:
-	if node is Control:
-		var c := node as Control
-		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		c.focus_mode = Control.FOCUS_NONE
-	for child in node.get_children():
-		_set_ui_mouse_ignore(child)
+	ship.look_at(flat_target, Vector3.UP)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not GameState.is_playing():
+		return
 	if event.is_action_pressed("ui_cancel"):
-		Input.mouse_mode = (
-			Input.MOUSE_MODE_VISIBLE
-			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
-			else Input.MOUSE_MODE_CAPTURED
-		)
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		GameState.transition(GameState.State.PAUSED)
+		return
 	if event.is_action_pressed("ship_auto_level_toggle"):
 		ship.toggle_auto_level()
-	if event.is_action_pressed("ship_upgrade_cycle"):
-		progression.cycle_upgrade_selection()
-	if event.is_action_pressed("ship_upgrade_buy"):
-		progression.try_purchase()
 
 
-func _process(_delta: float) -> void:
-	if not is_instance_valid(ship):
-		return
-	_refresh_hud()
+func open_upgrade_dock() -> void:
+	var shell := get_tree().root.get_node_or_null("Main")
+	if shell != null and shell.has_method("show_upgrade_dock"):
+		shell.show_upgrade_dock(progression)
 
 
-func _on_nav_updated(name: String, dist: float, _bearing: float) -> void:
-	if name == "none":
-		compass_label.text = "Nothing on scope — explore outward"
-		return
-	if name == "depot":
-		compass_label.text = "Home beacon · %s away" % WorldScale.format_distance(dist)
-		return
-	compass_label.text = "Nearest debris · %s away" % WorldScale.format_distance(dist)
-
-
-func _on_deposited(_mass: float) -> void:
-	_refresh_hud()
-
-
-func _on_progression_changed() -> void:
-	_refresh_hud()
-
-
-func _on_cargo_changed(_current: float, _maximum: float) -> void:
-	_refresh_hud()
-
-
-func _on_collected(_mass: float, _material_id: String, world_pos: Vector3) -> void:
+func _on_tractor_collected(_mass: float, _material_id: String, world_pos: Vector3) -> void:
 	if collect_feedback.has_method("play_at"):
-		collect_feedback.play_at(world_pos, _mass, cargo_bar)
-	_refresh_hud()
-
-
-func _refresh_hud() -> void:
-	var fill: float = cargo.fill_ratio() if cargo.has_method("fill_ratio") else 0.0
-	cargo_bar.value = fill * 100.0
-	cargo_text.text = "%.0f / %.0f in hold" % [cargo.current_mass, cargo.max_cargo_mass]
-	bank_label.text = "Stored at home · %.0f u" % progression.banked_mass
-
-	var loaded: bool = cargo.current_mass > 0.01
-	var near_home: bool = ship.global_position.length() < 120.0
-
-	if loaded:
-		mission_label.text = "Head home — fly to the cyan beacon and unload"
-	elif progression.banked_mass >= progression.selection_cost() and near_home:
-		mission_label.text = "At home — press Y to upgrade, U to pick what"
-	elif cargo.is_full():
-		mission_label.text = "Hold is full — return to the cyan beacon"
-	else:
-		mission_label.text = "Hold F near orange debris — it pulls into your hold"
-
-	var lvl: int = progression.selection_level()
-	var cost: float = progression.selection_cost()
-	if progression.banked_mass > 0.0 and near_home and lvl < progression.MAX_LEVEL and cost != INF:
-		upgrade_label.text = "%s · %.0f u · Y to buy · U to change" % [
-			progression.selection_label(),
-			cost,
-		]
-		upgrade_label.visible = true
-	elif lvl >= progression.MAX_LEVEL:
-		upgrade_label.text = "Upgrades maxed for this run"
-		upgrade_label.visible = progression.banked_mass > 0.0
-	else:
-		upgrade_label.visible = false
-
-	var now: float = Time.get_ticks_msec() / 1000.0
-	if now < _hint_visible_until:
-		hint_label.visible = true
-		hint_label.text = "WASD fly · Shift boost · F collect · Esc frees cursor"
-	else:
-		hint_label.visible = false
+		collect_feedback.play_at(world_pos, _mass)

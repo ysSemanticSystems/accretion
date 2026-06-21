@@ -38,12 +38,14 @@ func _process(delta: float) -> void:
 	if cargo != null and cargo.is_full():
 		_clear_target()
 		_hide_beam()
+		GameEvents.tractor_state_changed.emit("full")
 		return
 	if tractoring:
 		_tractor_tick(delta)
 	else:
 		_clear_target()
 		_hide_beam()
+		GameEvents.tractor_state_changed.emit("idle")
 
 
 func _tractor_tick(delta: float) -> void:
@@ -51,14 +53,18 @@ func _tractor_tick(delta: float) -> void:
 	_set_target(target)
 	if target == null:
 		_hide_beam()
+		GameEvents.tractor_state_changed.emit("idle")
 		return
 	target.apply_tractor_pull(ship_body.global_position, pull_accel, collect_radius, delta)
 	_update_beam(target.global_position)
+	GameEvents.tractor_state_changed.emit("pulling")
 	var mat: String = target.material_id
 	var amount: float = target.mass
 	var pos: Vector3 = target.global_position
 	if target.try_collect(cargo, ship_body.global_position, collect_radius):
 		collected.emit(amount, mat, pos)
+		GameEvents.debris_collected.emit(pos, amount)
+		GameEvents.toast.emit("+%.0f collected" % amount)
 		_clear_target()
 		_hide_beam()
 
@@ -87,6 +93,8 @@ func _pick_target() -> Node3D:
 		if dist < best_score:
 			best_score = dist
 			best = node
+	if best != null:
+		GameEvents.tractor_state_changed.emit("in_cone")
 	return best
 
 
