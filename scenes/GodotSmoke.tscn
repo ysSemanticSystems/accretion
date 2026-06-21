@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://csxs8qpfy65aa"]
+
+[ext_resource type="Script" path="res://scripts/godot_smoke.gd" id="1"]
+
+[node name="GodotSmoke" type="Node"]
+script = ExtResource("1")

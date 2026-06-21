@@ -22,9 +22,11 @@ struct BlackHole {
     mdot_gs: f64,
 
     #[export]
+    #[var(set = set_spin)]
     #[init(val = 0.0)]
     spin: f64,
 
+    /// Kerr radiative efficiency `eta = 1 - E_isco`; kept in sync with `spin`.
     #[export]
     #[init(val = 0.1)]
     efficiency: f64,
@@ -41,6 +43,10 @@ struct BlackHole {
 
 #[godot_api]
 impl INode for BlackHole {
+    fn ready(&mut self) {
+        self.sync_efficiency_from_spin();
+    }
+
     fn process(&mut self, _delta: f64) {
         let color = self.disk_inner_color();
         let uniform = StringName::from(&self.color_uniform);
@@ -52,6 +58,18 @@ impl INode for BlackHole {
 
 #[godot_api]
 impl BlackHole {
+    #[func]
+    fn set_spin(&mut self, spin: f64) {
+        self.spin = spin;
+        self.sync_efficiency_from_spin();
+    }
+
+    /// Radiative efficiency implied by the current spin (Kerr ISCO binding energy).
+    #[func]
+    fn efficiency_from_spin(&self) -> f64 {
+        phys::efficiency_from_spin(self.spin)
+    }
+
     #[func]
     fn disk_inner_temp(&self, r_cm: f64) -> f64 {
         phys::disk_temperature(r_cm, self.mass_solar, self.mdot_gs)
@@ -105,12 +123,6 @@ impl BlackHole {
         phys::integrity_rate(self.eddington_ratio())
     }
 
-    /// Radiative efficiency implied by the current spin (Kerr ISCO binding energy).
-    #[func]
-    fn efficiency_from_spin(&self) -> f64 {
-        phys::efficiency_from_spin(self.spin)
-    }
-
     /// Accretion rate \[g/s\] at the Eddington limit (`lambda = 1`) for current mass.
     #[func]
     fn mdot_at_eddington(&self) -> f64 {
@@ -156,5 +168,9 @@ impl BlackHole {
     #[func]
     fn isco_orbital_frequency_hz(&self) -> f64 {
         phys::orbital_frequency_hz(self.mass_solar, phys::isco_radius(self.spin), self.spin)
+    }
+
+    fn sync_efficiency_from_spin(&mut self) {
+        self.efficiency = phys::efficiency_from_spin(self.spin);
     }
 }

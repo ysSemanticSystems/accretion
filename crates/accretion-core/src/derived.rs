@@ -45,3 +45,25 @@ const COMPTON_REDUCED_E: f64 = H_BAR / (M_E * C_LIGHT);
 /// CODATA 2018.
 pub const SIGMA_T: f64 =
     (8.0 * PI / 3.0) * (ALPHA * ALPHA) * (COMPTON_REDUCED_E * COMPTON_REDUCED_E);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::constants::{ALPHA, C_LIGHT, H_PLANCK, K_BOLTZMANN, M_E};
+
+    const RTOL: f64 = 0.000000001;
+
+    #[test]
+    fn sigma_sb_matches_closed_form() {
+        let expected =
+            2.0 * PI.powi(5) * K_BOLTZMANN.powi(4) / (15.0 * C_LIGHT.powi(2) * H_PLANCK.powi(3));
+        assert!((SIGMA_SB - expected).abs() <= RTOL * expected.abs());
+    }
+
+    #[test]
+    fn sigma_t_matches_thomson_formula() {
+        let compton = H_BAR / (M_E * C_LIGHT);
+        let expected = (8.0 * PI / 3.0) * (ALPHA * ALPHA) * (compton * compton);
+        assert!((SIGMA_T - expected).abs() <= RTOL * expected.abs());
+    }
+}

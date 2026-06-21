@@ -48,6 +48,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Modular `accretion-core` architecture.** Split the monolithic `lib.rs` into
+  focused modules (`eddington`, `kerr`, `disk`, `evolution`, `colorimetry`)
+  with crate-root re-exports preserving the public API. Added extensive unit tests
+  in each module, shared integration-test helpers, and a cross-module
+  `tests/integration.rs` suite.
 - `constants.rs` now holds only FUNDAMENTAL constants (added `M_E`, `ALPHA`;
   dropped tabulated `SIGMA_SB`/`SIGMA_T`); composites are derived in `derived.rs`.
   Rule 11 / rule 02 updated for the two-layer (fundamental vs derived) provenance.

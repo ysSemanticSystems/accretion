@@ -52,6 +52,14 @@ accretion/                      # repo root (Godot 4.7 project lives here)
 ├── Cargo.toml                  # [workspace]
 ├── crates/
 │   ├── accretion-core/         # pure physics lib (CGS), cargo-testable
+│   │   └── src/
+│   │       ├── constants.rs    # fundamentals (generated)
+│   │       ├── derived.rs      # SIGMA_SB, SIGMA_T from fundamentals
+│   │       ├── eddington.rs    # L_Edd, lambda, mdot↔L
+│   │       ├── kerr.rs         # ISCO, efficiency, spin geometry
+│   │       ├── disk.rs         # Shakura–Sunyaev T(r)
+│   │       ├── evolution.rs    # mass/spin evolution, integrity
+│   │       └── colorimetry.rs  # Planck → CIE → sRGB
 │   └── godot-ext/              # cdylib gdext binding — presentation only
 ├── accretion.gdextension       # native lib wiring (api-4-6, loads under 4.7)
 ├── project.godot, icon.svg     # Godot project

@@ -209,7 +209,6 @@ func _apply_inputs() -> void:
 	black_hole.set("mass_solar", _mass)
 	black_hole.set("mdot_gs", pow(10.0, feed_slider.value))
 	black_hole.set("spin", spin_slider.value)
-	black_hole.set("efficiency", black_hole.call("efficiency_from_spin"))
 
 
 func _process(delta: float) -> void:
@@ -225,7 +224,6 @@ func _process(delta: float) -> void:
 
 
 func _step_simulation(delta: float) -> void:
-	black_hole.set("efficiency", black_hole.call("efficiency_from_spin"))
 	var t_salpeter: float = black_hole.call("salpeter_time_s")
 	var dt_sim := delta * t_salpeter / SECONDS_PER_EFOLD
 	_sim_seconds += dt_sim

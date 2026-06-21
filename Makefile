@@ -1,6 +1,12 @@
-.PHONY: check gen build test clippy fmt hooks
+.PHONY: check gen build test clippy fmt hooks godot-smoke
 
-GODOT_BIN ?= godot
+# Godot loads res://target/debug/libgodot_ext.dylib — always build there.
+CARGO_TARGET_DIR := $(CURDIR)/target
+export CARGO_TARGET_DIR
+
+# macOS default; override with GODOT_BIN=... or put `godot` on PATH.
+GODOT_BIN ?= /Applications/Godot.app/Contents/MacOS/Godot
+GODOT_FALLBACK := godot
 
 hooks:
 	./scripts/setup-hooks.sh
@@ -10,7 +16,7 @@ gen:
 	python3 scripts/gen_golden.py
 
 build:
-	cargo build
+	./scripts/build_godot_ext.sh
 
 test:
 	cargo test --workspace
@@ -21,15 +27,19 @@ clippy:
 fmt:
 	cargo fmt --check
 
+godot-smoke: build
+	@set -e; \
+	GODOT=""; \
+	if [ -x "$(GODOT_BIN)" ]; then GODOT="$(GODOT_BIN)"; \
+	elif command -v $(GODOT_FALLBACK) >/dev/null 2>&1; then GODOT="$(GODOT_FALLBACK)"; \
+	else echo "ERROR: Godot not found. Install to /Applications/Godot.app or set GODOT_BIN."; exit 1; fi; \
+	echo "Godot smoke test ($$GODOT)…"; \
+	"$$GODOT" --headless --path . res://scenes/GodotSmoke.tscn
+
 check: gen hooks
 	git diff --exit-code crates/accretion-core/src/constants.rs
 	git diff --exit-code crates/accretion-core/tests/fixtures/golden.json
 	sh scripts/check_invariants.sh
 	cargo test --workspace
 	cargo clippy --workspace --all-targets -- -D warnings
-	cargo build
-	@if command -v $(GODOT_BIN) >/dev/null 2>&1; then \
-		$(GODOT_BIN) --headless --quit --path . ; \
-	else \
-		echo "WARN: $(GODOT_BIN) not on PATH; skipping Godot headless load test"; \
-	fi
+	$(MAKE) godot-smoke
