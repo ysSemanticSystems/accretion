@@ -92,6 +92,9 @@ pages:
   - id: F010-hud-component
     path: features/F010-hud-component.md
     status: implemented
+  - id: F011-explore-world-soul
+    path: features/F011-explore-world-soul.md
+    status: implemented
   - id: concept-to-implementation
     path: workflow/concept-to-implementation.md
     status: active

@@ -6,7 +6,7 @@ const DEBRIS_SCENES: Array[PackedScene] = [
 	preload("res://assets/debris/rock_OQvi8PIZ40.glb"),
 ]
 
-@export var target_size := 0.45
+@export var target_size := 12.0
 
 
 func _ready() -> void:

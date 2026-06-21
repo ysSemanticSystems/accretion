@@ -15,11 +15,14 @@ var _selected := 0
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process_input(true)
+	if _progression != null:
+		_refresh()
 
 
 func bind_progression(progression: Node) -> void:
 	_progression = progression
-	_refresh()
+	if is_node_ready():
+		_refresh()
 
 
 func _refresh() -> void:
@@ -30,7 +33,6 @@ func _refresh() -> void:
 		child.queue_free()
 	for i in 3:
 		rows.add_child(_make_row(i))
-	_update_selection()
 
 
 func _make_row(kind: int) -> Label:

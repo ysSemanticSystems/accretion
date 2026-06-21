@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://bqx7shipf00101"]
+[gd_scene load_steps=23 format=3 uid="uid://bqx7shipf00101"]
 
 [ext_resource type="Script" path="res://scripts/ship_scene.gd" id="1_root"]
 [ext_resource type="Script" path="res://scripts/ship_controller.gd" id="2_ship"]
@@ -14,6 +14,8 @@
 [ext_resource type="Script" path="res://scripts/progression.gd" id="11_progress"]
 [ext_resource type="Script" path="res://scripts/collect_feedback.gd" id="12_feedback"]
 [ext_resource type="Script" path="res://scripts/ship_visual.gd" id="13_visual"]
+[ext_resource type="PackedScene" path="res://scenes/DistantBlackHole.tscn" id="14_bh"]
+[ext_resource type="Script" path="res://scripts/space_ambience.gd" id="15_amb"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_beam"]
 top_radius = 0.06
@@ -52,16 +54,59 @@ albedo_color = Color(0.8, 0.9, 1, 0.4)
 [sub_resource type="QuadMesh" id="QuadMesh_streak"]
 size = Vector2(0.08, 0.5)
 
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dust"]
+emission_shape = 3
+emission_box_extents = Vector3(120, 80, 120)
+direction = Vector3(0, 0, -1)
+spread = 180.0
+initial_velocity_min = 0.8
+initial_velocity_max = 3.5
+gravity = Vector3(0, 0, 0)
+scale_min = 0.02
+scale_max = 0.08
+color = Color(0.75, 0.82, 0.95, 0.25)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dust"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.85, 0.9, 1, 0.3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_dust"]
+size = Vector2(0.06, 0.06)
+
 [node name="Ship" type="Node3D"]
 script = ExtResource("1_root")
+
+[node name="DistantBlackHole" parent="." instance=ExtResource("14_bh")]
+
+[node name="SpaceAmbience" type="Node3D" parent="."]
+script = ExtResource("15_amb")
+
+[node name="DiskLight" type="DirectionalLight3D" parent="SpaceAmbience"]
+light_color = Color(1, 0.55, 0.28, 1)
+light_energy = 0.58
+shadow_enabled = false
+
+[node name="FillLight" type="DirectionalLight3D" parent="SpaceAmbience"]
+light_color = Color(0.62, 0.76, 1, 1)
+light_energy = 0.16
+shadow_enabled = false
+
+[node name="ParallaxDust" type="GPUParticles3D" parent="SpaceAmbience"]
+amount = 160
+lifetime = 8.0
+visibility_aabb = AABB(-140, -100, -140, 280, 200, 280)
+process_material = SubResource("ParticleProcessMaterial_dust")
+draw_pass_1 = SubResource("QuadMesh_dust")
+material_override = SubResource("StandardMaterial3D_dust")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource("4_env")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 0, 0)
-light_energy = 0.35
-shadow_enabled = true
+visible = false
+light_energy = 0.0
 
 [node name="HomeBeacon" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -60, 0)

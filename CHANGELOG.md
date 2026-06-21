@@ -9,11 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Game shell polish.** BH Lab menu entry (`LAB` state → `BhSurvival.tscn`, Esc back),
-  sector ring objectives with depletion toasts, live settings preview with revert on Back,
-  read-only controls reference, procedural ambient/thrust/tractor audio loops.
-- **Presentation test gate.** Headless checks for shader QPO fix, New Run spawn,
-  settings navigation, BH Lab flow, and scene/script type pairs (`make godot-presentation`).
+- **Explore world soul (F011).** Distant accretion black hole on the inward skyline,
+  warm disk lighting, nebula/disk sky glow, parallax dust, debris brackets with
+  600→400 km cross-fade, bus-scale clustered belts, BH-proximity audio tint.
 
 ### Changed
 
@@ -28,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   follows on render frames (fixes 100 Hz jitter); TAA/FSR disabled for clean fast flight.
 
 ### Added (prior slices)
+
+- **F007 graphics pipeline (ship slice).** PBR ship/debris meshes, procedural starfield
   environment, SSAO/glow tuning. See
   [wiki/features/F007-graphics-pipeline.md](wiki/features/F007-graphics-pipeline.md).
 - **Playability integration (F004–F006).** Home depot at origin banks cargo mass;

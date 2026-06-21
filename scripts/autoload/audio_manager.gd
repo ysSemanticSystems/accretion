@@ -9,6 +9,7 @@ var _music: AudioStreamPlayer
 var _thrust: AudioStreamPlayer
 var _tractor: AudioStreamPlayer
 var _thrust_level: float = 0.0
+var _explore_proximity: float = 0.0
 
 
 func _ready() -> void:
@@ -62,6 +63,15 @@ func stop_gameplay_audio() -> void:
 		_music.stop()
 	set_thrust_level(0.0)
 	set_tractor_active(false)
+
+
+func set_explore_proximity(proximity: float) -> void:
+	_explore_proximity = clampf(proximity, 0.0, 1.0)
+	if not _music.playing:
+		return
+	_music.pitch_scale = lerpf(0.9, 1.12, _explore_proximity)
+	var vol: float = lerpf(0.32, 0.58, _explore_proximity)
+	_music.volume_db = linear_to_db(vol) - 8.0
 
 
 func set_thrust_level(level: float) -> void:

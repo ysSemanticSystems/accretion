@@ -39,6 +39,18 @@ func _ready() -> void:
 	_update_mission()
 
 
+func _exit_tree() -> void:
+	if Settings and Settings.settings_changed.is_connected(_on_settings_changed):
+		Settings.settings_changed.disconnect(_on_settings_changed)
+	GameEvents.cargo_changed.disconnect(_on_cargo_changed)
+	GameEvents.mass_banked.disconnect(_on_mass_banked)
+	GameEvents.compass_target.disconnect(_on_compass_target)
+	GameEvents.toast.disconnect(_on_toast)
+	GameEvents.tractor_state_changed.disconnect(_on_tractor_state)
+	GameEvents.depot_docked.disconnect(_on_depot_docked)
+	GameEvents.sector_goal_changed.disconnect(_on_sector_goal_changed)
+
+
 func _process(_delta: float) -> void:
 	var now: float = Time.get_ticks_msec() / 1000.0
 	hint_label.visible = now < _hint_until
@@ -91,6 +103,8 @@ func _on_compass_target(world_pos: Vector3, dist: float, kind: String) -> void:
 
 
 func _on_toast(text: String) -> void:
+	if not is_inside_tree() or toasts == null or not is_instance_valid(toasts):
+		return
 	if toasts.has_method("push"):
 		toasts.push(text)
 

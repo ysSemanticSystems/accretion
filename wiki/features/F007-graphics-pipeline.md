@@ -42,7 +42,7 @@ visual scripts, `assets/` provenance, `project.godot` default environment.
 |---|---|---|
 | HDRI energy | `space_environment.tres` | n/a (procedural sky) |
 | Ship scale | `ship_visual.gd` `target_length` | 1.7 (AABB fit; GLB has embedded 100× node) |
-| Debris scale | `debris_visual.gd` `target_size` | 0.45 |
+| Debris scale | `debris_visual.gd` `target_size` | 12.0 (AABB fit; clusters 9–18) |
 | Glow threshold | `space_environment.tres` | 0.78 |
 
 ## Open questions

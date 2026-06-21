@@ -1,5 +1,5 @@
 extends Node3D
-## Loose debris harvestable by tractor. Spec: wiki/features/F002-tractor-cargo.md
+## Loose debris harvestable by tractor. Spec: wiki/features/F002-tractor-cargo.md, F011.
 
 const WorldScale = preload("res://scripts/world_scale.gd")
 
@@ -14,7 +14,9 @@ var _active := true
 
 var _visual_root: Node3D
 var _beacon: MeshInstance3D
+var _beacon_mat: StandardMaterial3D
 var _ship: Node3D
+var _base_visual_scale := Vector3.ONE
 
 
 func _ready() -> void:
@@ -26,6 +28,11 @@ func _ready() -> void:
 		velocity = velocity.normalized() * drift_speed
 	_visual_root = get_node_or_null("DebrisVisual") as Node3D
 	_beacon = get_node_or_null("NavBeacon") as MeshInstance3D
+	if _visual_root:
+		_base_visual_scale = _visual_root.scale
+	if _beacon:
+		_beacon_mat = _beacon.get_surface_override_material(0).duplicate() as StandardMaterial3D
+		_beacon.set_surface_override_material(0, _beacon_mat)
 
 
 func _process(delta: float) -> void:
@@ -86,10 +93,28 @@ func _update_visibility() -> void:
 	if _ship == null:
 		return
 	var dist: float = _ship.global_position.distance_to(global_position)
-	if _visual_root:
-		_visual_root.visible = dist <= WorldScale.VISUAL_MESH_RADIUS_UNITS
-	if _beacon:
-		_beacon.visible = (
-			dist > WorldScale.VISUAL_MESH_RADIUS_UNITS
-			and dist <= WorldScale.MARKER_BEACON_RADIUS_UNITS
+	var beacon_strength: float = 0.0
+	if dist >= WorldScale.BEACON_FADE_OUT_UNITS:
+		beacon_strength = 1.0
+	elif dist <= WorldScale.BEACON_FADE_IN_UNITS:
+		beacon_strength = 0.0
+	else:
+		beacon_strength = inverse_lerp(
+			WorldScale.BEACON_FADE_IN_UNITS,
+			WorldScale.BEACON_FADE_OUT_UNITS,
+			dist,
 		)
+	var rock_strength: float = 1.0 - beacon_strength
+
+	if _beacon and _beacon_mat:
+		_beacon.visible = beacon_strength > 0.02
+		var alpha: float = 0.45 * beacon_strength
+		_beacon_mat.albedo_color = Color(1.0, 0.55, 0.12, alpha)
+		_beacon_mat.emission_energy_multiplier = 1.4 * beacon_strength
+		var beacon_scale: float = lerpf(0.65, 1.0, beacon_strength)
+		_beacon.scale = Vector3.ONE * beacon_scale
+
+	if _visual_root:
+		_visual_root.visible = dist <= WorldScale.VISUAL_MESH_RADIUS_UNITS + 80.0 or rock_strength > 0.05
+		var rock_scale: float = lerpf(0.75, 1.0, rock_strength)
+		_visual_root.scale = _base_visual_scale * rock_scale

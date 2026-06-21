@@ -65,9 +65,9 @@ func show_upgrade_dock(progression: Node) -> void:
 		return
 	get_tree().paused = true
 	var screen: Node = UPGRADE_SCENE.instantiate()
+	_swap_screen(screen)
 	if screen.has_method("bind_progression"):
 		screen.bind_progression(progression)
-	_swap_screen(screen)
 
 
 func close_settings() -> void:

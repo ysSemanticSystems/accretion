@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://distantbh001"]
+
+[ext_resource type="Shader" path="res://shaders/blackhole.gdshader" id="1_shader"]
+[ext_resource type="Script" path="res://scripts/distant_black_hole.gd" id="2_script"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_disc"]
+noise_type = 1
+frequency = 0.015
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_disc"]
+seamless = true
+noise = SubResource("FastNoiseLite_disc")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_disc"]
+shader = ExtResource("1_shader")
+shader_parameter/disc_texture = SubResource("NoiseTexture2D_disc")
+shader_parameter/disc_outer_radius = 0.9
+shader_parameter/disc_inner_radius = 0.2
+shader_parameter/disc_speed = 1.4
+shader_parameter/disc_color = Color(0.85, 0.2, 0.05, 1)
+shader_parameter/inner_color = Color(1, 0.95, 0.85, 1)
+shader_parameter/doppler_beaming_factor = 66.0
+shader_parameter/emission_strength = 1.2
+shader_parameter/qpo_phase_rate = 1.5
+shader_parameter/turbulence_intensity = 0.35
+shader_parameter/ray_steps = 192
+shader_parameter/step_size = 0.09
+shader_parameter/ss_radius = 0.12
+shader_parameter/g_const = 0.38
+
+[sub_resource type="SphereMesh" id="SphereMesh_disc"]
+radius = 0.5
+height = 1.0
+
+[node name="DistantBlackHole" type="Node3D"]
+script = ExtResource("2_script")
+
+[node name="DiskMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_disc")
+surface_material_override/0 = SubResource("ShaderMaterial_disc")
+
+[node name="BlackHole" type="BlackHole" parent="."]
+mass_solar = 4000000.0
+mdot_gs = 2e+23
+spin = 0.0
+efficiency = 0.057
+disk_material = SubResource("ShaderMaterial_disc")
+color_uniform = "inner_color"

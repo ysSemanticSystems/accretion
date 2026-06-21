@@ -3,7 +3,7 @@ id: distance-and-visibility
 title: Distance Scale and Visibility
 status: active
 layer: game-design
-depends_on: [navigation, locked-decisions, F001-third-person-flight, F006-speed-camera-feel]
+depends_on: [navigation, locked-decisions, F001-third-person-flight, F006-speed-camera-feel, F011-explore-world-soul]
 last_reviewed: 2026-06-21
 ---
 
@@ -19,40 +19,45 @@ navigation**. Presentation tuning only (GDScript + wiki); no physics formulas.
 | Game unit | **1 km** displayed | `WorldScale.UNITS_PER_KM = 1` |
 | Sector cube | **1000 km** edge | Aligns with [sector-streaming.md](../architecture/sector-streaming.md) |
 | Impulse band | **65 km/s** cap | Terminal ~43 km/s at base tuning |
-| Cruise band | **250 km/s** cap | F001 v2 force budget; ~400 km crossing in ~2 s |
-| Home beacon | Origin `(0,0,0)` | Cyan pillar — depot + parallax reference |
+| Cruise band | **250 km/s** cap | F001 v2 force budget |
+| Home beacon | Origin `(0,0,0)` | Cyan pillar — depot reference |
+| Skyline BH | `(0, 0, -12000)` km | Distant accretion disk — visual landmark (F011) |
 
-True distances drive **compass**, **cargo timing**, and **tractor range**.
-The **radar disc** uses **sqrt compression** so far blips stay on-screen without
-lying about compass distance.
+## Debris visibility (F011)
+
+| Element | Behavior |
+|---|---|
+| **Target bracket** | Screen-stable `Label3D` billboard — always on out to 8000 km |
+| **Nav beacon** | Soft emissive sphere; **cross-fades out** 600→400 km |
+| **Rock mesh** | Bus-scale (~12 km AABB); ramps in as beacon fades |
+| **Clusters** | 4–7 belts × 8–16 rocks per sector, ~150 km cluster radius |
+
+No hard pop at 500 km — transition band overlaps mesh and beacon.
 
 ## Speed perception (F006)
 
 Primary motion cues (not HUD numbers):
 
-- FOV widens with speed (70° → 90°)
+- FOV widens with speed (70° → 86°)
 - Near-field streak particles on camera
-- Optional chase distance kick under thrust
+- Always-on parallax dust (F011)
 
-Position `(x, y, z) km` readout remains for debug; not the primary motion sell.
-
-## Visibility rings
+## Visibility rings (legacy labels)
 
 | Ring | Radius | What the player sees |
 |---|---|---|
-| **Mesh** | ≤ 500 km | Full debris sphere |
-| **Beacon** | 500–8000 km | Large emissive marker only |
-| **Radar only** | ≤ 2500 km | Blip on tactical radar + compass bearing |
-| **Off-radar** | > 2500 km | Hidden until adjacent sector entered (F005) |
+| **Mesh + bracket** | ≤ ~550 km (+ overlap) | Rock + bracket |
+| **Beacon fade** | 400–600 km | Beacon alpha ↓, rock ↑ |
+| **Bracket only** | ≤ 8000 km | Target bracket (+ fading beacon far) |
+| **Radar** | ≤ 2500 km | Tactical blip + compass |
 
 ## Navigation outputs (F003)
 
 - **Sector grid** — `Sector (x, y, z)` from ship position
-- **Position** — `(x, y, z) km` debug readout
-- **Compass** — navigation objective (depot or nearest debris), true km, bearing
-- **Radar** — heading-up blips with altitude stalks, sqrt-scaled layout
+- **Compass** — depot when cargo loaded, nearest debris when empty
+- **Radar** — heading-up blips, depot cyan, objective highlight
 
 ## Future hooks
 
-- Wormhole / BH landmarks register as `nav_poi` group with distinct blip color
-- Full sector streaming per [sector-streaming.md](../architecture/sector-streaming.md)
+- Inner-sector radiation hazard tied to BH proximity (gameplay, not yet implemented)
+- Wormhole / insertion prestige at disk (navigation.md)

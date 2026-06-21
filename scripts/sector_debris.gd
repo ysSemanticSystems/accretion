@@ -1,17 +1,21 @@
 extends Node3D
-## Seeded per-sector debris generation (lite). Spec: wiki/features/F005-seeded-sector-debris.md
+## Seeded per-sector debris — dense clusters. Spec: wiki/features/F005-seeded-sector-debris.md
 
 const WorldScale = preload("res://scripts/world_scale.gd")
 const DEBRIS_SCENE := preload("res://scenes/harvestable_debris.tscn")
 
 @export var ship_path: NodePath = ^"../ShipBody"
 @export var run_state_path: NodePath = ^"../RunState"
-@export var debris_per_sector_min := 8
-@export var debris_per_sector_max := 14
+@export var clusters_per_sector_min := 4
+@export var clusters_per_sector_max := 7
+@export var rocks_per_cluster_min := 8
+@export var rocks_per_cluster_max := 16
+@export var cluster_radius := 150.0
 @export var debris_mass_min := 15.0
 @export var debris_mass_max := 55.0
 @export var sector_margin := 80.0
 @export var mass_dist_multiplier := 0.15
+@export var size_near_bh_multiplier := 1.35
 
 var _ship: Node3D
 var _run_state: Node
@@ -56,26 +60,38 @@ func _ensure_sector(sector: Vector3i) -> void:
 
 func _spawn_sector(sector: Vector3i) -> void:
 	var rng: RandomNumberGenerator = _run_state.sector_rng(sector)
-	var count: int = rng.randi_range(debris_per_sector_min, debris_per_sector_max)
-	var dist: int = _chebyshev(sector)
+	var dist: int = WorldScale.chebyshev_from_origin(sector)
 	var mass_scale: float = 1.0 + mass_dist_multiplier * float(dist)
+	var size_scale: float = lerpf(1.0, 1.45, clampf(float(dist) / 6.0, 0.0, 1.0))
+	var toward_bh: float = clampf(inverse_lerp(0.0, -3.0, float(sector.z)), 0.0, 1.0)
+	size_scale *= lerpf(1.0, size_near_bh_multiplier, toward_bh)
 	if dist == 0:
-		count = maxi(count, 12)
 		mass_scale *= 1.35
 	var half: float = WorldScale.SECTOR_EDGE_UNITS * 0.5 - sector_margin
 	var origin := Vector3(sector) * WorldScale.SECTOR_EDGE_UNITS
-	for i in count:
-		var debris = DEBRIS_SCENE.instantiate()
-		add_child(debris)
-		var pos := origin + Vector3(
+	var cluster_count: int = rng.randi_range(clusters_per_sector_min, clusters_per_sector_max)
+	for _c in cluster_count:
+		var center := origin + Vector3(
 			rng.randf_range(-half, half),
-			rng.randf_range(-half * 0.4, half * 0.4),
+			rng.randf_range(-half * 0.35, half * 0.35),
 			rng.randf_range(-half, half),
 		)
-		debris.global_position = pos
-		debris.mass = rng.randf_range(debris_mass_min, debris_mass_max) * mass_scale
-		if debris.has_signal("collected"):
-			debris.collected.connect(_on_debris_collected.bind(debris))
+		var rocks: int = rng.randi_range(rocks_per_cluster_min, rocks_per_cluster_max)
+		for _i in rocks:
+			var offset := Vector3(
+				rng.randf_range(-cluster_radius, cluster_radius),
+				rng.randf_range(-cluster_radius * 0.35, cluster_radius * 0.35),
+				rng.randf_range(-cluster_radius, cluster_radius),
+			)
+			var debris = DEBRIS_SCENE.instantiate()
+			add_child(debris)
+			debris.global_position = center + offset
+			debris.mass = rng.randf_range(debris_mass_min, debris_mass_max) * mass_scale
+			var visual: Node = debris.get_node_or_null("DebrisVisual")
+			if visual != null:
+				visual.set("target_size", 12.0 * size_scale * rng.randf_range(0.75, 1.25))
+			if debris.has_signal("collected"):
+				debris.collected.connect(_on_debris_collected.bind(debris))
 
 
 func _sector_has_harvestables(sector: Vector3i) -> bool:
@@ -88,10 +104,6 @@ func _sector_has_harvestables(sector: Vector3i) -> bool:
 		if absf(local.x) <= half and absf(local.y) <= half and absf(local.z) <= half:
 			return true
 	return false
-
-
-func _chebyshev(sector: Vector3i) -> int:
-	return maxi(absi(sector.x), maxi(absi(sector.y), absi(sector.z)))
 
 
 func _sector_key(sector: Vector3i) -> String:

@@ -10,6 +10,7 @@ const SCENE_PATHS: Array[String] = [
 	"res://scenes/harvestable_debris.tscn",
 	"res://scenes/BhMenuBackdrop.tscn",
 	"res://scenes/BhSurvival.tscn",
+	"res://scenes/DistantBlackHole.tscn",
 	"res://scenes/screens/MainMenu.tscn",
 	"res://scenes/screens/PauseMenu.tscn",
 	"res://scenes/screens/SettingsMenu.tscn",
@@ -36,6 +37,9 @@ func _run() -> int:
 	failures.append_array(_test_settings_api())
 	failures.append_array(await _test_shell_settings_navigation())
 	failures.append_array(await _test_new_run_flow())
+	failures.append_array(await _test_upgrade_dock_flow())
+	failures.append_array(await _test_toast_queue_burst())
+	failures.append_array(_test_visibility_constants())
 	failures.append_array(_test_shader_qpo_fix())
 	failures.append_array(_test_settings_apply_runtime())
 	failures.append_array(await _test_bh_lab_flow())
@@ -202,10 +206,99 @@ func _test_new_run_flow() -> Array[String]:
 		failures.append("Ship scene missing ChaseCamera after New Run")
 	elif gameplay_node.get_node_or_null("RunObjectives") == null:
 		failures.append("Ship scene missing RunObjectives after New Run")
+	elif gameplay_node.get_node_or_null("DistantBlackHole") == null:
+		failures.append("Ship scene missing DistantBlackHole skyline after New Run")
 
 	shell.queue_free()
 	GameState.state = prior_state
 	get_tree().paused = prior_state == GameState.State.PAUSED
+	return failures
+
+
+func _test_upgrade_dock_flow() -> Array[String]:
+	var failures: Array[String] = []
+	var prior_state := GameState.state
+	get_tree().paused = false
+
+	var shell: Node = MAIN_SHELL.instantiate()
+	get_tree().root.add_child.call_deferred(shell)
+	for _i in 120:
+		if GameState.state != GameState.State.BOOT and is_instance_valid(shell.get_parent()):
+			break
+		await get_tree().process_frame
+
+	GameState.transition(GameState.State.PLAYING)
+	for _i in 120:
+		var gameplay: Variant = shell.get("_gameplay")
+		if gameplay != null and is_instance_valid(gameplay):
+			break
+		await get_tree().process_frame
+
+	var gameplay_node: Node = shell.get("_gameplay")
+	if gameplay_node == null or not is_instance_valid(gameplay_node):
+		failures.append("upgrade-dock test: Ship gameplay missing")
+		shell.queue_free()
+		GameState.state = prior_state
+		return failures
+
+	var progression: Node = gameplay_node.get_node_or_null("Progression")
+	if progression == null:
+		failures.append("upgrade-dock test: Progression node missing")
+		shell.queue_free()
+		GameState.state = prior_state
+		return failures
+
+	if progression.has_method("add_banked"):
+		progression.add_banked(100.0)
+	shell.show_upgrade_dock(progression)
+	await get_tree().process_frame
+
+	if not _active_screen_named(shell, "UpgradeScreen"):
+		failures.append("show_upgrade_dock did not open UpgradeScreen")
+
+	shell.close_upgrade_dock()
+	await get_tree().process_frame
+	get_tree().paused = false
+
+	shell.queue_free()
+	GameState.state = prior_state
+	get_tree().paused = prior_state == GameState.State.PAUSED
+	return failures
+
+
+func _test_toast_queue_burst() -> Array[String]:
+	var failures: Array[String] = []
+	var packed: PackedScene = load("res://scenes/ui/GameHud.tscn")
+	var hud: Node = packed.instantiate()
+	add_child.call_deferred(hud)
+	for _i in 30:
+		if hud.is_inside_tree():
+			break
+		await get_tree().process_frame
+	var queue: Node = hud.get_node_or_null("ToastQueue")
+	if queue == null or not queue.has_method("push"):
+		failures.append("ToastQueue missing from GameHud")
+		hud.queue_free()
+		return failures
+	for i in 8:
+		queue.push("burst toast %d" % i)
+	for _i in 20:
+		await get_tree().process_frame
+	hud.queue_free()
+	for _i in 10:
+		await get_tree().process_frame
+	return failures
+
+
+func _test_visibility_constants() -> Array[String]:
+	var failures: Array[String] = []
+	const WorldScale = preload("res://scripts/world_scale.gd")
+	if WorldScale.BEACON_FADE_IN_UNITS >= WorldScale.BEACON_FADE_OUT_UNITS:
+		failures.append("BEACON_FADE_IN must be less than BEACON_FADE_OUT")
+	if WorldScale.VISUAL_MESH_RADIUS_UNITS > WorldScale.BEACON_FADE_OUT_UNITS:
+		failures.append("VISUAL_MESH_RADIUS should not exceed BEACON_FADE_OUT")
+	if WorldScale.BH_WORLD_POSITION.z >= 0.0:
+		failures.append("BH_WORLD_POSITION should lie inward (-Z)")
 	return failures
 
 

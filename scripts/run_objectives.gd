@@ -50,4 +50,4 @@ func _on_sector_depleted(sector: Vector3i) -> void:
 
 
 func _chebyshev(sector: Vector3i) -> int:
-	return maxi(absi(sector.x), maxi(absi(sector.y), absi(sector.z)))
+	return WorldScale.chebyshev_from_origin(sector)
