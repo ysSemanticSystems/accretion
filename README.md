@@ -1,13 +1,15 @@
 # accretion
 
-**Explore, navigate, and collect** in space — or **ride the Eddington limit**
-at a black hole. An accretion-disk game built like scientific software: every
-formula cites a primary source, physical constants come from astropy, and the
-physics core is independently testable in Rust. Godot 4.7 handles flight,
-navigation, lensing, and presentation.
+**Fly, collect, bank, upgrade** — a third-person explore baseline set around a
+distant accretion black hole. Built like scientific software: every formula cites a
+primary source, physical constants come from astropy, and the physics core is
+independently testable in Rust. Godot 4.7 handles flight, navigation, lensing, and
+presentation.
 
-The default play scene is **`scenes/Ship.tscn`** (6DOF flight, tactical radar,
-tractor cargo). The black-hole survival slice lives in **`scenes/Main.tscn`**.
+Press **New Run** from the main menu to spawn into open space: 6DOF arcade flight,
+sector debris belts, tractor cargo, a home depot loop, and a warm disk glowing on
+the inward skyline. The black-hole **survival lab** (Eddington limit, disk tuning) is
+still available from the menu.
 
 Companion to
 [BlackHoleResearch](https://github.com/ysSemanticSystems/BlackHoleResearch)
@@ -23,30 +25,45 @@ physics discipline into Rust + Godot.
 
 ---
 
+## Play today (baseline)
+
+| Mode | Entry | What you do |
+|---|---|---|
+| **Explore run** | `scenes/Main.tscn` → **New Run** | Fly outward from home, tractor orange debris into your hold, return to the cyan beacon to bank mass, buy upgrades, push to richer sector rings. Distant BH on the skyline; compass + radar guide you. |
+| **BH Lab** | Main menu → **BH Lab** | Tune mass, accretion rate, and spin; watch the lensed disk respond. Classic survival slice (`BhSurvival.tscn`). |
+| **Dev slice** | `scenes/Ship.tscn` (F5) | Ship scene only — flight, nav, tractor, depot — without the menu shell. |
+
+The shipped loop is intentionally small but end-to-end: **fly → collect → bank →
+upgrade → explore outward**. Presentation is tuned for readable targets (screen-space
+brackets, decluttered radar, motivated lighting) rather than final art polish.
+
+---
+
 ## What you get
 
 | Layer | Crate / path | Role |
 |---|---|---|
 | **Physics core** | [`crates/accretion-core`](crates/accretion-core/) | Eddington luminosity, Shakura–Sunyaev `T(r)`, Kerr ISCO, blackbody color. CGS, zero Godot deps, `cargo test`. |
 | **Engine binding** | [`crates/godot-ext`](crates/godot-ext/) | Thin gdext cdylib: exposes the core to the scene tree. **No physics here.** |
-| **Presentation** | `shaders/`, `scenes/`, `scripts/` | Lensing disk (Tyler Kennedy, MIT), starfield sky, HUD, controls. |
+| **Presentation** | `shaders/`, `scenes/`, `scripts/` | Lensing disk (Tyler Kennedy, MIT), procedural starfield, game shell, HUD, controls. |
 
 Constants and golden expected values are **generated from astropy** — not
 hand-typed. See [AGENTS.md](AGENTS.md) and rule `11-constants-provenance`.
 
 ```
-  Player input (mass, Ṁ, spin)
-           │
-           ▼
-  ┌─────────────────┐     ┌──────────────────┐
-  │  godot-ext      │────▶│  accretion-core  │  ← astropy-generated constants
-  │  (BlackHole)    │     │  (pure Rust)     │  ← golden.json oracle tests
-  └────────┬────────┘     └──────────────────┘
-           │ disk color, T, λ_Edd
-           ▼
-  ┌─────────────────┐
-  │  lensing shader │  HDR + bloom
-  └─────────────────┘
+  Player input (mass, Ṁ, spin)          Explore run (WASD, tractor, depot)
+           │                                        │
+           ▼                                        ▼
+  ┌─────────────────┐     ┌──────────────────┐   ┌──────────────────┐
+  │  godot-ext      │────▶│  accretion-core  │   │  Game shell +    │
+  │  (BlackHole)    │     │  (pure Rust)     │   │  Ship.tscn loop  │
+  └────────┬────────┘     └──────────────────┘   └────────┬─────────┘
+           │ disk color, T, λ_Edd                       │ flight, nav, cargo
+           ▼                                            ▼
+  ┌─────────────────┐                          ┌──────────────────┐
+  │  lensing shader │  HDR + bloom             │  starfield sky,  │
+  └─────────────────┘                          │  distant BH glow │
+                                               └──────────────────┘
 ```
 
 ---
@@ -54,8 +71,8 @@ hand-typed. See [AGENTS.md](AGENTS.md) and rule `11-constants-provenance`.
 ## Documentation
 
 **[wiki/README.md](wiki/README.md)** is the source of truth for game design,
-architecture, physics invariants, and feature specs. Agents and contributors
-start there. [AGENTS.md](AGENTS.md) covers setup and workflow bootstrap.
+architecture, physics invariants, and feature specs (`F001`–`F011`). Agents and
+contributors start there. [AGENTS.md](AGENTS.md) covers setup and workflow bootstrap.
 
 ---
 
@@ -72,9 +89,8 @@ cd accretion
 ./scripts/setup-hooks.sh          # once per clone — AI-attribution strip hooks
 pip install -r scripts/requirements.txt
 
-make check                        # generators, invariants, test, clippy, build, Godot smoke
-# Open the project in Godot 4.7 and run scenes/Main.tscn (F5)
-# Explore slice (default): scenes/Ship.tscn is the main scene — flight, nav, tractor
+make check                        # generators, invariants, wiki, test, clippy, build, Godot smoke + presentation
+# Open the project in Godot 4.7 and run scenes/Main.tscn (F5) → New Run
 ```
 
 **Before opening Godot**, run `make build` (or `make godot-smoke`). The native
@@ -83,25 +99,16 @@ library is copied to `bin/libgodot_ext.dylib` (macOS) or `bin/libgodot_ext.so`
 stale `target/debug/` artifact from an old build.
 
 `make godot-smoke` headlessly instantiates `BlackHole` and calls every Rust API
-used by the game (`salpeter_time_s`, `advance_mass`, …). On macOS the Makefile
-defaults to `/Applications/Godot.app/Contents/MacOS/Godot`; override with
-`GODOT_BIN=...` if needed.
+used by the game. `make godot-presentation` runs shell/HUD/scene compatibility
+regressions headlessly. On macOS the Makefile defaults to
+`/Applications/Godot.app/Contents/MacOS/Godot`; override with `GODOT_BIN=...` if
+needed.
 
 ---
 
 ## Controls
 
-### Black-hole slice (`scenes/Main.tscn`)
-
-| Input | Action |
-|---|---|
-| **Mass slider** / `Q` `E` | Black-hole mass (log₁₀ M☉) — disk color comes from Rust `blackbody_rgb(T_inner)` |
-| **Feed slider** / `Z` `X` | Accretion rate (log₁₀ g/s) — drive λ_Edd toward the loss ceiling |
-| **Spin slider** / `A` `D` | Dimensionless spin a/M — ISCO shrinks, disk tightens |
-| `1` `2` `3` | Presets: **Cyg X-1** (21 M☉), **Sgr A\*** (4×10⁶ M☉), **M87\*** (6.5×10⁹ M☉) |
-| **Drag** / **scroll** | Orbit camera / zoom |
-
-### Ship flight (`scenes/Ship.tscn` — F001)
+### Explore run (main menu → **New Run**)
 
 | Input | Action |
 |---|---|
@@ -109,18 +116,27 @@ defaults to `/Applications/Godot.app/Contents/MacOS/Godot`; override with
 | **A** **D** | Strafe |
 | **Space** **C** | Up / down |
 | **Q** **E** | Roll |
-| **Mouse** | Steer (captured) |
-| **Hold RMB** | Look orbit (camera only) |
+| **Mouse** | Steer ship (captured) |
+| **Hold RMB** | Orbit camera without turning ship |
 | **Shift** | Cruise speed band |
-| **Hold F** | Tractor beam (aim at debris) |
-| **L** | Toggle auto-level |
-| **Esc** | Release / capture mouse |
+| **Hold F** | Tractor beam (pull debris into hold) |
+| **L** | Toggle auto-level (roll-only — keeps your pitch/yaw aim) |
+| **Esc** | Pause menu |
 
-**Navigation:** sector + position (top-left HUD), compass bearing to nearest debris,
-tactical radar (bottom-right). Cyan **home beacon** at origin — fly toward orange
-blips / compass bearing to reach debris (~100–400 km out). Hold **Shift** for cruise.
+**Navigation:** mission line + cargo bar (top-left), compass to nearest debris or
+home beacon, waypoint chevron, tactical radar (bottom-right). Fly to **orange debris**
+fields, return to the **cyan home beacon** at origin to unload and upgrade.
 
-The black-hole survival slice remains at `scenes/Main.tscn`.
+### BH Lab (main menu → **BH Lab**)
+
+| Input | Action |
+|---|---|
+| **Mass slider** / `Q` `E` | Black-hole mass (log₁₀ M☉) |
+| **Feed slider** / `Z` `X` | Accretion rate (log₁₀ g/s) |
+| **Spin slider** / `A` `D` | Dimensionless spin a/M |
+| `1` `2` `3` | Presets: **Cyg X-1**, **Sgr A\***, **M87\*** |
+| **Drag** / **scroll** | Orbit camera / zoom |
+| **Esc** | Back to main menu |
 
 ---
 
@@ -138,7 +154,7 @@ doc comment. Current Slice 0 coverage:
 
 **Known limitation:** `disk_temperature` uses the bare Shakura–Sunyaev profile
 (`T ∝ r^(-3/4)`) without the inner-boundary factor — no temperature peak or dark
-inner gap yet. Tracked as a fast-follow in [CHANGELOG.md](CHANGELOG.md).
+inner gap yet. Tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -171,12 +187,16 @@ accretion/
 │   ├── accretion-core/     # physics (CGS, astropy-sourced constants)
 │   └── godot-ext/          # gdext binding (presentation only)
 ├── scripts/                # generators, invariant checks, setup-hooks
-├── scenes/Main.tscn        # playable vertical slice
+├── scenes/
+│   ├── Main.tscn           # game shell (menu → explore / BH Lab)
+│   ├── Ship.tscn           # explore gameplay scene
+│   └── BhSurvival.tscn     # Eddington survival lab
 ├── shaders/                # blackhole (MIT) + starfield
 ├── accretion.gdextension   # native lib wiring (api-4-6 → Godot 4.7)
-├── AGENTS.md                 # operational guide
+├── wiki/                   # design source of truth
+├── AGENTS.md
 ├── CHANGELOG.md
-└── CITATION.cff              # machine-readable citation metadata
+└── CITATION.cff
 ```
 
 ---

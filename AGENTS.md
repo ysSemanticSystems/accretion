@@ -85,7 +85,9 @@ See [wiki/invariants/](wiki/invariants/) for full rules. Summary:
 
 When publishing the repository, set the **About** description to:
 
-> Accretion-disk explore game — ship flight, nav radar, tractor cargo; honest Rust physics, Godot 4.7 HDR. Companion to BlackHoleResearch.
+> Playable explore baseline — 6DOF flight, tractor cargo, home depot loop, distant
+> accretion BH skyline; honest Rust physics + Godot 4.7 HDR. Companion to
+> BlackHoleResearch.
 
 Suggested **Topics:** `black-hole`, `accretion-disk`, `godot`, `rust`, `astrophysics`,
 `shakura-sunyaev`, `gravitational-lensing`, `game`, `scientific-software`.
