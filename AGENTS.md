@@ -10,6 +10,8 @@ core is independently testable. It is the game-side companion to
 [`ysSemanticSystems/BlackHoleResearch`](https://github.com/ysSemanticSystems/BlackHoleResearch),
 and inherits its discipline — relocated from Python/Streamlit to Rust/Godot.
 
+**Docs:** [README.md](README.md) (public face) · [CONTRIBUTING.md](CONTRIBUTING.md) · [CITATION.cff](CITATION.cff)
+
 ## Setup
 
 **After cloning, run `./scripts/setup-hooks.sh` once.** It sets
@@ -60,6 +62,8 @@ accretion/                      # repo root (Godot 4.7 project lives here)
 ├── scripts/setup-hooks.sh      # per-clone hook wiring
 ├── .cursor/rules/              # persistent AI guidance (5 rules)
 ├── CHANGELOG.md, CITATION.cff  # repro metadata
+├── README.md, CONTRIBUTING.md, LICENSE
+└── .github/                    # CI workflow, PR + issue templates
 ```
 
 ## Workflow
@@ -76,6 +80,19 @@ accretion/                      # repo root (Godot 4.7 project lives here)
 - A physical constant or formula in `godot-ext`, a shader, or GDScript (rule 10).
 - A physics change without a golden test.
 - `cargo clippy --workspace -- -D warnings` regresses.
+
+## GitHub visibility (maintainers)
+
+When publishing the repository, set the **About** description to:
+
+> Accretion-disk survival game — honest Rust physics, Godot 4.7 HDR lensing. Companion to BlackHoleResearch.
+
+Suggested **Topics:** `black-hole`, `accretion-disk`, `godot`, `rust`, `astrophysics`,
+`shakura-sunyaev`, `gravitational-lensing`, `game`, `scientific-software`.
+
+Enable **Issues** and **Discussions** if you want community feedback. CI badge in
+README assumes the default branch is `main` and workflow file is
+`.github/workflows/ci.yml`.
 
 ## Known deferred physics (be honest about it)
 

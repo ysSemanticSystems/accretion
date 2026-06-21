@@ -1,0 +1,31 @@
+name: Feature / physics
+description: New gameplay, physics formula, or visual — cite sources for physics
+title: "[feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Physics changes need a primary-source citation and an astropy-oracle or
+        analytic golden test. See AGENTS.md and rule 02.
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should the player see or the core compute?
+    validations:
+      required: true
+  - type: textarea
+    id: physics
+    attributes:
+      label: Physics / formula (if any)
+      description: Primary reference (paper, equation). Leave blank for pure UI/gameplay.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Likely touch points
+      options:
+        - label: accretion-core (Rust physics)
+        - label: godot-ext (binding only)
+        - label: shaders / scene / HUD
+        - label: generators / CI / docs

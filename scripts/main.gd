@@ -1,5 +1,9 @@
 extends Node3D
-## Presentation glue: playable controls + telemetry HUD. All numbers from Rust.
+## Game controller: input, camera orbit, and telemetry HUD.
+##
+## Presentation only (rule 10). Every physical quantity displayed here is read
+## from the BlackHole gdext node, which delegates to accretion-core in Rust.
+## This script formats and logs; it never computes physics.
 
 const PRESET_CYGX1 := {"name": "Cyg X-1", "mass": 21.0, "mdot": 1.0e18}
 const PRESET_SGRA := {"name": "Sgr A*", "mass": 4.0e6, "mdot": 1.0e15}
@@ -21,6 +25,7 @@ var _cam_yaw := 0.0
 var _cam_pitch := 0.12
 var _dragging := false
 var _preset_name := "custom"
+var _was_super_eddington := false
 
 
 func _ready() -> void:
@@ -30,6 +35,7 @@ func _ready() -> void:
 	spin_slider.value_changed.connect(_on_control_changed)
 	_apply_sliders()
 	_update_camera()
+	print("[accretion] ready — presets 1=Cyg X-1, 2=Sgr A*, 3=M87*; push feed past Eddington with Z/X")
 
 
 func _input(event: InputEvent) -> void:
@@ -82,6 +88,9 @@ func _apply_preset(p: Dictionary) -> void:
 	_preset_name = p.name
 	mass_slider.value = log(p.mass) / log(10.0)
 	feed_slider.value = log(p.mdot) / log(10.0)
+	print("[accretion] preset → %s (M=%s, Ṁ=%s g/s)" % [
+		p.name, HudFormat.mass_msun(p.mass), HudFormat.grams_per_s(p.mdot)
+	])
 	_apply_sliders()
 
 
@@ -123,28 +132,38 @@ func _refresh_hud() -> void:
 	title_label.text = "Accretion — %s" % _preset_name
 
 	var super_edd := lam > 1.0
+	if super_edd and not _was_super_eddington:
+		push_warning("[accretion] super-Eddington: λ=%.2f — loss condition (future gameplay)" % lam)
+	elif not super_edd and _was_super_eddington:
+		print("[accretion] sub-Eddington again: λ=%.3f" % lam)
+	_was_super_eddington = super_edd
+
 	warning_label.visible = super_edd
-	warning_label.text = "⚠ SUPER-EDDINGTON (λ = %.1f×): radiation pressure would blow the disk apart" % lam
+	warning_label.text = (
+		"SUPER-EDDINGTON — λ = %s\n"
+		% HudFormat.lambda_edd(lam)
+		+ "Radiation pressure exceeds gravity; the disk would be blown apart."
+	)
 	warning_label.modulate = Color(1.0, 0.35, 0.2) if super_edd else Color.WHITE
 
 	stats_label.text = (
 		"[b]Black hole[/b]\n"
-		+ "  M = [color=cyan]%s[/color]\n" % HudFormat.mass_msun(m)
-		+ "  spin a/M = %.2f  →  ISCO = %.2f R_g\n" % [spin, isco_rg]
-		+ "  r_s = %s\n" % HudFormat.cm(r_s)
-		+ "  r_ISCO = %s\n\n" % HudFormat.cm(r_in)
+		+ "  mass M = [color=cyan]%s[/color]\n" % HudFormat.mass_msun(m)
+		+ "  spin a/M = %.2f   ISCO = %.2f R_g (%.1f r_s)\n" % [spin, isco_rg, isco_rg / 2.0]
+		+ "  Schwarzschild radius r_s = %s\n" % HudFormat.cm(r_s)
+		+ "  ISCO radius r_in = %s\n\n" % HudFormat.cm(r_in)
 		+ "[b]Accretion[/b]\n"
-		+ "  Ṁ = [color=yellow]%s[/color]\n" % HudFormat.grams_per_s(mdot)
-		+ "  L_bol = %s\n" % HudFormat.erg_per_s(l_bol)
-		+ "  L_Edd = %s\n" % HudFormat.erg_per_s(l_edd)
-		+ "  λ_Edd = [color=%s]%s[/color]\n\n" % [
+		+ "  accretion rate Ṁ = [color=yellow]%s[/color]\n" % HudFormat.grams_per_s(mdot)
+		+ "  bolometric luminosity L = %s\n" % HudFormat.erg_per_s(l_bol)
+		+ "  Eddington limit L_Edd = %s\n" % HudFormat.erg_per_s(l_edd)
+		+ "  Eddington ratio λ = [color=%s]%s[/color]\n\n" % [
 			"red" if super_edd else "lightgreen", HudFormat.lambda_edd(lam)
 		]
-		+ "[b]Inner disk (Rust)[/b]\n"
-		+ "  T_peak = [color=orange]%s[/color]\n" % HudFormat.kelvin(t_in)
-		+ "  blackbody RGB = (%.2f, %.2f, %.2f)" % [c.r, c.g, c.b]
+		+ "[b]Inner disk edge[/b] [color=gray](computed in Rust)[/color]\n"
+		+ "  temperature T = [color=orange]%s[/color]\n" % HudFormat.kelvin(t_in)
+		+ "  blackbody sRGB = (%.2f, %.2f, %.2f)" % [c.r, c.g, c.b]
 	)
 
 	help_label.text = (
-		"Q/E mass · Z/X feed · A/D spin · 1/2/3 presets · drag orbit · scroll zoom"
+		"Q/E · mass   Z/X · feed   A/D · spin   1/2/3 · presets   drag · orbit   scroll · zoom"
 	)

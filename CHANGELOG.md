@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **README.md** — public landing page with architecture, controls, quick start, CI badge.
+- **LICENSE** (MPL-2.0), **CONTRIBUTING.md**, GitHub CI workflow, PR and issue templates.
 - Astropy-oracle pipeline: `scripts/gen_constants.py` → `constants.rs`,
   `scripts/gen_golden.py` → `golden.json`; `scripts/check_invariants.sh` and
   `make check` gate (C1–C6).

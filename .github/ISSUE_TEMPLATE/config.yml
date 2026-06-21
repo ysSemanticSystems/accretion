@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: BlackHoleResearch (physics reference)
+    url: https://github.com/ysSemanticSystems/BlackHoleResearch
+    about: Companion scientific-software repo — accretion physics source discipline
+  - name: AGENTS.md
+    url: https://github.com/ysSemanticSystems/accretion/blob/main/AGENTS.md
+    about: Contributor and AI-agent operational guide

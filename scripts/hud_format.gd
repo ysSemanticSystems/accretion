@@ -1,6 +1,9 @@
 class_name HudFormat
 extends RefCounted
-## Presentation-only number formatting for the telemetry HUD. No physics.
+## Human-readable telemetry formatting for the accretion HUD.
+##
+## Presentation only: converts Rust-computed floats into astronomer-friendly
+## strings (M☉, erg/s, kK/MK). No physics is performed here.
 
 
 static func mass_msun(m: float) -> String:
