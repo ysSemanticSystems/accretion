@@ -1,0 +1,3 @@
+Poly Pizza rock debris models (debris_01.glb, debris_02.glb)
+License: CC0
+Source: https://poly.pizza/

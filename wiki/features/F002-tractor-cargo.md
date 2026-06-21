@@ -9,8 +9,10 @@ acceptance:
   - "Hold F to tractor nearest debris in forward cone; debris pulls toward ship"
   - "Debris auto-collects into cargo when within collection radius and cargo has capacity"
   - "HUD shows cargo mass / capacity and active tractor target"
-  - "Static debris field (~12 pieces) placed in scenes/Ship.tscn without sector streaming"
+  - "Collection emits soft visual feedback; sound disabled by default"
   - "Loaded cargo slightly reduces max speed (gameplay tuning in GDScript)"
+  - "No dead Area3D collision on debris (explorer no-collision mode)"
+  - "Deposit at home depot owned by F004; F002 owns collect verb only"
   - "No mining laser, refinery, or combat"
 implements:
   - "scenes/Ship.tscn"
@@ -18,7 +20,8 @@ implements:
   - "scripts/cargo_hold.gd"
   - "scripts/tractor_beam.gd"
   - "scripts/harvestable_debris.gd"
-  - "scripts/debris_field.gd"
+  - "scripts/sector_debris.gd"
+  - "scripts/collect_feedback.gd"
   - "scripts/ship_scene.gd"
   - "scripts/ship_controller.gd"
 last_reviewed: 2026-06-21
@@ -46,7 +49,17 @@ bulk volatiles (mass units). Collection is automatic at close range.
 
 **Out of scope:**
 
-- Sector streaming, scanner map, mining laser, refinery, upgrades
+- Sector streaming ([F005](F005-seeded-sector-debris.md)), scanner map, mining laser, refinery
+- Deposit and upgrades ([F004](F004-home-depot-progression.md))
+
+## Collection feedback
+
+At `collected.emit`:
+
+- Soft particle burst and small +mass floater
+- Cargo bar pulse (no loud audio — `enable_sound := false` by default)
+
+Remove unused `Area3D` / `CollisionShape3D` from `harvestable_debris.tscn` — collection is distance-based.
 
 ## Tuning (GDScript)
 
@@ -54,10 +67,11 @@ bulk volatiles (mass units). Collection is automatic at close range.
 |---|---|---|
 | `max_cargo_mass` | 500 | `cargo_hold.gd` |
 | `cargo_speed_penalty` | 0.35 | `cargo_hold.gd` |
-| `tractor_range` | 180 | `tractor_beam.gd` |
-| `tractor_cone_deg` | 28 | `tractor_beam.gd` |
-| `pull_accel` | 55 | `tractor_beam.gd` |
-| `collect_radius` | 6 | `tractor_beam.gd` |
+| `tractor_range` | 180 (+40/level) | `tractor_beam.gd` |
+| `tractor_cone_deg` | 42 | `tractor_beam.gd` |
+| `vacuum_range` | 70 | `tractor_beam.gd` |
+| `pull_accel` | 85 | `tractor_beam.gd` |
+| `collect_radius` | 45 | `tractor_beam.gd` |
 | Debris mass | 15–45 each | `debris_field.gd` spawn specs |
 | Debris count | 12 | `debris_field.gd` |
 

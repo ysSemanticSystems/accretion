@@ -34,6 +34,7 @@ is updated in the same session/PR. Agents and implementers must not contradict t
 | Accretion survival | **Deferred** — do not wire disk feeding / Eddington loop into ship gameplay yet |
 | Black hole interaction | **Visual landmark only** — distant lensing disk, no traversal mechanics yet |
 | Universe count | **TBD** — do not design multi-universe prestige until BH/wormhole navigation requires it |
+| **Home depot** | **Origin beacon is v1 collection sink** until onboard refinery ships ([F004](../features/F004-home-depot-progression.md)) |
 
 ## Navigation (future — spec only)
 

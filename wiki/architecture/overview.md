@@ -25,6 +25,7 @@ flowchart TB
   subgraph presentation [Presentation]
     GDScript[scripts/ scenes/]
     Shaders[shaders/]
+    Assets[assets/ resources/]
   end
   subgraph gameSystems [Game systems deferred]
     Ship[Ship controller]
@@ -52,6 +53,8 @@ accretion/
 │   └── godot-ext/              # Thin gdext binding
 ├── scenes/                     # Godot scenes
 ├── scripts/                    # GDScript glue
+├── assets/                     # External CC0 meshes, HDRIs (see ASSETS.md)
+├── resources/                  # Shared .tres (e.g. space_environment)
 ├── shaders/                    # Lensing + sky
 ├── accretion.gdextension       # Native lib wiring
 └── scripts/check_*.sh          # Mechanical invariant + wiki checks
@@ -65,5 +68,7 @@ Player input → godot-ext (BlackHole) → accretion-core → numbers out → sh
 
 Game-system loops (ship flight, harvesting) live in GDScript for now; any formula
 that must be physically honest goes to `accretion-core` with citation + golden test.
+
+Ship-slice visuals: [graphics-pipeline.md](graphics-pipeline.md).
 
 See [layers.md](layers.md) for layer responsibilities.

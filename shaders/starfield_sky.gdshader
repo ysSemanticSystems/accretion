@@ -1,30 +1,38 @@
-// Minimal procedural starfield sky, so the gravitational lensing has
-// background detail to bend. Presentation only; no physics.
+// Procedural deep-space sky — presentation only; no physics.
 shader_type sky;
 
+uniform vec3 nebula_tint : source_color = vec3(0.04, 0.05, 0.12);
+uniform vec3 band_tint : source_color = vec3(0.14, 0.08, 0.22);
+uniform float star_density = 380.0;
+uniform float star_threshold = 0.9962;
+
 float hash13(vec3 p) {
-    p = fract(p * 0.1031);
-    p += dot(p, p.zyx + 31.32);
-    return fract((p.x + p.y) * p.z);
+	p = fract(p * 0.1031);
+	p += dot(p, p.zyx + 31.32);
+	return fract((p.x + p.y) * p.z);
 }
 
 void sky() {
-    vec3 d = normalize(EYEDIR);
+	vec3 d = normalize(EYEDIR);
 
-    // Quantize the view direction into cells; a sparse subset of cells host a
-    // star, each with a stable brightness and a slow twinkle.
-    vec3 cell = floor(d * 350.0);
-    float h = hash13(cell);
-    float star = smoothstep(0.9965, 1.0, h);
-    float twinkle = 0.6 + 0.4 * sin(TIME * 1.5 + h * 6.2831);
-    float brightness = star * twinkle * (0.4 + h * 1.4);
+	vec3 cell = floor(d * star_density);
+	float h = hash13(cell);
+	float star = smoothstep(star_threshold, 1.0, h);
+	float twinkle = 0.55 + 0.45 * sin(TIME * 1.2 + h * 6.2831);
+	float brightness = star * twinkle * (0.35 + h * 1.6);
 
-    // Cool stars vs warm stars for a little variety.
-    vec3 star_tint = mix(vec3(0.7, 0.8, 1.0), vec3(1.0, 0.9, 0.75), hash13(cell + 7.0));
+	vec3 cool = vec3(0.72, 0.84, 1.0);
+	vec3 warm = vec3(1.0, 0.88, 0.72);
+	vec3 star_tint = mix(cool, warm, hash13(cell + 7.0));
 
-    // Faint band of "galactic" glow plus a near-black base.
-    float band = exp(-pow(d.y * 3.0, 2.0)) * 0.05;
-    vec3 nebula = vec3(0.02, 0.025, 0.05) + vec3(0.06, 0.04, 0.08) * band;
+	float band = exp(-pow(d.y * 2.4, 2.0));
+	vec3 nebula = nebula_tint + band_tint * band * 0.35;
 
-    COLOR = nebula + star_tint * brightness;
+	// Secondary sparse layer for depth.
+	vec3 cell2 = floor(d * (star_density * 0.55));
+	float h2 = hash13(cell2 + 13.0);
+	float star2 = smoothstep(0.9985, 1.0, h2) * 0.45;
+
+	vec3 col = nebula + star_tint * brightness + vec3(0.9, 0.92, 1.0) * star2;
+	COLOR = col;
 }

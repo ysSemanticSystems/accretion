@@ -9,7 +9,9 @@ acceptance:
   - "Playable 3rd person chase camera follows a ship in the starfield for 5+ minutes without nausea"
   - "6DOF arcade flight with capped momentum; WASD + mouse or equivalent"
   - "Optional auto-level; manual override always available"
-  - "Speed bands: impulse maneuver vs cruise (tunable in GDScript, documented here)"
+  - "Speed bands: impulse maneuver vs cruise change force budget not clamp only"
+  - "Cruise spool ramp ~0.4 s on Shift hold before full cruise accel/drag"
+  - "Q/E roll works with auto-level ON except during RMB look mode"
   - "Scene runnable standalone: scenes/Ship.tscn or equivalent entry point"
   - "No combat, harvesting, or BH interaction in this feature"
 implements:
@@ -64,14 +66,34 @@ Arcade assist: capped velocity, auto-level on by default (toggle `L`).
 | `cruise_max_speed` | 250 u/s | `ship_controller.gd` |
 | `acceleration` | 50 | `ship_controller.gd` |
 | `linear_drag` | 1.15 | `ship_controller.gd` |
-| `mouse_sensitivity` | 0.0022 | `ship_controller.gd` |
-| `auto_level_strength` | 4.0 | `ship_controller.gd` |
+| `mouse_sensitivity` | 0.0028 | `ship_controller.gd` |
+| `auto_level_strength` | 2.2 | `ship_controller.gd` |
+| `cruise_accel_mult` | 4.0 | `ship_controller.gd` |
+| `cruise_drag_mult` | 0.4 | `ship_controller.gd` |
+| `cruise_spool_sec` | 0.4 | `ship_controller.gd` |
 | `roll_speed` | 1.6 rad/s | `ship_controller.gd` |
 | `follow_distance` | 9.0 | `chase_camera.gd` |
 | `follow_height` | 2.6 | `chase_camera.gd` |
 | `position_smooth` | 9.0 | `chase_camera.gd` |
 
-**Speed bands:** hold **Shift** for cruise; release for impulse.
+**Speed bands:** hold **Shift** for cruise; release for impulse. Cruise changes
+**acceleration and drag**, not only the speed cap.
+
+## Flight model v2
+
+Cruise band force budget (not clamp-only):
+
+- `_band_accel()`: `acceleration * cruise_accel_mult` in CRUISE else `acceleration`
+- `_band_drag()`: `linear_drag * cruise_drag_mult` in CRUISE else `linear_drag`
+- Target terminal cruise ≈ **430 km/s** before cap; cap **250 km/s** bites — gear feel
+- **Cruise spool:** `cruise_spool_sec` ramp on Shift hold before full multipliers apply
+
+Roll vs auto-level:
+
+- Manual roll (Q/E) allowed when auto-level ON unless RMB look mode active
+- Auto-level still rebuilds pitch/yaw; roll is not zeroed when player rolls
+
+Steering smoothing (stretch — Wave 2b): target angular velocity + exponential decay.
 
 ## Implementation notes
 

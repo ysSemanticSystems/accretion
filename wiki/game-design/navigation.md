@@ -42,16 +42,25 @@ without shortcuts. Not in current slice.
 
 **Build when:** Collection upgrade tree has a clear ceiling. Not in current slice.
 
-## Current slice (implemented)
+## Current slice (implemented + integration)
 
 - **3rd person flight** ([F001](../features/F001-third-person-flight.md))
 - **Tractor + cargo** ([F002](../features/F002-tractor-cargo.md))
+- **Home depot + upgrades** ([F004](../features/F004-home-depot-progression.md))
+- **Seeded sector debris** ([F005](../features/F005-seeded-sector-debris.md))
 - **Navigation HUD** ([F003](../features/F003-navigation-radar.md)):
-  sector grid, position km, compass to nearest debris, tactical radar
-- **Home beacon** at origin — motion parallax reference
+  sector grid, position km (debug), **objective compass**, heading-up tactical radar
+- **Home beacon** at origin — depot sink + motion parallax reference
 - **Debris visibility rings** — mesh / beacon / radar-only per distance
 - Black hole remains a **future landmark** (not yet in `Ship.tscn`)
 - No wormhole or BH transit mechanics
+
+### Compass modes (F004)
+
+| Cargo | Objective |
+|---|---|
+| Loaded | Home depot at origin — inbound |
+| Empty | Nearest harvestable in radar range — outbound |
 
 ## One-line summary
 

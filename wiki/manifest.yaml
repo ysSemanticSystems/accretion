@@ -35,6 +35,9 @@ pages:
   - id: architecture-layers
     path: architecture/layers.md
     status: active
+  - id: graphics-pipeline
+    path: architecture/graphics-pipeline.md
+    status: active
   - id: sector-streaming
     path: architecture/sector-streaming.md
     status: deferred
@@ -53,6 +56,9 @@ pages:
   - id: distance-and-visibility
     path: game-design/distance-and-visibility.md
     status: active
+  - id: playability-roadmap
+    path: game-design/playability-roadmap.md
+    status: active
   - id: F001-third-person-flight
     path: features/F001-third-person-flight.md
     status: implemented
@@ -61,6 +67,18 @@ pages:
     status: implemented
   - id: F003-navigation-radar
     path: features/F003-navigation-radar.md
+    status: implemented
+  - id: F004-home-depot-progression
+    path: features/F004-home-depot-progression.md
+    status: implemented
+  - id: F005-seeded-sector-debris
+    path: features/F005-seeded-sector-debris.md
+    status: implemented
+  - id: F006-speed-camera-feel
+    path: features/F006-speed-camera-feel.md
+    status: implemented
+  - id: F007-graphics-pipeline
+    path: features/F007-graphics-pipeline.md
     status: implemented
   - id: concept-to-implementation
     path: workflow/concept-to-implementation.md

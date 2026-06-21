@@ -10,6 +10,20 @@ signal cargo_changed(current_mass: float, max_mass: float)
 var current_mass: float = 0.0
 
 
+func set_max_mass(maximum: float) -> void:
+	max_cargo_mass = max(maximum, 1.0)
+	if current_mass > max_cargo_mass:
+		current_mass = max_cargo_mass
+	cargo_changed.emit(current_mass, max_cargo_mass)
+
+
+func clear_all() -> void:
+	if current_mass <= 0.01:
+		return
+	current_mass = 0.0
+	cargo_changed.emit(current_mass, max_cargo_mass)
+
+
 func free_mass() -> float:
 	return max(max_cargo_mass - current_mass, 0.0)
 

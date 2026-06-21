@@ -1,0 +1,4 @@
+Quaternius spaceship models (player_ship.glb, scout.glb, uCeLfsdmNP.glb)
+License: CC0 (via Poly Pizza redistribution)
+Source: https://poly.pizza/ — Quaternius Ultimate Spaceships Pack
+Original author: Quaternius — https://quaternius.com/

@@ -9,8 +9,9 @@ last_reviewed: 2026-06-21
 
 # Sector streaming (deferred)
 
-Spec for procedural object loading. **Not implemented** until after harvest loop
-(F001–F005 approximate). Captured here so architecture is documented before code.
+Spec for procedural object loading. **Lite sector debris** is implemented in
+[F005](../features/F005-seeded-sector-debris.md) (session depletion, deterministic
+spawn). Full `SectorManager` autoload remains deferred.
 
 ## Goals
 

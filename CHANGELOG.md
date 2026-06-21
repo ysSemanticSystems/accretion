@@ -7,8 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Ship slice visuals and motion.** Procedural starfield replaces ground HDRI; camera
+  follows on render frames (fixes 100 Hz jitter); TAA/FSR disabled for clean fast flight.
 ### Added
 
+- **F007 graphics pipeline (ship slice).** PBR ship/debris meshes, procedural starfield
+  environment, SSAO/glow tuning. See
+  [wiki/features/F007-graphics-pipeline.md](wiki/features/F007-graphics-pipeline.md).
+- **Playability integration (F004–F006).** Home depot at origin banks cargo mass;
+  U/Y purchase cargo, tractor range, and cruise upgrades. Seeded sector debris
+  (F005) replaces static field. Cruise band force budget + spool (F001 v2).
+  Speed FOV, streak particles, heading-up radar with altitude stalks, collection
+  juice (particles, optional quiet chime, floater). See [wiki/game-design/playability-roadmap.md](wiki/game-design/playability-roadmap.md).
+- **Human-centric HUD** for `Ship.tscn`: one mission line, cargo bar, compass distance; controls hint fades after 45 s.
 - **`wiki/` source-of-truth documentation.** Game design, architecture, feature
   RFCs (`F001` third-person flight), and migrated physics invariants live in
   `wiki/` with `manifest.yaml` for machine indexing. `.cursor/rules/` are thin

@@ -1,13 +1,14 @@
 extends Node3D
-## Forward-cone tractor pull + collection. Spec: wiki/features/F002-tractor-cargo.md
+## Forward tractor pull + forgiving intake. Spec: wiki/features/F002-tractor-cargo.md
 
 signal target_changed(debris: Node3D)
-signal collected(mass: float, material_id: String)
+signal collected(mass: float, material_id: String, world_pos: Vector3)
 
 @export var tractor_range := 180.0
-@export var tractor_cone_deg := 28.0
-@export var pull_accel := 55.0
-@export var collect_radius := 6.0
+@export var tractor_cone_deg := 42.0
+@export var vacuum_range := 70.0
+@export var pull_accel := 85.0
+@export var collect_radius := 45.0
 
 @onready var ship_body: Node3D = get_parent()
 @onready var cargo: Node = $"../../CargoHold"
@@ -20,11 +21,11 @@ var _beam_material: StandardMaterial3D
 func _ready() -> void:
 	_beam_material = StandardMaterial3D.new()
 	_beam_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_beam_material.albedo_color = Color(0.35, 0.85, 1.0, 0.85)
+	_beam_material.albedo_color = Color(0.35, 0.85, 1.0, 0.65)
 	_beam_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_beam_material.emission_enabled = true
 	_beam_material.emission = Color(0.2, 0.7, 1.0)
-	_beam_material.emission_energy_multiplier = 1.2
+	_beam_material.emission_energy_multiplier = 0.9
 	if beam_mesh:
 		beam_mesh.material_override = _beam_material
 		beam_mesh.visible = false
@@ -34,25 +35,30 @@ func _process(delta: float) -> void:
 	if ship_body == null:
 		return
 	var tractoring := Input.is_action_pressed("ship_tractor") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
-	if not tractoring:
-		_clear_target()
-		_hide_beam()
-		return
 	if cargo != null and cargo.is_full():
 		_clear_target()
 		_hide_beam()
 		return
+	if tractoring:
+		_tractor_tick(delta)
+	else:
+		_clear_target()
+		_hide_beam()
+
+
+func _tractor_tick(delta: float) -> void:
 	var target: Node3D = _pick_target()
 	_set_target(target)
 	if target == null:
 		_hide_beam()
 		return
-	target.apply_tractor_pull(ship_body.global_position, pull_accel, delta)
+	target.apply_tractor_pull(ship_body.global_position, pull_accel, collect_radius, delta)
 	_update_beam(target.global_position)
 	var mat: String = target.material_id
 	var amount: float = target.mass
+	var pos: Vector3 = target.global_position
 	if target.try_collect(cargo, ship_body.global_position, collect_radius):
-		collected.emit(amount, mat)
+		collected.emit(amount, mat, pos)
 		_clear_target()
 		_hide_beam()
 
@@ -69,6 +75,11 @@ func _pick_target() -> Node3D:
 		var offset: Vector3 = node.global_position - origin
 		var dist: float = offset.length()
 		if dist > tractor_range or dist < 0.1:
+			continue
+		if dist <= vacuum_range:
+			if dist < best_score:
+				best_score = dist
+				best = node
 			continue
 		var dir: Vector3 = offset / dist
 		if forward.dot(dir) < cos_limit:

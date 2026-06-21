@@ -3,12 +3,14 @@ id: F003-navigation-radar
 title: Navigation Radar and Compass
 status: implemented
 layer: features
-depends_on: [F001-third-person-flight, distance-and-visibility, navigation]
+depends_on: [F001-third-person-flight, distance-and-visibility, F004-home-depot-progression]
 blocks: []
 acceptance:
   - "HUD shows sector grid coordinates and ship position in km updating while flying"
-  - "Compass row shows nearest debris true distance and bearing"
+  - "Compass tracks navigation objective: depot when cargo loaded, nearest debris when empty"
   - "Tactical radar displays harvestable blips with sqrt-scaled layout to 2500 km"
+  - "Radar blips show altitude stalks (signed Y offset from ship)"
+  - "Radar disc is heading-up (ship local XZ projection rotated with ship yaw)"
   - "Debris shows mesh within 500 km and emissive beacon marker beyond until 8000 km"
   - "Home beacon at origin provides visual motion reference"
 implements:
@@ -37,6 +39,14 @@ you are actually moving. Spec detail: [distance-and-visibility.md](../game-desig
 | `RADAR_RANGE_UNITS` | 2500 | `world_scale.gd` |
 | `VISUAL_MESH_RADIUS_UNITS` | 500 | `world_scale.gd` |
 | `MARKER_BEACON_RADIUS_UNITS` | 8000 | `world_scale.gd` |
+
+## Radar v2
+
+- **Altitude stalks:** vertical line from disc blip; length = signed Y / max range
+- **Heading-up:** project POI offsets into ship local frame before drawing
+- **Objective compass:** requires [F004](F004-home-depot-progression.md) depot target when loaded
+
+Sqrt range compression and visibility rings unchanged.
 
 ## Controls
 
