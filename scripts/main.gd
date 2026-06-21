@@ -1,17 +1,15 @@
 extends Node3D
-## Game controller: the accretion survival loop, cinematic camera, and HUD.
+## Game controller: accretion survival loop, scoring, and presentation.
 ##
-## Presentation only (rule 10). Every physical quantity is read from the
-## BlackHole gdext node, which delegates to accretion-core in Rust. This script
-## steps game state in time, formats telemetry, and drives shader uniforms; it
-## never computes physics itself. Gameplay tuning constants (time compression,
-## meter rates) live here, deliberately separated from the physics (rule 02 §6).
+## Presentation only (rule 10). Physics comes from the BlackHole gdext node
+## (accretion-core in Rust). Gameplay tuning constants live here (rule 02 §6).
 
-const PRESET_CYGX1 := {"name": "Cyg X-1", "mass": 21.0, "mdot": 1.0e19}
-const PRESET_SGRA := {"name": "Sgr A*", "mass": 4.0e6, "mdot": 3.0e24}
-const PRESET_M87 := {"name": "M87*", "mass": 6.5e9, "mdot": 3.0e27}
+enum RunPhase { PLAYING, ENDED }
 
-## Growth goals, in ascending mass. The loop always points at the next one.
+const PRESET_CYGX1 := {"name": "Cyg X-1", "mass": 21.0, "mdot": 8.0e17, "spin": 0.0}
+const PRESET_SGRA := {"name": "Sgr A*", "mass": 4.0e6, "mdot": 2.0e23, "spin": 0.0}
+const PRESET_M87 := {"name": "M87*", "mass": 6.5e9, "mdot": 2.0e26, "spin": 0.85}
+
 const MILESTONES := [
 	{"mass": 21.0, "name": "Cyg X-1 — stellar-mass"},
 	{"mass": 1.0e3, "name": "Intermediate-mass (IMBH)"},
@@ -20,13 +18,13 @@ const MILESTONES := [
 	{"mass": 1.0e8, "name": "Supermassive"},
 	{"mass": 6.5e9, "name": "M87* — giant elliptical"},
 ]
+const VICTORY_MASS := 6.5e9
+const MAX_DISRUPTIONS := 3
+const START_PRESET := PRESET_CYGX1
 
-## Real seconds for an Eddington-limited (lambda=1) e-fold of mass. Lower = faster.
 const SECONDS_PER_EFOLD := 22.0
-## Disk-integrity meter response (fraction per real second at |1 - lambda| = 1).
 const DRAIN_SCALE := 0.55
 const RECOVER_SCALE := 0.16
-## Integrity the disk rebuilds to after a disruption.
 const DISRUPT_RESET := 0.35
 
 const IDLE_BEFORE_AUTORBIT := 4.0
@@ -34,8 +32,8 @@ const AUTORBIT_SPEED := 0.07
 const CAM_SMOOTH := 7.0
 const INTRO_DOLLY_FROM := 30.0
 const DISK_BASE_SCALE := 4.0
-const OUTER_RG := 26.0  # visual disk outer edge, in gravitational radii
-const GRADIENT_OUTER_RISCO := 14.0  # outer color sampled this many ISCO radii out
+const OUTER_RG := 26.0
+const GRADIENT_OUTER_RISCO := 14.0
 
 @onready var black_hole: Node = $BlackHole
 @onready var camera: Camera3D = $Camera3D
@@ -45,6 +43,7 @@ const GRADIENT_OUTER_RISCO := 14.0  # outer color sampled this many ISCO radii o
 @onready var spin_slider: HSlider = $UI/Panel/Controls/SpinSlider
 @onready var title_label: Label = $UI/Panel/Controls/TitleLabel
 @onready var class_label: Label = $UI/Panel/Controls/ClassLabel
+@onready var score_label: Label = $UI/Panel/Controls/ScoreLabel
 @onready var milestone_label: Label = $UI/Panel/Controls/MilestoneLabel
 @onready var milestone_bar: ProgressBar = $UI/Panel/Controls/MilestoneBar
 @onready var integrity_bar: ProgressBar = $UI/Panel/Controls/IntegrityBar
@@ -53,7 +52,11 @@ const GRADIENT_OUTER_RISCO := 14.0  # outer color sampled this many ISCO radii o
 @onready var swatch: ColorRect = $UI/Panel/Controls/Swatch
 @onready var help_label: Label = $UI/Panel/Controls/HelpLabel
 @onready var banner: Label = $UI/Banner
+@onready var run_overlay: PanelContainer = $UI/RunOverlay
+@onready var run_title: Label = $UI/RunOverlay/Margin/VBox/RunTitle
+@onready var run_body: RichTextLabel = $UI/RunOverlay/Margin/VBox/RunBody
 
+var _phase := RunPhase.PLAYING
 var _mass := 10.0
 var _integrity := 1.0
 var _sim_seconds := 0.0
@@ -62,6 +65,12 @@ var _class_name := ""
 var _was_super_eddington := false
 var _setting_slider := false
 var _banner_time := 0.0
+var _disruptions := 0
+var _milestones_hit := 0
+var _milestone_idx := 0
+var _run_score := 0
+var _best_score := 0
+var _victory := false
 
 var _cam_dist := 9.0
 var _cam_yaw := 0.4
@@ -77,19 +86,22 @@ func _ready() -> void:
 	mass_slider.value_changed.connect(_on_mass_changed)
 	feed_slider.value_changed.connect(_on_feed_changed)
 	spin_slider.value_changed.connect(_on_spin_changed)
-	_mass = pow(10.0, mass_slider.value)
 	integrity_bar.min_value = 0.0
 	integrity_bar.max_value = 1.0
 	milestone_bar.min_value = 0.0
 	milestone_bar.max_value = 1.0
 	banner.visible = false
-	_apply_inputs()
-	_cam_dist = INTRO_DOLLY_FROM  # intro dolly: glide in to the framing distance
+	run_overlay.visible = false
+	_best_score = RunScore.load_best()
+	_start_run(START_PRESET)
+	_cam_dist = INTRO_DOLLY_FROM
 	_update_camera_transform()
-	print("[accretion] Feed the disk to grow. Ride the Eddington limit — push λ past 1 and the disk is blown apart. 1/2/3 = presets.")
+	print("[accretion] Grow to M87* without losing the disk three times. R = new run · 1/2/3 = challenge presets")
 
 
 func _input(event: InputEvent) -> void:
+	if _phase == RunPhase.ENDED:
+		return
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			_dragging = event.pressed
@@ -107,6 +119,11 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed:
 		return
+	if event.keycode == KEY_R or event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
+		_start_run(_current_preset_dict())
+		return
+	if _phase == RunPhase.ENDED:
+		return
 	match event.keycode:
 		KEY_Q, KEY_COMMA:
 			mass_slider.value = max(mass_slider.min_value, mass_slider.value - 0.05)
@@ -121,15 +138,54 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_D:
 			spin_slider.value = min(spin_slider.max_value, spin_slider.value + 0.02)
 		KEY_1:
-			_apply_preset(PRESET_CYGX1)
+			_start_run(PRESET_CYGX1)
 		KEY_2:
-			_apply_preset(PRESET_SGRA)
+			_start_run(PRESET_SGRA)
 		KEY_3:
-			_apply_preset(PRESET_M87)
+			_start_run(PRESET_M87)
+
+
+func _current_preset_dict() -> Dictionary:
+	match _preset_name:
+		PRESET_CYGX1.name:
+			return PRESET_CYGX1
+		PRESET_SGRA.name:
+			return PRESET_SGRA
+		PRESET_M87.name:
+			return PRESET_M87
+		_:
+			return {
+				"name": "custom",
+				"mass": _mass,
+				"mdot": black_hole.get("mdot_gs"),
+				"spin": black_hole.get("spin"),
+			}
+
+
+func _start_run(p: Dictionary) -> void:
+	_phase = RunPhase.PLAYING
+	run_overlay.visible = false
+	_preset_name = p.name
+	_mass = p.mass
+	_integrity = 1.0
+	_sim_seconds = 0.0
+	_disruptions = 0
+	_milestones_hit = 0
+	_milestone_idx = 0
+	_class_name = ""
+	_victory = false
+	_was_super_eddington = false
+	_set_slider_silent(mass_slider, log(_mass) / log(10.0))
+	_set_slider_silent(feed_slider, log(p.mdot) / log(10.0))
+	_set_slider_silent(spin_slider, p.get("spin", 0.0))
+	_apply_inputs()
+	_update_class()
+	_show_banner("RUN START — feed the disk, ride λ ≤ 1, reach M87*", 2.5)
+	print("[accretion] new run → %s" % p.name)
 
 
 func _on_mass_changed(v: float) -> void:
-	if _setting_slider:
+	if _setting_slider or _phase != RunPhase.PLAYING:
 		return
 	_preset_name = "custom"
 	_mass = pow(10.0, v)
@@ -137,28 +193,18 @@ func _on_mass_changed(v: float) -> void:
 
 
 func _on_feed_changed(_v: float) -> void:
-	if _setting_slider:
+	if _setting_slider or _phase != RunPhase.PLAYING:
 		return
 	_preset_name = "custom"
 	_apply_inputs()
 
 
 func _on_spin_changed(_v: float) -> void:
-	if _setting_slider:
+	if _setting_slider or _phase != RunPhase.PLAYING:
 		return
 	_apply_inputs()
 
 
-func _apply_preset(p: Dictionary) -> void:
-	_preset_name = p.name
-	_mass = p.mass
-	_set_slider_silent(mass_slider, log(p.mass) / log(10.0))
-	_set_slider_silent(feed_slider, log(p.mdot) / log(10.0))
-	_apply_inputs()
-	print("[accretion] preset → %s" % p.name)
-
-
-## Push current inputs into the Rust node. Efficiency tracks spin (Kerr ISCO).
 func _apply_inputs() -> void:
 	black_hole.set("mass_solar", _mass)
 	black_hole.set("mdot_gs", pow(10.0, feed_slider.value))
@@ -167,7 +213,8 @@ func _apply_inputs() -> void:
 
 
 func _process(delta: float) -> void:
-	_step_simulation(delta)
+	if _phase == RunPhase.PLAYING:
+		_step_simulation(delta)
 	_update_camera(delta)
 	_refresh_hud()
 	_drive_graphics()
@@ -177,7 +224,6 @@ func _process(delta: float) -> void:
 			banner.visible = false
 
 
-## Advance mass and disk integrity in simulated time (compressed from real time).
 func _step_simulation(delta: float) -> void:
 	black_hole.set("efficiency", black_hole.call("efficiency_from_spin"))
 	var t_salpeter: float = black_hole.call("salpeter_time_s")
@@ -188,8 +234,11 @@ func _step_simulation(delta: float) -> void:
 	black_hole.set("mass_solar", _mass)
 	_set_slider_silent(mass_slider, clamp(log(_mass) / log(10.0), mass_slider.min_value, mass_slider.max_value))
 
-	# Disk integrity: drains super-Eddington, slowly rebuilds when sub-Eddington.
-	var rate: float = black_hole.call("integrity_rate")  # 1 - lambda
+	var spin: float = black_hole.call("advance_spin", dt_sim)
+	black_hole.set("spin", spin)
+	_set_slider_silent(spin_slider, spin)
+
+	var rate: float = black_hole.call("integrity_rate")
 	if rate < 0.0:
 		_integrity += rate * DRAIN_SCALE * delta
 	else:
@@ -198,15 +247,54 @@ func _step_simulation(delta: float) -> void:
 	if _integrity <= 0.0:
 		_on_disruption()
 
+	_check_milestones()
 	_update_class()
+
+	if _mass >= VICTORY_MASS:
+		_end_run(true)
+
+
+func _check_milestones() -> void:
+	while _milestone_idx < MILESTONES.size() and _mass >= MILESTONES[_milestone_idx].mass:
+		_milestones_hit += 1
+		_show_banner("MILESTONE — %s" % MILESTONES[_milestone_idx].name, 2.5)
+		_milestone_idx += 1
 
 
 func _on_disruption() -> void:
+	_disruptions += 1
 	_integrity = DISRUPT_RESET
 	_set_slider_silent(feed_slider, feed_slider.min_value)
 	black_hole.set("mdot_gs", pow(10.0, feed_slider.min_value))
-	_show_banner("DISK DISRUPTED\nRadiation pressure overwhelmed gravity (λ > 1). The disk was blown apart — ramp the feed back up carefully.", 4.0)
-	push_warning("[accretion] disk disrupted at λ > 1 — feed reset")
+	push_warning("[accretion] disk disrupted (%d/%d)" % [_disruptions, MAX_DISRUPTIONS])
+	if _disruptions >= MAX_DISRUPTIONS:
+		_show_banner("DISK LOST — three super-Eddington blowouts", 2.0)
+		_end_run(false)
+	else:
+		_show_banner(
+			"DISK DISRUPTED (%d/%d)\nFeed reset — rebuild integrity before pushing λ past 1 again."
+			% [_disruptions, MAX_DISRUPTIONS],
+			3.5
+		)
+
+
+func _end_run(victory: bool) -> void:
+	_phase = RunPhase.ENDED
+	_victory = victory
+	_run_score = RunScore.compute(_mass, _milestones_hit, _disruptions, _sim_seconds / 31557600.0)
+	var new_best := RunScore.save_best(_run_score)
+	if new_best:
+		_best_score = _run_score
+	run_overlay.visible = true
+	run_title.text = "VICTORY — M87* reached" if victory else "RUN OVER — disk destroyed"
+	run_body.text = (
+		"[b]Score[/b]  [color=yellow]%d[/color]   best [color=cyan]%d[/color]\n"
+		% [_run_score, _best_score]
+		+ "  mass [color=cyan]%s[/color]\n" % HudFormat.mass_msun(_mass)
+		+ "  milestones %d · disruptions %d\n" % [_milestones_hit, _disruptions]
+		+ "  sim time %s\n\n" % HudFormat.years(_sim_seconds)
+		+ "[color=gray]R or Enter — new run · 1/2/3 — challenge preset[/color]"
+	)
 
 
 func _update_class() -> void:
@@ -218,9 +306,8 @@ func _update_class() -> void:
 	elif _mass >= 1.0e2:
 		cls = "Intermediate-mass black hole"
 	if cls != _class_name:
-		if _class_name != "":
-			_show_banner("MILESTONE — now a %s" % cls, 3.0)
-			print("[accretion] reclassified → %s (M = %s)" % [cls, HudFormat.mass_msun(_mass)])
+		if _class_name != "" and _phase == RunPhase.PLAYING:
+			_show_banner("RECLASSIFIED — %s" % cls, 2.0)
 		_class_name = cls
 
 
@@ -229,6 +316,10 @@ func _next_milestone() -> Dictionary:
 		if m.mass > _mass:
 			return m
 	return {"mass": MILESTONES[-1].mass, "name": "%s (reached)" % MILESTONES[-1].name}
+
+
+func _live_score() -> int:
+	return RunScore.compute(_mass, _milestones_hit, _disruptions, _sim_seconds / 31557600.0)
 
 
 func _update_camera(delta: float) -> void:
@@ -252,32 +343,27 @@ func _update_camera_transform() -> void:
 	camera.look_at(Vector3.ZERO, Vector3.UP)
 
 
-## Drive shader uniforms and disk scale from Rust-computed physics.
 func _drive_graphics() -> void:
 	var mat: ShaderMaterial = black_hole.get("disk_material")
 	if mat == null:
 		return
 	var spin: float = black_hole.get("spin")
 	var isco_rg: float = black_hole.call("isco_in_rg")
-	var horizon_rg := 1.0 + sqrt(max(1.0 - spin * spin, 0.0))  # r_+ = 1 + sqrt(1 - a^2)
+	var horizon_rg := 1.0 + sqrt(max(1.0 - spin * spin, 0.0))
+	var f_qpo: float = black_hole.call("isco_orbital_frequency_hz")
 
-	# Inner/outer disk colors from blackbody physics (inner_color also set in Rust).
 	mat.set_shader_parameter("inner_color", black_hole.call("disk_color_at", 1.0))
 	mat.set_shader_parameter("disc_color", black_hole.call("disk_color_at", GRADIENT_OUTER_RISCO))
-
-	# Spin tightens the inner edge and shrinks the horizon, visibly (ratios of r_g).
 	mat.set_shader_parameter("disc_inner_radius", clamp(isco_rg / OUTER_RG, 0.05, 0.6))
 	mat.set_shader_parameter("ss_radius", clamp(horizon_rg / OUTER_RG, 0.02, 0.3))
 
-	# Bounded HDR bloom from the real inner temperature (presentation tone-map of T).
 	var t_in: float = black_hole.call("disk_inner_temp_k")
 	var log_t: float = clamp(log(max(t_in, 1.0)) / log(10.0), 4.0, 7.5)
-	var emission: float = remap(log_t, 4.0, 7.5, 0.6, 3.2)
-	mat.set_shader_parameter("emission_strength", emission)
+	mat.set_shader_parameter("emission_strength", remap(log_t, 4.0, 7.5, 0.6, 3.2))
+	mat.set_shader_parameter("disc_speed", clamp(log(max(f_qpo, 1.0e-12)) / log(10.0) + 2.5, 0.8, 4.0))
+	mat.set_shader_parameter("qpo_phase_rate", clamp(f_qpo * 0.02, 0.4, 6.0))
 
-	# Disk grows with mass class to make progression visible.
-	var class_scale := 1.0 + 0.12 * _class_index()
-	disk_mesh.scale = Vector3.ONE * DISK_BASE_SCALE * class_scale
+	disk_mesh.scale = Vector3.ONE * DISK_BASE_SCALE * (1.0 + 0.12 * _class_index())
 
 
 func _class_index() -> int:
@@ -298,17 +384,20 @@ func _refresh_hud() -> void:
 	var l_edd: float = black_hole.call("l_eddington")
 	var l_bol: float = black_hole.call("luminosity_erg_s")
 	var lam: float = black_hole.call("eddington_ratio")
-	var r_in: float = black_hole.call("inner_radius_cm")
-	var r_s: float = black_hole.call("schwarzschild_radius_cm")
 	var isco_rg: float = black_hole.call("isco_in_rg")
+	var r_s: float = black_hole.call("schwarzschild_radius_cm")
 	var t_in: float = black_hole.call("disk_inner_temp_k")
 	var f_qpo: float = black_hole.call("isco_orbital_frequency_hz")
 	var t_salpeter: float = black_hole.call("salpeter_time_s")
+	var mdot_edd: float = black_hole.call("mdot_at_eddington")
 	var c: Color = black_hole.call("disk_inner_color")
 
 	swatch.color = c
 	title_label.text = "Accretion — %s" % _preset_name
 	class_label.text = _class_name
+	score_label.text = "Score %d  ·  best %d  ·  disruptions %d/%d" % [
+		_live_score(), _best_score, _disruptions, MAX_DISRUPTIONS
+	]
 
 	var next: Dictionary = _next_milestone()
 	milestone_label.text = "Next: %s  (%s)" % [next.name, HudFormat.mass_msun(next.mass)]
@@ -318,29 +407,32 @@ func _refresh_hud() -> void:
 	integrity_bar.modulate = Color(1.0, 0.4, 0.25) if _integrity < 0.35 else Color(0.4, 0.9, 1.0)
 
 	var super_edd := lam > 1.0
-	if super_edd and not _was_super_eddington:
-		push_warning("[accretion] super-Eddington: λ=%.2f — disk integrity draining" % lam)
+	if super_edd and not _was_super_eddington and _phase == RunPhase.PLAYING:
+		push_warning("[accretion] super-Eddington: λ=%.2f" % lam)
 	_was_super_eddington = super_edd
 
-	warning_label.visible = super_edd
-	warning_label.text = "SUPER-EDDINGTON — λ = %s\nRadiation pressure exceeds gravity; integrity is draining." % HudFormat.lambda_edd(lam)
-	warning_label.modulate = Color(1.0, 0.35, 0.2)
+	warning_label.visible = super_edd and _phase == RunPhase.PLAYING
+	warning_label.text = "SUPER-EDDINGTON — λ = %s\nIntegrity draining." % HudFormat.lambda_edd(lam)
 
 	stats_label.text = (
 		"[b]Black hole[/b]   [color=gray]sim t = %s[/color]\n" % HudFormat.years(_sim_seconds)
 		+ "  mass M = [color=cyan]%s[/color]\n" % HudFormat.mass_msun(m)
 		+ "  spin a/M = %.3f → η = [color=violet]%.1f%%[/color]\n" % [spin, eta * 100.0]
 		+ "  ISCO = %.2f R_g   r_s = %s\n" % [isco_rg, HudFormat.cm(r_s)]
-		+ "  e-fold time (at λ=1) = %s\n\n" % HudFormat.years(t_salpeter)
+		+ "  e-fold @ λ=1 = %s\n\n" % HudFormat.years(t_salpeter)
 		+ "[b]Accretion[/b]\n"
 		+ "  feed Ṁ = [color=yellow]%s[/color]\n" % HudFormat.grams_per_s(mdot)
+		+ "  λ-safe Ṁ = [color=lightgreen]%s[/color]  (λ = 1 ceiling)\n" % HudFormat.grams_per_s(mdot_edd)
 		+ "  L = %s   L_Edd = %s\n" % [HudFormat.erg_per_s(l_bol), HudFormat.erg_per_s(l_edd)]
 		+ "  λ = [color=%s]%s[/color]\n\n" % ["red" if super_edd else "lightgreen", HudFormat.lambda_edd(lam)]
-		+ "[b]Inner edge[/b] [color=gray](computed in Rust)[/color]\n"
+		+ "[b]Inner edge[/b]\n"
 		+ "  T = [color=orange]%s[/color]   QPO f = %s\n" % [HudFormat.kelvin(t_in), HudFormat.hertz(f_qpo)]
 	)
 
-	help_label.text = "Q/E mass · Z/X feed · A/D spin · 1/2/3 presets · drag orbit · scroll zoom"
+	if _phase == RunPhase.ENDED:
+		help_label.text = "R or Enter — new run · 1/2/3 — challenge preset"
+	else:
+		help_label.text = "Q/E mass · Z/X feed · A/D spin · 1/2/3 presets · R restart · drag · scroll"
 
 
 func _set_slider_silent(slider: HSlider, value: float) -> void:

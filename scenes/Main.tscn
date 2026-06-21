@@ -22,6 +22,7 @@ shader_parameter/disc_color = Color(0.8, 0.18, 0.05, 1.0)
 shader_parameter/inner_color = Color(1.0, 1.0, 0.95, 1.0)
 shader_parameter/doppler_beaming_factor = 66.0
 shader_parameter/emission_strength = 1.0
+shader_parameter/qpo_phase_rate = 1.5
 shader_parameter/hue_radius = 0.75
 shader_parameter/hue_shift_factor = -0.03
 shader_parameter/streak_intensity = 0.5
@@ -81,8 +82,8 @@ color_uniform = "inner_color"
 [node name="Panel" type="Panel" parent="UI"]
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 420.0
-offset_bottom = 420.0
+offset_right = 440.0
+offset_bottom = 480.0
 
 [node name="Controls" type="VBoxContainer" parent="UI/Panel"]
 anchor_right = 1.0
@@ -100,6 +101,11 @@ text = "Accretion"
 [node name="ClassLabel" type="Label" parent="UI/Panel/Controls"]
 theme_override_colors/font_color = Color(0.6, 0.85, 1, 1)
 text = "Stellar-mass black hole"
+
+[node name="ScoreLabel" type="Label" parent="UI/Panel/Controls"]
+theme_override_colors/font_color = Color(1, 0.9, 0.55, 1)
+theme_override_font_sizes/font_size = 12
+text = "Score 0"
 
 [node name="MassLabel" type="Label" parent="UI/Panel/Controls"]
 text = "Mass (log₁₀ M☉)"
@@ -186,3 +192,37 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 text = "BANNER"
+
+[node name="RunOverlay" type="PanelContainer" parent="UI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -150.0
+offset_right = 260.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="UI/RunOverlay"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="UI/RunOverlay/Margin"]
+theme_override_constants/separation = 10
+
+[node name="RunTitle" type="Label" parent="UI/RunOverlay/Margin/VBox"]
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = "RUN OVER"
+
+[node name="RunBody" type="RichTextLabel" parent="UI/RunOverlay/Margin/VBox"]
+custom_minimum_size = Vector2(0, 180)
+bbcode_enabled = true
+fit_content = true
+text = "..."

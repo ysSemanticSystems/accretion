@@ -111,6 +111,24 @@ impl BlackHole {
         phys::efficiency_from_spin(self.spin)
     }
 
+    /// Accretion rate \[g/s\] at the Eddington limit (`lambda = 1`) for current mass.
+    #[func]
+    fn mdot_at_eddington(&self) -> f64 {
+        phys::mdot_at_eddington(self.mass_solar, self.efficiency)
+    }
+
+    /// Kerr spin after accreting at the current feed for `dt_s` \[s\].
+    #[func]
+    fn advance_spin(&self, dt_s: f64) -> f64 {
+        phys::advance_spin(
+            self.spin,
+            self.mass_solar,
+            self.mdot_gs,
+            self.efficiency,
+            dt_s,
+        )
+    }
+
     #[func]
     fn disk_inner_color(&self) -> Color {
         let t = phys::disk_temperature(self.inner_radius_cm(), self.mass_solar, self.mdot_gs);

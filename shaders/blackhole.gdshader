@@ -54,6 +54,8 @@ uniform float doppler_beaming_factor : hint_range(0.0, 200.0) = 66.0;
 // Bounded HDR bloom factor; driven from Rust as a tone-map of the inner-edge
 // temperature, so hotter disks visibly bloom brighter (presentation only).
 uniform float emission_strength : hint_range(0.1, 6.0) = 1.0;
+// ISCO orbital phase rate (Hz, presentation-scaled from Rust QPO frequency).
+uniform float qpo_phase_rate : hint_range(0.0, 10.0) = 1.5;
 uniform float hue_radius : hint_range(0.0, 1.0) = 0.75;
 uniform float hue_shift_factor : hint_range(-1.0, 1.0) = -0.03;
 uniform float streak_intensity : hint_range(0.0, 1.0) = 0.5;
@@ -254,6 +256,10 @@ vec3 calc_disc_color(vec3 base_color, vec3 planar_disc_pos, vec3 disc_dir, vec3 
     float turb_intensity_mod = (combined_turb - 0.5) * 2.0 * turbulence_intensity;
 
     float hot_spot = pow(max(0.0, combined_turb - 0.6) * 2.5, 2.0) * turbulence_intensity;
+    // Keplerian hotspot orbiting at the ISCO (QPO-scale flicker; phase rate from Rust).
+    float qpo_angle = uv.y * PI * 2.0 + TIME * qpo_phase_rate;
+    float qpo_spot = pow(max(0.0, cos(qpo_angle) * 0.5 + 0.5), 6.0) * (1.0 - radial_t);
+    hot_spot += qpo_spot * 0.35;
 
     // inner_color is the Rust-computed blackbody color of the disc inner edge.
     vec3 temp_color = mix(inner_color.rgb, base_color, pow(radial_t, 0.6));

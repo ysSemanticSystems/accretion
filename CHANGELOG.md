@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Run lifecycle and replay value.** Each run starts at Cyg X-1 scale with a
+  clear win (reach M87*) and lose (three super-Eddington disk disruptions).
+  Live score, persisted high score (`user://accretion_best.run`), end-of-run
+  overlay, and `R`/Enter restart. Challenge presets 1/2/3 start at different
+  mass/feed/spin. λ-safe Ṁ ceiling shown in the HUD.
+- **Kerr spin-up from accretion.** `advance_spin` and ISCO specific angular
+  momentum (Bardeen-Press-Teukolsky 1972; King & Raine 2002); spin now evolves
+  during play, raising η and tightening the ISCO.
+- **QPO hotspot animation.** Shader `qpo_phase_rate` driven from the Rust ISCO
+  orbital frequency so the inner disk flickers at a physically scaled rate.
 - **Survival/progression loop.** Mass now evolves in (compressed) time via
   `advance_mass` (`dM/dt = (1 - eta) Mdot`, Frank/King/Raine 2002); a disk-integrity
   meter drains when super-Eddington and rebuilds when sub-Eddington, and reaching

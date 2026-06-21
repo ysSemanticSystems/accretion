@@ -85,3 +85,33 @@ fn orbital_frequency_scales_inverse_mass() {
     assert!(f1 > 0.0);
     assert!((f2 - f1 / 2.0).abs() <= RTOL * (f1 / 2.0));
 }
+
+/// Schwarzschild ISCO specific angular momentum is `6 sqrt(2)` in the BPT
+/// dimensionless convention used by `advance_spin`.
+///
+/// Reference: Bardeen, Press & Teukolsky 1972, Eq. (2.15) at `r = 6`, `a = 0`.
+#[test]
+fn isco_angular_momentum_schwarzschild() {
+    let expected = 6.0 * 2.0_f64.sqrt();
+    assert!((phys::isco_specific_angular_momentum(0.0) - expected).abs() < TOL);
+    assert!((phys::specific_angular_momentum(6.0, 0.0) - expected).abs() < TOL);
+}
+
+/// Prograde accretion spins the hole up when `l_isco > 2 a`.
+#[test]
+fn advance_spin_increases_from_zero() {
+    const M0: f64 = 10.0;
+    let mdot = phys::mdot_from_luminosity(phys::l_eddington(M0), EFFICIENCY);
+    let dt = phys::salpeter_time_s(EFFICIENCY);
+    let a1 = phys::advance_spin(0.0, M0, mdot, EFFICIENCY, dt);
+    assert!(a1 > 0.0);
+    assert!(a1 <= phys::THORNE_SPIN_LIMIT);
+}
+
+/// Eddington feed rate reproduces `lambda = 1`.
+#[test]
+fn mdot_at_eddington_is_unit_lambda() {
+    const M: f64 = 42.0;
+    let mdot = phys::mdot_at_eddington(M, EFFICIENCY);
+    assert!((phys::eddington_ratio(M, mdot, EFFICIENCY) - 1.0).abs() < RTOL);
+}

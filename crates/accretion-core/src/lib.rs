@@ -93,6 +93,62 @@ pub fn integrity_rate(eddington_ratio: f64) -> f64 {
     1.0 - eddington_ratio
 }
 
+/// Accretion rate \[g/s\] that yields `lambda = 1` at mass `m_bh_msun` and
+/// efficiency `eta`.
+///
+/// # Reference
+/// Novikov & Thorne 1973; Eddington 1926.
+pub fn mdot_at_eddington(m_bh_msun: f64, eta: f64) -> f64 {
+    mdot_from_luminosity(l_eddington(m_bh_msun), eta)
+}
+
+/// Dimensionless specific angular momentum `l = L/(mu GM/c)` of a prograde
+/// circular orbit at radius `r_over_rg` (in `R_g`) around a Kerr hole of spin
+/// `spin`.
+///
+/// `l = (r^2 - 2 a r^(1/2) + a^2) / (r^(1/2) (r - 3 + 2 a r^(-1/2))^(1/2))`.
+///
+/// # Reference
+/// Bardeen, Press & Teukolsky 1972, ApJ 178, 347, Eq. (2.15).
+pub fn specific_angular_momentum(r_over_rg: f64, spin: f64) -> f64 {
+    let a = spin;
+    let r = r_over_rg;
+    let sqrt_r = r.sqrt();
+    let numerator = r * r - 2.0 * a * sqrt_r + a * a;
+    let denominator = sqrt_r * (r - 3.0 + 2.0 * a / sqrt_r).sqrt();
+    numerator / denominator
+}
+
+/// ISCO specific angular momentum (dimensionless), i.e. `l_isco(a)`.
+pub fn isco_specific_angular_momentum(spin: f64) -> f64 {
+    specific_angular_momentum(isco_radius(spin), spin)
+}
+
+/// Advance Kerr spin parameter `spin` after accreting for `dt_s` \[s\].
+///
+/// Gas arrives at the ISCO with specific angular momentum `l_isco`; only the
+/// rest-mass fraction `(1 - eta)` of the feed rate adds to the hole. In
+/// geometric units `J = a M^2`, accretion gives `da/dt = (1 - eta) Mdot
+/// (l_isco - 2 a) / M^2` (King & Raine 2002, spin-up of a Kerr hole).
+///
+/// # Reference
+/// Bardeen 1970; King & Raine 2002, *Accretion Power in Astrophysics*, Ch. 5.
+pub fn advance_spin(spin: f64, m_bh_msun: f64, mdot_gs: f64, eta: f64, dt_s: f64) -> f64 {
+    if m_bh_msun <= 0.0 || dt_s <= 0.0 || mdot_gs <= 0.0 {
+        return spin;
+    }
+    let l = isco_specific_angular_momentum(spin);
+    let dm = (1.0 - eta) * mdot_gs * dt_s;
+    let da = dm * (l - 2.0 * spin) / (m_bh_msun * M_SUN);
+    (spin + da).clamp(0.0, THORNE_SPIN_LIMIT)
+}
+
+/// Thorne (1974) maximum prograde spin of a thin disk (`a/M ~= 0.998`).
+///
+/// # Reference
+/// Thorne 1974, ApJ 191, 507.
+pub const THORNE_SPIN_LIMIT: f64 = 0.998;
+
 /// Shakura-Sunyaev disk temperature \[K\] at radius `r_cm` \[cm\].
 ///
 /// Bare form: `T = (3 G M Mdot / (8 pi sigma_sb r^3))^(1/4)`. Omits the inner-
