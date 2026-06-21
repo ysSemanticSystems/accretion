@@ -41,7 +41,7 @@ func _run() -> int:
 	]
 	for method in methods:
 		if not bh.has_method(method):
-			push_error("Missing BlackHole method: %s (stale libgodot_ext.dylib? run `make build`)" % method)
+			push_error("Missing BlackHole method: %s (stale native lib? run `make build`)" % method)
 			return 1
 
 	var t_salpeter: float = bh.call("salpeter_time_s")

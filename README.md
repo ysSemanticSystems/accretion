@@ -66,10 +66,9 @@ make check                        # generators, invariants, test, clippy, build,
 ```
 
 **Before opening Godot**, run `make build` (or `make godot-smoke`). The native
-library must land in `target/debug/libgodot_ext.dylib` — that is what
-`accretion.gdextension` loads via `res://target/debug/`. A plain `cargo build`
-from some environments writes elsewhere and Godot will keep an old, method-poor
-dylib.
+library is copied to `bin/libgodot_ext.dylib` (macOS) or `bin/libgodot_ext.so`
+(Linux) — that is what `accretion.gdextension` loads. Do not point Godot at a
+stale `target/debug/` artifact from an old build.
 
 `make godot-smoke` headlessly instantiates `BlackHole` and calls every Rust API
 used by the game (`salpeter_time_s`, `advance_mass`, …). On macOS the Makefile

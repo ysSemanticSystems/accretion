@@ -32,12 +32,18 @@ jobs:
       - name: Install Godot 4.7 (headless smoke test)
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfontconfig1 libglu1-mesa
+          sudo apt-get install -y libfontconfig1 libglu1-mesa libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2
           curl -L -o godot.zip \
             "https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_linux.x86_64.zip"
           unzip -q godot.zip
           chmod +x Godot_v4.7-stable_linux.x86_64
           echo "GODOT_BIN=${{ github.workspace }}/Godot_v4.7-stable_linux.x86_64" >> "$GITHUB_ENV"
+
+      - name: Verify gdext artifact after build
+        run: |
+          make build
+          ls -la bin/
+          ldd bin/libgodot_ext.so
 
       - name: Full gate
         run: make check

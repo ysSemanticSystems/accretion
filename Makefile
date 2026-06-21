@@ -33,8 +33,14 @@ godot-smoke: build
 	if [ -x "$(GODOT_BIN)" ]; then GODOT="$(GODOT_BIN)"; \
 	elif command -v $(GODOT_FALLBACK) >/dev/null 2>&1; then GODOT="$(GODOT_FALLBACK)"; \
 	else echo "ERROR: Godot not found. Install to /Applications/Godot.app or set GODOT_BIN."; exit 1; fi; \
+	case "$(uname -s)" in \
+	  Darwin) test -f bin/libgodot_ext.dylib || { echo "ERROR: bin/libgodot_ext.dylib missing"; exit 1; } ;; \
+	  Linux)  test -f bin/libgodot_ext.so || { echo "ERROR: bin/libgodot_ext.so missing"; exit 1; } ;; \
+	esac; \
 	echo "Godot smoke test ($$GODOT)…"; \
-	"$$GODOT" --headless --path . res://scenes/GodotSmoke.tscn
+	"$$GODOT" --headless --path . res://scenes/GodotSmoke.tscn; \
+	status=$$?; \
+	if [ $$status -ne 0 ]; then exit $$status; fi
 
 check: gen hooks
 	git diff --exit-code crates/accretion-core/src/constants.rs
