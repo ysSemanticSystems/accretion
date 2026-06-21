@@ -4,3 +4,4 @@
 
 # Rust / Cargo build artifacts
 /target/
+rust_out
