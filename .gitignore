@@ -6,7 +6,6 @@
 /target/
 rust_out
 
-# Godot-loaded native libs (copied from target/ by scripts/build_godot_ext.sh)
-/bin/*.dylib
-/bin/*.so
-/bin/*.dll
+# bin/ holds Godot-loaded native libs (must NOT be gitignored — Godot skips
+# ignored paths when resolving res://). Do not commit the binaries; make build
+# creates them locally.

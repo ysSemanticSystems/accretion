@@ -38,8 +38,8 @@ godot-smoke: build
 	  Linux)  test -f bin/libgodot_ext.so || { echo "ERROR: bin/libgodot_ext.so missing"; exit 1; } ;; \
 	esac; \
 	echo "Godot smoke test ($$GODOT)…"; \
-	"$$GODOT" --headless --path . res://scenes/GodotSmoke.tscn; \
-	status=$$?; \
+	"$$GODOT" --headless --verbose --path . res://scenes/GodotSmoke.tscn 2>&1 | tail -20; \
+	status=$${PIPESTATUS[0]}; \
 	if [ $$status -ne 0 ]; then exit $$status; fi
 
 check: gen hooks

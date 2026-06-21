@@ -7,6 +7,11 @@ const GRADIENT_OUTER_RISCO := 14.0
 
 
 func _ready() -> void:
+	# GDExtension may register one frame after project boot on some hosts.
+	for _i in 30:
+		if ClassDB.class_exists("BlackHole"):
+			break
+		await get_tree().process_frame
 	var exit_code := _run()
 	get_tree().quit(exit_code)
 
