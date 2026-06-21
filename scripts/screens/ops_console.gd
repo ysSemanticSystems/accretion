@@ -2,6 +2,7 @@ extends Control
 ## In-flight ops console — chart, arsenal, intel, cmd. Spec: F014.
 
 const OpsStyles = preload("res://scripts/ui/ops_styles.gd")
+const RunFlow = preload("res://scripts/ui/run_flow.gd")
 
 enum Tab { CHART, ARSENAL, INTEL, CMD }
 
@@ -43,7 +44,22 @@ func _ready() -> void:
 	cmd_panel.settings_requested.connect(_on_settings)
 	cmd_panel.pause_requested.connect(_on_pause)
 	cmd_panel.abandon_requested.connect(_on_abandon)
+	GameEvents.milestone_updated.connect(_on_data_changed)
+	GameEvents.mass_banked.connect(_on_data_changed_mass)
+	GameEvents.cargo_changed.connect(_on_data_changed_cargo)
+	GameEvents.run_stats_updated.connect(_on_data_changed_stats)
 	_select_tab(Tab.CHART)
+
+
+func _exit_tree() -> void:
+	if GameEvents.milestone_updated.is_connected(_on_data_changed):
+		GameEvents.milestone_updated.disconnect(_on_data_changed)
+	if GameEvents.mass_banked.is_connected(_on_data_changed_mass):
+		GameEvents.mass_banked.disconnect(_on_data_changed_mass)
+	if GameEvents.cargo_changed.is_connected(_on_data_changed_cargo):
+		GameEvents.cargo_changed.disconnect(_on_data_changed_cargo)
+	if GameEvents.run_stats_updated.is_connected(_on_data_changed_stats):
+		GameEvents.run_stats_updated.disconnect(_on_data_changed_stats)
 
 
 func bind_gameplay(root: Node) -> void:
@@ -62,9 +78,19 @@ func bind_gameplay(root: Node) -> void:
 	_refresh_all()
 
 
-func _process(_delta: float) -> void:
-	if not visible:
-		return
+func _on_data_changed(_a: int = 0, _b: int = 0, _c: int = 0) -> void:
+	_refresh_all()
+
+
+func _on_data_changed_mass(_a: float = 0.0, _b: float = 0.0) -> void:
+	_refresh_all()
+
+
+func _on_data_changed_cargo(_a: float = 0.0, _b: float = 0.0) -> void:
+	_refresh_all()
+
+
+func _on_data_changed_stats(_stats: Dictionary = {}) -> void:
 	_refresh_all()
 
 
@@ -106,6 +132,7 @@ func _select_tab(tab: Tab) -> void:
 			)
 		idx += 1
 	AudioManager.play_ui_tab()
+	_refresh_all()
 
 
 func _input(event: InputEvent) -> void:
@@ -134,9 +161,7 @@ func _on_resume() -> void:
 
 func _on_settings() -> void:
 	AudioManager.play_ui_click()
-	var shell := get_tree().root.get_node_or_null("Main")
-	if shell != null and shell.has_method("show_settings_from_ops"):
-		shell.show_settings_from_ops()
+	GameShell.show_settings_from_ops()
 
 
 func _on_pause() -> void:
@@ -146,10 +171,7 @@ func _on_pause() -> void:
 
 func _on_abandon() -> void:
 	AudioManager.play_ui_click()
-	SessionSave.clear_active_run()
-	RunTracker.end_run()
-	SessionSave.record_completed_run(RunTracker.summary_dict())
-	GameState.transition(GameState.State.SUMMARY)
+	RunFlow.abandon_run()
 
 
 func _close() -> void:

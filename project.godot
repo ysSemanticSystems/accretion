@@ -23,6 +23,7 @@ GameEvents="*res://scripts/autoload/game_events.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
 Settings="*res://scripts/autoload/settings.gd"
 RunTracker="*res://scripts/run_tracker.gd"
+GameShell="*res://scripts/autoload/game_shell.gd"
 SessionSave="*res://scripts/autoload/session_save.gd"
 
 [display]

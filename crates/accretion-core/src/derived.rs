@@ -54,6 +54,12 @@ mod tests {
     const RTOL: f64 = 0.000000001;
 
     #[test]
+    fn h_bar_matches_reduced_planck() {
+        let expected = H_PLANCK / (2.0 * std::f64::consts::PI);
+        assert!((H_BAR - expected).abs() <= RTOL * expected.abs());
+    }
+
+    #[test]
     fn sigma_sb_matches_closed_form() {
         let expected =
             2.0 * PI.powi(5) * K_BOLTZMANN.powi(4) / (15.0 * C_LIGHT.powi(2) * H_PLANCK.powi(3));

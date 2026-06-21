@@ -73,3 +73,11 @@ physics formulas.
 - [ ] Any reported physical quantity is a delegation to `accretion-core`.
 - [ ] New game-affecting numbers were added to `accretion-core` (with citation
       and a golden test), not here.
+
+## Mechanical enforcement
+
+`scripts/check_invariants.sh` **C7** scans `scripts/**/*.gd` and
+`shaders/**/*.gdshader` for banned physics patterns (Kerr horizon closed form,
+Shakura–Sunyaev literals, `sigma_sb` / `sigma_t`, ISCO BPT expansion in
+presentation). Failures print file and line. See
+[mechanical-gates.md](mechanical-gates.md).

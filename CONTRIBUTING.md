@@ -7,7 +7,7 @@ Operational bootstrap: **[AGENTS.md](AGENTS.md)**.
 
 ## Quick checklist
 
-1. **Clone setup:** `./scripts/setup-hooks.sh` (once per clone).
+1. **Clone setup:** `./scripts/setup-hooks.sh` (once per clone) or `make setup`.
 2. **Dependencies:** `pip install -r scripts/requirements.txt`, Rust stable, Godot 4.7.
 3. **Before push:** `make check` must pass (includes wiki validation).
 4. **Wiki:** update for any scope/behavior change; cite feature `id:` if applicable.

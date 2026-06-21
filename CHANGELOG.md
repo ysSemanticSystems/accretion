@@ -30,7 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **UI sound feedback.** Replaced sharp 880 Hz menu beeps with soft procedural clicks,
   warm confirm chimes, muted deny thuds, and gentler deposit clinks. Ops tab switches
-  use a quieter tick.
+  use a quieter tick. WAV synthesis lives in `scripts/audio/audio_synth.gd`; `AudioManager`
+  handles buses and playback only.
+
+- **Rust-first quality hardening.** Kerr outer horizon (`outer_horizon_radius_rg`) in
+  `accretion-core` with gdext `horizon_in_rg`; extended astropy golden oracle (horizon,
+  ISCO, efficiency, blackbody RGB). Mechanical gates C7 (presentation-boundary scan),
+  W9 (wiki `implements` paths), and `cargo fmt --check` in `make check`. Shared UI
+  modules (`UpgradeCatalog`, `MilestoneFormat`, `RunFlow`, `UpgradePanelLogic`),
+  `GameShell` autoload, `GameState.UPGRADE`, throttled ops refresh and run stats emit.
 
 - **Visual drama pass (F011).** Replaced flat ambient with intent-lit scene: hard warm
   BH-motivated key + cool rim, ambient dropped to 0.12 for contrast; ACES tonemap and

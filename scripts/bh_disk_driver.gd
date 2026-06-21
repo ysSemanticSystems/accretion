@@ -13,9 +13,8 @@ static func update_disk_material(
 ) -> void:
 	if bh == null or mat == null:
 		return
-	var spin: float = bh.get("spin")
 	var isco_rg: float = bh.call("isco_in_rg")
-	var horizon_rg := 1.0 + sqrt(max(1.0 - spin * spin, 0.0))
+	var horizon_rg: float = bh.call("horizon_in_rg")
 	var f_qpo: float = bh.call("isco_orbital_frequency_hz")
 
 	mat.set_shader_parameter("inner_color", bh.call("disk_color_at", 1.0))

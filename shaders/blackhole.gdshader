@@ -36,7 +36,7 @@ ACCRETION-GAME MODIFICATION
 The original hardcoded the disc's hot inner color as `vec3(1.0, 1.0, 0.95)`.
 Here it is exposed as the `inner_color` uniform, which is driven every frame by
 the BlackHole gdext node from `accretion_core::blackbody_rgb(T_inner)`. The disc
-color is therefore computed in Rust from Shakura-Sunyaev physics, not in the
+color is therefore computed in Rust from accretion-core disk temperature physics, not in the
 shader. (Search "inner_color" for the two touched lines.)
 */
 

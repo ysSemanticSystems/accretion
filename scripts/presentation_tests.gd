@@ -3,14 +3,22 @@ extends Node
 ##
 ## Run: make godot-presentation  (or godot --headless --path . res://scenes/PresentationTests.tscn)
 
-const SCENE_PATHS: Array[String] = [
+const SCENE_EXCLUDE: Array[String] = [
 	"res://scenes/Main.tscn",
+	"res://scenes/GodotSmoke.tscn",
+	"res://scenes/PresentationTests.tscn",
+]
+
+const UpgradeCatalog = preload("res://scripts/ui/upgrade_catalog.gd")
+
+const SCENE_PATHS: Array[String] = [
 	"res://scenes/Ship.tscn",
 	"res://scenes/ui/GameHud.tscn",
 	"res://scenes/harvestable_debris.tscn",
 	"res://scenes/BhMenuBackdrop.tscn",
 	"res://scenes/BhSurvival.tscn",
 	"res://scenes/DistantBlackHole.tscn",
+	"res://scenes/PrimaryStar.tscn",
 	"res://scenes/screens/MainMenu.tscn",
 	"res://scenes/screens/PauseMenu.tscn",
 	"res://scenes/screens/SettingsMenu.tscn",
@@ -45,6 +53,9 @@ func _run() -> int:
 	failures.append_array(_test_settings_apply_runtime())
 	failures.append_array(await _test_bh_lab_flow())
 	failures.append_array(_test_approach_zone_constants())
+	failures.append_array(_test_approach_zone_thresholds())
+	failures.append_array(_test_upgrade_catalog())
+	failures.append_array(_test_presentation_boundary_script())
 	failures.append_array(_test_session_save_roundtrip())
 	if failures.is_empty():
 		print("[presentation_tests] OK (%d scenes, shell + gameplay regressions)" % SCENE_PATHS.size())
@@ -56,7 +67,8 @@ func _run() -> int:
 
 func _test_scene_script_compat() -> Array[String]:
 	var failures: Array[String] = []
-	for path in SCENE_PATHS:
+	var paths := _all_scene_paths()
+	for path in paths:
 		var packed: PackedScene = load(path)
 		if packed == null:
 			failures.append("failed to load %s" % path)
@@ -90,6 +102,11 @@ func _test_game_state_pause() -> Array[String]:
 		failures.append("GameState did not enter PAUSED")
 	if not get_tree().paused:
 		failures.append("tree.paused not set when GameState is PAUSED")
+	GameState.transition(GameState.State.UPGRADE)
+	if GameState.state != GameState.State.UPGRADE:
+		failures.append("GameState did not enter UPGRADE")
+	if not get_tree().paused:
+		failures.append("tree.paused not set when GameState is UPGRADE")
 	GameState.transition(GameState.State.PLAYING)
 	if get_tree().paused:
 		failures.append("tree.paused still true after resume")
@@ -230,6 +247,12 @@ func _test_upgrade_dock_flow() -> Array[String]:
 			break
 		await get_tree().process_frame
 
+	if GameState.state != GameState.State.MENU:
+		failures.append("upgrade-dock test: shell did not reach MENU")
+		shell.queue_free()
+		GameState.state = prior_state
+		return failures
+
 	GameState.transition(GameState.State.PLAYING)
 	for _i in 120:
 		var gameplay: Variant = shell.get("_gameplay")
@@ -256,11 +279,20 @@ func _test_upgrade_dock_flow() -> Array[String]:
 	shell.show_upgrade_dock(progression)
 	await get_tree().process_frame
 
+	if GameState.state != GameState.State.UPGRADE:
+		failures.append("show_upgrade_dock did not enter UPGRADE state")
+	if not get_tree().paused:
+		failures.append("upgrade dock did not pause tree")
 	if not _active_screen_named(shell, "UpgradeScreen"):
 		failures.append("show_upgrade_dock did not open UpgradeScreen")
 
 	shell.close_upgrade_dock()
-	await get_tree().process_frame
+	for _i in 30:
+		if GameState.state == GameState.State.PLAYING:
+			break
+		await get_tree().process_frame
+	if GameState.state != GameState.State.PLAYING:
+		failures.append("close_upgrade_dock did not return to PLAYING")
 	get_tree().paused = false
 
 	shell.queue_free()
@@ -429,4 +461,73 @@ func _test_session_save_roundtrip() -> Array[String]:
 	if float(loaded.get("cargo_current", 0.0)) != 120.0:
 		failures.append("SessionSave round-trip cargo mismatch")
 	SessionSave.clear_active_run()
+	return failures
+
+
+func _all_scene_paths() -> Array[String]:
+	var merged: Dictionary = {}
+	for path in SCENE_PATHS:
+		merged[path] = true
+	for path in _discover_scene_paths():
+		merged[path] = true
+	var out: Array[String] = []
+	for key in merged.keys():
+		out.append(key)
+	return out
+
+
+func _discover_scene_paths() -> Array[String]:
+	var out: Array[String] = []
+	_scan_scenes("res://scenes", out)
+	return out
+
+
+func _scan_scenes(dir_path: String, out: Array[String]) -> void:
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var entry := dir.get_next()
+	while entry != "":
+		if not entry.begins_with("."):
+			var full := dir_path.path_join(entry)
+			if dir.current_is_dir():
+				_scan_scenes(full, out)
+			elif entry.ends_with(".tscn") and full not in SCENE_EXCLUDE:
+				out.append(full)
+		entry = dir.get_next()
+	dir.list_dir_end()
+
+
+func _test_approach_zone_thresholds() -> Array[String]:
+	var failures: Array[String] = []
+	const WorldScale = preload("res://scripts/world_scale.gd")
+	if WorldScale.approach_zone_for_distance(8000.0) != 0:
+		failures.append("deep space should be zone 0 beyond outer threshold")
+	if WorldScale.approach_zone_for_distance(7500.0) != 1:
+		failures.append("7500 km should unlock zone 1")
+	if WorldScale.approach_zone_for_distance(1400.0) != 4:
+		failures.append("1400 km should unlock zone 4")
+	return failures
+
+
+func _test_upgrade_catalog() -> Array[String]:
+	var failures: Array[String] = []
+	if UpgradeCatalog.TRACK_COUNT != 3:
+		failures.append("UpgradeCatalog.TRACK_COUNT expected 3")
+	var row := UpgradeCatalog.row_text(0, 0, 1, 150.0, true)
+	if "Cargo Hold" not in row:
+		failures.append("UpgradeCatalog row missing track name")
+	return failures
+
+
+func _test_presentation_boundary_script() -> Array[String]:
+	var failures: Array[String] = []
+	var path := "res://scripts/bh_disk_driver.gd"
+	if not FileAccess.file_exists(path):
+		failures.append("bh_disk_driver.gd missing")
+		return failures
+	var text := FileAccess.get_file_as_string(path)
+	if "sqrt(max(1.0 - spin" in text:
+		failures.append("bh_disk_driver.gd still computes Kerr horizon in GDScript")
 	return failures

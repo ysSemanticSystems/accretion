@@ -15,6 +15,7 @@ acceptance:
 implements:
   - "scripts/autoload/settings.gd"
   - "scripts/autoload/audio_manager.gd"
+  - "scripts/audio/audio_synth.gd"
   - "scenes/screens/SettingsMenu.tscn"
 last_reviewed: 2026-06-21
 ---

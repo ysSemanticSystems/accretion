@@ -61,12 +61,15 @@ godot-presentation: build
 	fi; \
 	"$$GODOT" --headless --path . res://scenes/PresentationTests.tscn
 
-check: gen hooks
+check: gen
 	git diff --exit-code crates/accretion-core/src/constants.rs
 	git diff --exit-code crates/accretion-core/tests/fixtures/golden.json
 	sh scripts/check_invariants.sh
 	sh scripts/check_wiki.sh
 	cargo test --workspace
 	cargo clippy --workspace --all-targets -- -D warnings
+	cargo fmt --check
 	$(MAKE) godot-smoke
 	$(MAKE) godot-presentation
+
+setup: hooks

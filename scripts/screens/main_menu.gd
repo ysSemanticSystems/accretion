@@ -20,9 +20,7 @@ func _refresh_stats() -> void:
 
 func _on_continue_pressed() -> void:
 	AudioManager.play_ui_click()
-	var shell := get_tree().root.get_node_or_null("Main")
-	if shell != null and shell.has_method("continue_run"):
-		shell.continue_run()
+	GameShell.continue_run()
 
 
 func _on_new_run_pressed() -> void:
@@ -38,9 +36,7 @@ func _on_bh_lab_pressed() -> void:
 
 func _on_settings_pressed() -> void:
 	AudioManager.play_ui_click()
-	var shell := get_tree().root.get_node_or_null("Main")
-	if shell != null and shell.has_method("show_settings"):
-		shell.show_settings()
+	GameShell.show_settings()
 
 
 func _on_quit_pressed() -> void:

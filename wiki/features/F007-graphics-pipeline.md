@@ -10,7 +10,11 @@ acceptance:
   - "Player ship is a PBR GLB with engine glow, not a capsule placeholder"
   - "Harvestable debris uses rock GLB variants with emissive tint"
   - "All external assets logged in assets/ASSETS.md with license"
-implements: [Ship.tscn, harvestable_debris.tscn, ship_visual.gd, debris_visual.gd]
+implements:
+  - "scenes/Ship.tscn"
+  - "scenes/harvestable_debris.tscn"
+  - "scripts/ship_visual.gd"
+  - "scripts/debris_visual.gd"
 last_reviewed: 2026-06-21
 ---
 

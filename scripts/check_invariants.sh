@@ -41,4 +41,46 @@ if cargo tree -p accretion-core 2>/dev/null | grep -qi '^.*godot'; then
   exit 1
 fi
 
+echo "C7: no physics formulas in GDScript or shaders (presentation boundary)"
+python3 <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(".")
+PATTERNS: list[tuple[str, re.Pattern[str]]] = [
+    ("Kerr horizon leak", re.compile(r"sqrt\s*\(\s*max\s*\(\s*1\.0\s*-\s*spin", re.I)),
+    ("Shakura-Sunyaev literal", re.compile(r"shakura|sunyaev", re.I)),
+    ("Stefan-Boltzmann in presentation", re.compile(r"sigma_sb|sigma_t\b", re.I)),
+    ("ISCO closed form in presentation", re.compile(r"3\.0\s*\+\s*z2\s*-\s*\(\(", re.I)),
+]
+SCAN_DIRS = [ROOT / "scripts", ROOT / "shaders"]
+SKIP = {"presentation_tests.gd"}
+
+
+def fail(msg: str) -> None:
+    print(f"FAIL: {msg}")
+    sys.exit(1)
+
+
+for base in SCAN_DIRS:
+    if not base.is_dir():
+        continue
+    for path in sorted(base.rglob("*")):
+        if path.suffix not in {".gd", ".gdshader"}:
+            continue
+        if path.name in SKIP:
+            continue
+        text = path.read_text(encoding="utf-8")
+        for label, pat in PATTERNS:
+            m = pat.search(text)
+            if m:
+                line = text.count("\n", 0, m.start()) + 1
+                fail(f"{path.relative_to(ROOT)}:{line} matches {label!r}")
+
+print("C7 OK")
+PY
+
 echo "All invariant checks passed."

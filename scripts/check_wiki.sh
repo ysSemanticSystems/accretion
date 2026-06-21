@@ -187,5 +187,23 @@ for doc in (ROOT / "AGENTS.md", ROOT / "CONTRIBUTING.md"):
     if "wiki/README.md" not in doc.read_text(encoding="utf-8"):
         fail(f"{doc.name} must link to wiki/README.md")
 
+print("W9: implements paths exist for implemented features")
+for path, fm in wiki_pages.items():
+    if fm.get("status") != "implemented":
+        continue
+    if fm.get("layer") != "features" and path.parent.name != "features":
+        continue
+    for impl in fm.get("implements", []) or []:
+        if not impl:
+            continue
+        candidate = ROOT / impl
+        if candidate.is_file() or candidate.is_dir():
+            continue
+        if impl.endswith("/") and candidate.is_dir():
+            continue
+        fail(
+            f"{path.relative_to(ROOT)}: implements path missing: {impl}"
+        )
+
 print("All wiki checks passed.")
 PY

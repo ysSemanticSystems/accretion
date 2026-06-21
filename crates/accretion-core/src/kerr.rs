@@ -36,6 +36,14 @@ pub fn isco_radius(spin: f64) -> f64 {
     3.0 + z2 - ((3.0 - z1) * (3.0 + z1 + 2.0 * z2)).sqrt()
 }
 
+/// Outer (event) horizon radius in units of `R_g = GM/c^2` for prograde Kerr.
+///
+/// BPT (1972): `r_+ = R_g (1 + sqrt(1 - a^2))`. Schwarzschild limit: `2 R_g` at `a = 0`.
+pub fn outer_horizon_radius_rg(spin: f64) -> f64 {
+    let a = spin;
+    1.0 + (1.0 - a * a).max(0.0).sqrt()
+}
+
 /// ISCO radius \[cm\] for mass `m_bh_msun` and spin `spin`.
 pub fn r_isco(m_bh_msun: f64, spin: f64) -> f64 {
     isco_radius(spin) * gravitational_radius_cm(m_bh_msun)
@@ -138,6 +146,23 @@ mod tests {
     fn isco_angular_momentum_schwarzschild() {
         let expected = 6.0 * 2.0_f64.sqrt();
         assert!((isco_specific_angular_momentum(0.0) - expected).abs() < TOL);
+    }
+
+    #[test]
+    fn outer_horizon_schwarzschild_is_two_rg() {
+        assert!((outer_horizon_radius_rg(0.0) - 2.0).abs() < TOL);
+    }
+
+    #[test]
+    fn outer_horizon_shrinks_with_prograde_spin() {
+        assert!(outer_horizon_radius_rg(0.9) < outer_horizon_radius_rg(0.0));
+        assert!(outer_horizon_radius_rg(0.998) < outer_horizon_radius_rg(0.9));
+    }
+
+    #[test]
+    fn specific_angular_momentum_at_isco_schwarzschild() {
+        let expected = 6.0 * 2.0_f64.sqrt();
+        assert!((specific_angular_momentum(6.0, 0.0) - expected).abs() < TOL);
     }
 
     #[test]

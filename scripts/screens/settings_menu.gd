@@ -78,11 +78,7 @@ func _on_apply_pressed() -> void:
 func _on_back_pressed() -> void:
 	AudioManager.play_ui_click()
 	_restore_snapshot()
-	var shell := get_tree().root.get_node_or_null("Main")
-	if shell != null and shell.has_method("close_settings"):
-		shell.close_settings()
-	elif GameState.state == GameState.State.MENU:
-		GameState.transition(GameState.State.MENU)
+	GameShell.close_settings()
 
 
 func _on_reset_pressed() -> void:

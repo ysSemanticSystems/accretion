@@ -1,6 +1,8 @@
 extends Control
 ## Pause overlay — Resume, Settings, Abandon, Quit to menu.
 
+const RunFlow = preload("res://scripts/ui/run_flow.gd")
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if Settings:
@@ -15,17 +17,12 @@ func _on_resume_pressed() -> void:
 
 func _on_settings_pressed() -> void:
 	AudioManager.play_ui_click()
-	var shell := get_tree().root.get_node_or_null("Main")
-	if shell != null and shell.has_method("show_settings"):
-		shell.show_settings()
+	GameShell.show_settings()
 
 
 func _on_abandon_pressed() -> void:
 	AudioManager.play_ui_click()
-	SessionSave.clear_active_run()
-	RunTracker.end_run()
-	SessionSave.record_completed_run(RunTracker.summary_dict())
-	GameState.transition(GameState.State.SUMMARY)
+	RunFlow.abandon_run()
 
 
 func _on_ops_pressed() -> void:
@@ -36,9 +33,4 @@ func _on_ops_pressed() -> void:
 
 func _on_menu_pressed() -> void:
 	AudioManager.play_ui_click()
-	var shell := get_tree().root.get_node_or_null("Main")
-	if shell != null and shell.has_method("save_active_run_from_gameplay"):
-		shell.save_active_run_from_gameplay()
-	RunTracker.end_run()
-	get_tree().paused = false
-	GameState.transition(GameState.State.MENU)
+	RunFlow.quit_to_menu(true)

@@ -17,6 +17,9 @@ pages:
   - id: testing-discipline
     path: invariants/testing-discipline.md
     status: active
+  - id: mechanical-gates
+    path: invariants/mechanical-gates.md
+    status: active
   - id: presentation-boundary
     path: invariants/presentation-boundary.md
     status: active

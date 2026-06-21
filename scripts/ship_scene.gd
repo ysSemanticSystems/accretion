@@ -144,9 +144,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func open_upgrade_dock() -> void:
-	var shell := get_tree().root.get_node_or_null("Main")
-	if shell != null and shell.has_method("show_upgrade_dock"):
-		shell.show_upgrade_dock(progression)
+	GameShell.show_upgrade_dock(progression)
 
 
 func _on_tractor_collected(_mass: float, _material_id: String, world_pos: Vector3) -> void:

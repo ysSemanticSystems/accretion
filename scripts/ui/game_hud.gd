@@ -2,6 +2,7 @@ extends CanvasLayer
 ## Event-driven HUD shell. Spec: wiki/features/F010-hud-component.md
 
 const WorldScale = preload("res://scripts/world_scale.gd")
+const MilestoneFormat = preload("res://scripts/ui/milestone_format.gd")
 
 @onready var mission_label: Label = $HudPanel/Margin/VBox/MissionLabel
 @onready var milestone_label: Label = $HudPanel/Margin/VBox/MilestoneLabel
@@ -159,16 +160,11 @@ func _on_bh_interior_changed(inside: bool) -> void:
 
 
 func _update_milestone_label() -> void:
-	var parts: PackedStringArray = []
-	for zone in range(1, _zone_count + 1):
-		if zone <= _max_zone:
-			parts.append("●")
-		elif zone == _next_zone:
-			parts.append("◐")
-		else:
-			parts.append("○")
-	var next_label := WorldScale.approach_zone_label(_next_zone)
-	milestone_label.text = "M87* approach %s · next: %s" % [" ".join(parts), next_label]
+	milestone_label.text = MilestoneFormat.approach_line(
+		_max_zone,
+		_next_zone,
+		_zone_count,
+	)
 
 
 func _update_mission() -> void:

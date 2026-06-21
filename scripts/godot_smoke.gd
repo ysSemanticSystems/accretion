@@ -36,6 +36,7 @@ func _run() -> int:
 		"luminosity_erg_s",
 		"eddington_ratio",
 		"isco_in_rg",
+		"horizon_in_rg",
 		"schwarzschild_radius_cm",
 		"disk_inner_temp_k",
 		"isco_orbital_frequency_hz",
@@ -75,6 +76,11 @@ func _run() -> int:
 	var rate: float = bh.call("integrity_rate")
 	if not is_finite(rate):
 		push_error("integrity_rate returned NaN")
+		return 1
+
+	var horizon_rg: float = bh.call("horizon_in_rg")
+	if not is_finite(horizon_rg) or absf(horizon_rg - 2.0) > 0.001:
+		push_error("horizon_in_rg at spin 0 expected ~2.0 R_g, got %s" % horizon_rg)
 		return 1
 
 	var inner: Color = bh.call("disk_color_at", 1.0)

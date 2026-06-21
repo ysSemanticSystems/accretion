@@ -42,8 +42,8 @@ pub use eddington::{
 
 pub use kerr::{
     THORNE_SPIN_LIMIT, efficiency_from_spin, gravitational_radius_cm, isco_radius,
-    isco_specific_angular_momentum, isco_specific_energy, orbital_frequency_hz, r_isco, r_s,
-    specific_angular_momentum,
+    isco_specific_angular_momentum, isco_specific_energy, orbital_frequency_hz,
+    outer_horizon_radius_rg, r_isco, r_s, specific_angular_momentum,
 };
 
 // --- Disk ------------------------------------------------------------------

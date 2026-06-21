@@ -21,9 +21,11 @@ var _backdrop: Node3D
 var _active_screen: Node
 var _settings_origin_state: GameState.State = GameState.State.MENU
 var _continue_requested := false
+var _upgrade_progression: Node
 
 
 func _ready() -> void:
+	GameShell.register(self)
 	GameState.state_changed.connect(_on_state_changed)
 	call_deferred("_boot")
 
@@ -40,7 +42,11 @@ func continue_run() -> void:
 
 
 func _on_state_changed(_from: GameState.State, to: GameState.State) -> void:
-	dimmer.visible = to == GameState.State.PAUSED or to == GameState.State.OPS
+	dimmer.visible = (
+		to == GameState.State.PAUSED
+		or to == GameState.State.OPS
+		or to == GameState.State.UPGRADE
+	)
 	match to:
 		GameState.State.MENU:
 			_clear_gameplay()
@@ -58,10 +64,16 @@ func _on_state_changed(_from: GameState.State, to: GameState.State) -> void:
 		GameState.State.PAUSED:
 			_swap_screen(PAUSE_MENU_SCENE.instantiate())
 		GameState.State.OPS:
-			var ops: Node = OPS_SCENE.instantiate()
-			_swap_screen(ops)
-			if ops.has_method("bind_gameplay") and _gameplay != null:
-				ops.bind_gameplay(_gameplay)
+			_show_ops_screen()
+		GameState.State.UPGRADE:
+			var screen: Node = UPGRADE_SCENE.instantiate()
+			_swap_screen(screen)
+			if screen.has_method("bind_progression") and _upgrade_progression != null:
+				screen.bind_progression(_upgrade_progression)
+			if screen.has_method("bind_objectives") and _gameplay != null:
+				var objectives: Node = _gameplay.get_node_or_null("RunObjectives")
+				if objectives != null:
+					screen.bind_objectives(objectives)
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		GameState.State.SUMMARY:
 			_clear_gameplay()
@@ -79,15 +91,8 @@ func show_settings() -> void:
 func show_upgrade_dock(progression: Node) -> void:
 	if GameState.state != GameState.State.PLAYING:
 		return
-	get_tree().paused = true
-	var screen: Node = UPGRADE_SCENE.instantiate()
-	_swap_screen(screen)
-	if screen.has_method("bind_progression"):
-		screen.bind_progression(progression)
-	if screen.has_method("bind_objectives") and _gameplay != null:
-		var objectives: Node = _gameplay.get_node_or_null("RunObjectives")
-		if objectives != null:
-			screen.bind_objectives(objectives)
+	_upgrade_progression = progression
+	GameState.transition(GameState.State.UPGRADE)
 
 
 func show_settings_from_ops() -> void:
@@ -100,10 +105,9 @@ func close_settings() -> void:
 
 
 func close_upgrade_dock() -> void:
-	get_tree().paused = false
-	_clear_screen()
-	if _gameplay != null and _gameplay.has_method("export_snapshot"):
-		SessionSave.save_active_run(_gameplay.export_snapshot())
+	save_active_run_from_gameplay()
+	GameState.transition(GameState.State.PLAYING)
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func save_active_run_from_gameplay() -> void:
@@ -121,14 +125,22 @@ func _restore_after_settings(origin: GameState.State) -> void:
 			_swap_screen(PAUSE_MENU_SCENE.instantiate())
 		GameState.State.OPS:
 			get_tree().paused = true
-			var ops: Node = OPS_SCENE.instantiate()
-			_swap_screen(ops)
-			if ops.has_method("bind_gameplay") and _gameplay != null:
-				ops.bind_gameplay(_gameplay)
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			_show_ops_screen()
 		_:
-			get_tree().paused = GameState.state == GameState.State.PAUSED
+			get_tree().paused = GameState.state in [
+				GameState.State.PAUSED,
+				GameState.State.OPS,
+				GameState.State.UPGRADE,
+			]
 			_clear_screen()
+
+
+func _show_ops_screen() -> void:
+	var ops: Node = OPS_SCENE.instantiate()
+	_swap_screen(ops)
+	if ops.has_method("bind_gameplay") and _gameplay != null:
+		ops.bind_gameplay(_gameplay)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _start_ship_run(resume: bool = false) -> void:

@@ -105,6 +105,11 @@ impl BlackHole {
         phys::isco_radius(self.spin)
     }
 
+    #[func]
+    fn horizon_in_rg(&self) -> f64 {
+        phys::outer_horizon_radius_rg(self.spin)
+    }
+
     /// New mass \[M_sun\] after accreting at the current feed rate for `dt_s` \[s\].
     #[func]
     fn advance_mass(&self, dt_s: f64) -> f64 {

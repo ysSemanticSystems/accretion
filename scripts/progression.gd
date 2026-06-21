@@ -1,6 +1,8 @@
 extends Node
 ## Session progression — banked mass and ship upgrades. Spec: wiki/features/F004-home-depot-progression.md
 
+const UpgradeCatalog = preload("res://scripts/ui/upgrade_catalog.gd")
+
 enum UpgradeKind { CARGO, TRACTOR, CRUISE }
 
 signal progression_changed
@@ -105,8 +107,7 @@ func track_cost(kind: int) -> float:
 
 
 func track_name(kind: int) -> String:
-	var names := ["Cargo Hold", "Tractor", "Cruise Drive"]
-	return names[kind] if kind >= 0 and kind < names.size() else "Upgrade"
+	return UpgradeCatalog.track_name(kind)
 
 
 func total_upgrades() -> int:

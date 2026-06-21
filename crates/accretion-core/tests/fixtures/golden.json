@@ -51,6 +51,88 @@
       },
       "radius": "20.0*R_S",
       "expected": 1918879.3025530614
+    },
+    {
+      "fn": "outer_horizon_radius_rg",
+      "args": {
+        "spin": 0.0
+      },
+      "expected": 2.0
+    },
+    {
+      "fn": "outer_horizon_radius_rg",
+      "args": {
+        "spin": 0.5
+      },
+      "expected": 1.8660254037844386
+    },
+    {
+      "fn": "outer_horizon_radius_rg",
+      "args": {
+        "spin": 0.998
+      },
+      "expected": 1.0632139225171164
+    },
+    {
+      "fn": "isco_radius",
+      "args": {
+        "spin": 0.0
+      },
+      "expected": 6.0
+    },
+    {
+      "fn": "efficiency_from_spin",
+      "args": {
+        "spin": 0.0
+      },
+      "expected": 0.057190958417936755
+    },
+    {
+      "fn": "isco_radius",
+      "args": {
+        "spin": 0.9
+      },
+      "expected": 2.320883041761887
+    },
+    {
+      "fn": "efficiency_from_spin",
+      "args": {
+        "spin": 0.9
+      },
+      "expected": 0.15575299199446402
+    },
+    {
+      "fn": "blackbody_rgb",
+      "args": {
+        "temp_k": 10000.0
+      },
+      "expected": {
+        "r": 0.6107029755863023,
+        "g": 0.6953388614148782,
+        "b": 1.0
+      }
+    },
+    {
+      "fn": "blackbody_rgb",
+      "args": {
+        "temp_k": 1000000.0
+      },
+      "expected": {
+        "r": 0.30118764851471985,
+        "g": 0.43900865221295887,
+        "b": 1.0
+      }
+    },
+    {
+      "fn": "blackbody_rgb",
+      "args": {
+        "temp_k": 10000000.0
+      },
+      "expected": {
+        "r": 0.2998291305366286,
+        "g": 0.4376873079904965,
+        "b": 1.0
+      }
     }
   ]
 }
