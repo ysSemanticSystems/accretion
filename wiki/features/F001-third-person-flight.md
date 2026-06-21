@@ -66,12 +66,13 @@ Arcade assist: capped velocity, auto-level on by default (toggle `L`).
 | `cruise_max_speed` | 250 u/s | `ship_controller.gd` |
 | `acceleration` | 50 | `ship_controller.gd` |
 | `linear_drag` | 1.15 | `ship_controller.gd` |
-| `mouse_sensitivity` | 0.0028 | `ship_controller.gd` |
-| `auto_level_strength` | 2.2 | `ship_controller.gd` |
+| `mouse_sensitivity` | 0.0045 (Settings default) | `ship_controller.gd`, `settings.gd` |
+| `auto_level_strength` | 3.0 (roll-only) | `ship_controller.gd` |
 | `cruise_accel_mult` | 4.0 | `ship_controller.gd` |
 | `cruise_drag_mult` | 0.4 | `ship_controller.gd` |
 | `cruise_spool_sec` | 0.4 | `ship_controller.gd` |
-| `roll_speed` | 1.6 rad/s | `ship_controller.gd` |
+| `roll_speed` | 1.8 rad/s | `ship_controller.gd` |
+| `bank_factor` | 0.32 (visual hull lean) | `ship_controller.gd` |
 | `follow_distance` | 9.0 | `chase_camera.gd` |
 | `follow_height` | 2.6 | `chase_camera.gd` |
 | `position_smooth` | 9.0 | `chase_camera.gd` |
@@ -88,12 +89,19 @@ Cruise band force budget (not clamp-only):
 - Target terminal cruise ≈ **430 km/s** before cap; cap **250 km/s** bites — gear feel
 - **Cruise spool:** `cruise_spool_sec` ramp on Shift hold before full multipliers apply
 
-Roll vs auto-level:
+Roll vs auto-level (v3 — fixes "can't turn around"):
 
-- Manual roll (Q/E) allowed when auto-level ON unless RMB look mode active
-- Auto-level still rebuilds pitch/yaw; roll is not zeroed when player rolls
-
-Steering smoothing (stretch — Wave 2b): target angular velocity + exponential decay.
+- Auto-level is **roll-only**: it preserves the player's `forward` (pitch + yaw)
+  exactly and relaxes only the roll toward upright. The previous version reprojected
+  `forward` perpendicular to world-up every frame, which slowly decayed any pitch the
+  player applied — the nose drifted back to the horizon, making it feel impossible to
+  aim up/down or hold a heading toward home. Skipped when the nose is near-vertical
+  (roll undefined).
+- Manual roll (Q/E) always allowed.
+- Mouse steering is accumulated in `_input` and applied in `_process`; default
+  sensitivity raised to `0.0045` so turning is responsive.
+- A subtle visual bank leans the **hull mesh only** into yaw (`bank_factor`); the
+  physics body orientation is unchanged.
 
 ## Implementation notes
 

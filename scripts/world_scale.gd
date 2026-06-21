@@ -18,7 +18,7 @@ const BEACON_FADE_IN_UNITS := 400.0
 ## Target bracket + beacon visible out to this radius (km).
 const MARKER_BEACON_RADIUS_UNITS := 8000.0
 ## Distant skyline black hole (visual landmark). Negative Z = inward.
-const BH_WORLD_POSITION := Vector3(0.0, 0.0, -12000.0)
+const BH_WORLD_POSITION := Vector3(0.0, 600.0, -9000.0)
 ## Audio/lighting ramp: outer calm → inner hot (km from BH).
 const BH_OUTER_ZONE_UNITS := 8000.0
 const BH_INNER_ZONE_UNITS := 2500.0

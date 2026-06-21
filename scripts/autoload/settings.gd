@@ -6,7 +6,7 @@ signal settings_changed
 const PATH := "user://settings.cfg"
 
 const DEFAULTS := {
-	"mouse_sensitivity": 0.0028,
+	"mouse_sensitivity": 0.0045,
 	"invert_y": false,
 	"auto_level_default": true,
 	"fov_rest": 70.0,

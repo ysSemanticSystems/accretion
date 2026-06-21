@@ -70,10 +70,10 @@ color = Color(0.75, 0.82, 0.95, 0.25)
 transparency = 1
 shading_mode = 0
 vertex_color_use_as_albedo = true
-albedo_color = Color(0.85, 0.9, 1, 0.3)
+albedo_color = Color(0.82, 0.88, 1, 0.42)
 
 [sub_resource type="QuadMesh" id="QuadMesh_dust"]
-size = Vector2(0.06, 0.06)
+size = Vector2(0.09, 0.09)
 
 [node name="Ship" type="Node3D"]
 script = ExtResource("1_root")
@@ -84,19 +84,21 @@ script = ExtResource("1_root")
 script = ExtResource("15_amb")
 
 [node name="DiskLight" type="DirectionalLight3D" parent="SpaceAmbience"]
-light_color = Color(1, 0.55, 0.28, 1)
-light_energy = 0.58
+light_color = Color(1, 0.58, 0.26, 1)
+light_energy = 2.6
+light_specular = 0.9
 shadow_enabled = false
 
 [node name="FillLight" type="DirectionalLight3D" parent="SpaceAmbience"]
-light_color = Color(0.62, 0.76, 1, 1)
-light_energy = 0.16
+light_color = Color(0.5, 0.66, 1, 1)
+light_energy = 0.55
+light_specular = 0.4
 shadow_enabled = false
 
 [node name="ParallaxDust" type="GPUParticles3D" parent="SpaceAmbience"]
-amount = 160
-lifetime = 8.0
-visibility_aabb = AABB(-140, -100, -140, 280, 200, 280)
+amount = 420
+lifetime = 9.0
+visibility_aabb = AABB(-160, -120, -160, 320, 240, 320)
 process_material = SubResource("ParticleProcessMaterial_dust")
 draw_pass_1 = SubResource("QuadMesh_dust")
 material_override = SubResource("StandardMaterial3D_dust")

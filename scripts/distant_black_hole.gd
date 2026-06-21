@@ -4,7 +4,7 @@ extends Node3D
 const WorldScale = preload("res://scripts/world_scale.gd")
 const BhDiskDriver = preload("res://scripts/bh_disk_driver.gd")
 
-const DISK_MESH_SCALE := 1400.0
+const DISK_MESH_SCALE := 2800.0
 
 @onready var black_hole: Node = $BlackHole
 @onready var disk_mesh: MeshInstance3D = $DiskMesh

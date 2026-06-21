@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://harvestdebris01"]
+[gd_scene load_steps=4 format=3 uid="uid://harvestdebris01"]
 
 [ext_resource type="Script" path="res://scripts/harvestable_debris.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/debris_visual.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/debris_target_bracket.gd" id="3"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_beacon"]
 radius = 4.0
@@ -25,9 +24,3 @@ script = ExtResource("2")
 visible = false
 mesh = SubResource("SphereMesh_beacon")
 surface_material_override/0 = SubResource("StandardMaterial3D_beacon")
-
-[node name="TargetBracket" type="Node3D" parent="."]
-script = ExtResource("3")
-
-[node name="Marker" type="Label3D" parent="TargetBracket"]
-text = "▣"

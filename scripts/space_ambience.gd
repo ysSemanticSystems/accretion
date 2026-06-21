@@ -20,17 +20,28 @@ func _process(_delta: float) -> void:
 		_ship = get_tree().get_first_node_in_group("player_ship") as Node3D
 	if _ship == null:
 		return
+	var ship_pos: Vector3 = _ship.global_position
 	var bh_pos: Vector3 = WorldScale.BH_WORLD_POSITION
-	var inward: Vector3 = (bh_pos - _ship.global_position).normalized()
+	var inward: Vector3 = (bh_pos - ship_pos).normalized()
+	# Warm key sits on the BH side and rakes outward, so the disk lights the
+	# BH-facing hull and rocks. Light position is only used to orient the beam.
 	if disk_light:
-		disk_light.global_position = _ship.global_position - inward * 200.0
-		disk_light.look_at(_ship.global_position, Vector3.UP)
+		disk_light.global_position = ship_pos + inward * 300.0
+		disk_light.look_at(ship_pos, _safe_up(inward))
+	# Cool rim from above/behind separates the dark side from the void.
 	if fill_light:
-		fill_light.global_position = _ship.global_position + inward * 120.0
-		fill_light.look_at(_ship.global_position, Vector3.UP)
+		var rim_offset: Vector3 = (-inward * 120.0) + Vector3.UP * 260.0
+		fill_light.global_position = ship_pos + rim_offset
+		fill_light.look_at(ship_pos, Vector3.UP)
 	if dust:
-		dust.global_position = _ship.global_position
-		_update_bh_audio(_ship.global_position.distance_to(bh_pos))
+		dust.global_position = ship_pos
+		_update_bh_audio(ship_pos.distance_to(bh_pos))
+
+
+func _safe_up(forward: Vector3) -> Vector3:
+	if absf(forward.dot(Vector3.UP)) > 0.98:
+		return Vector3.FORWARD
+	return Vector3.UP
 
 
 func _update_bh_audio(dist_to_bh: float) -> void:

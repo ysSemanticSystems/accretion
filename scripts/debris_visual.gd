@@ -28,7 +28,7 @@ func _fit_and_tint(model: Node3D) -> void:
 	var jitter: float = randf_range(0.85, 1.15)
 	var factor: float = (target_size * jitter) / max(longest, 1.0e-4)
 	model.scale = Vector3.ONE * factor
-	_apply_emissive_tint(model)
+	_apply_rock_material(model)
 
 
 func _combined_aabb(root: Node3D) -> AABB:
@@ -49,18 +49,32 @@ func _combined_aabb(root: Node3D) -> AABB:
 	return merged
 
 
-func _apply_emissive_tint(node: Node) -> void:
+## Real PBR rock: no self-emission. Let the warm BH key + cool rim sculpt form.
+## We keep the GLB albedo/normal where present and only fix roughness/metallic so
+## surfaces read as rough rock rather than flat shadeless clay.
+func _apply_rock_material(node: Node) -> void:
 	if node is MeshInstance3D:
 		var mi := node as MeshInstance3D
-		for i in mi.get_surface_override_material_count():
+		var surfaces: int = 0
+		if mi.mesh != null:
+			surfaces = mi.mesh.get_surface_count()
+		surfaces = maxi(surfaces, mi.get_surface_override_material_count())
+		for i in surfaces:
 			var mat: Material = mi.get_surface_override_material(i)
-			if mat == null and mi.mesh:
+			if mat == null and mi.mesh != null:
 				mat = mi.mesh.surface_get_material(i)
+			var rock: StandardMaterial3D
 			if mat is StandardMaterial3D:
-				var dup: StandardMaterial3D = mat.duplicate() as StandardMaterial3D
-				dup.emission_enabled = true
-				dup.emission = Color(0.95, 0.5, 0.15)
-				dup.emission_energy_multiplier = 0.35
-				mi.set_surface_override_material(i, dup)
+				rock = (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+			else:
+				rock = StandardMaterial3D.new()
+				rock.albedo_color = Color(0.42, 0.34, 0.28)
+			rock.emission_enabled = false
+			rock.metallic = 0.04
+			rock.metallic_specular = 0.4
+			rock.roughness = 0.92
+			rock.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_GREEN
+			rock.ao_light_affect = 1.0
+			mi.set_surface_override_material(i, rock)
 	for child in node.get_children():
-		_apply_emissive_tint(child)
+		_apply_rock_material(child)

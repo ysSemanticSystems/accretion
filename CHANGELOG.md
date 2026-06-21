@@ -15,6 +15,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Visual drama pass (F011).** Replaced flat ambient with intent-lit scene: hard warm
+  BH-motivated key + cool rim, ambient dropped to 0.12 for contrast; ACES tonemap and
+  stronger SSAO/SSIL. Debris now use real PBR (no self-emission) so the key light
+  sculpts form. Sky shader rebuilt with fbm nebula structure, varied stars, and a broad
+  warm galactic-core glow + hot core so the BH reads as a near-constant skyline presence;
+  disk enlarged and pulled closer.
+- **Target brackets.** Replaced the `Label3D` "▣" glyph (which stamped a grey box over
+  close debris) with screen-space hollow corner-tick brackets drawn in the HUD for the
+  nearest ~16 contacts.
+- **Radar declutter.** Dense belt blips merge into one count-labelled blip sized by
+  member count, capped at 14, so clusters no longer smear into an orange blob.
+- **Flight feel (F001 v3).** Auto-level is now roll-only — it preserves the player's
+  pitch/yaw aim instead of decaying the nose to the horizon (fixes "can't turn around").
+  Mouse sensitivity raised to 0.0045; steering applied in `_process`; subtle visual hull
+  bank into turns.
+- **Cargo bar.** Styled with `StyleBoxFlat` background + warm fill (was unstyled default).
+
+### Changed (prior)
+
 - **Black hole shader.** QPO hotspot uses cylinder `v` coordinate (fixes invalid `uv` in vertex-stage helper).
 - **Collection feedback.** Particles/floaters parent to `gameplay_root`, not `current_scene`.
 - **Radar v3.** Cyan depot blip, range rings, objective highlight ring on heading-up disc.
