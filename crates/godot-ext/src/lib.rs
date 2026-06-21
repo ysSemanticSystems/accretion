@@ -87,10 +87,56 @@ impl BlackHole {
         phys::isco_radius(self.spin)
     }
 
+    /// New mass \[M_sun\] after accreting at the current feed rate for `dt_s` \[s\].
+    #[func]
+    fn advance_mass(&self, dt_s: f64) -> f64 {
+        phys::advance_mass(self.mass_solar, self.mdot_gs, self.efficiency, dt_s)
+    }
+
+    /// Salpeter (Eddington) e-folding time \[s\] at the current efficiency.
+    #[func]
+    fn salpeter_time_s(&self) -> f64 {
+        phys::salpeter_time_s(self.efficiency)
+    }
+
+    /// Disk-support fraction `1 - lambda`: >0 stable/recovering, <0 disrupting.
+    #[func]
+    fn integrity_rate(&self) -> f64 {
+        phys::integrity_rate(self.eddington_ratio())
+    }
+
+    /// Radiative efficiency implied by the current spin (Kerr ISCO binding energy).
+    #[func]
+    fn efficiency_from_spin(&self) -> f64 {
+        phys::efficiency_from_spin(self.spin)
+    }
+
     #[func]
     fn disk_inner_color(&self) -> Color {
         let t = phys::disk_temperature(self.inner_radius_cm(), self.mass_solar, self.mdot_gs);
         let (r, g, b) = phys::blackbody_rgb(t);
         Color::from_rgba(r as f32, g as f32, b as f32, 1.0)
+    }
+
+    /// Blackbody color of the disk at `r_over_risco` ISCO radii out (clamped to the
+    /// inner edge), so the presentation can build a physical radial gradient.
+    #[func]
+    fn disk_color_at(&self, r_over_risco: f64) -> Color {
+        let r = self.inner_radius_cm() * r_over_risco.max(1.0);
+        let t = phys::disk_temperature(r, self.mass_solar, self.mdot_gs);
+        let (red, g, b) = phys::blackbody_rgb(t);
+        Color::from_rgba(red as f32, g as f32, b as f32, 1.0)
+    }
+
+    /// Disk inner-edge temperature \[K\] (Shakura-Sunyaev at the ISCO).
+    #[func]
+    fn disk_inner_temp_k(&self) -> f64 {
+        phys::disk_temperature(self.inner_radius_cm(), self.mass_solar, self.mdot_gs)
+    }
+
+    /// Prograde orbital frequency \[Hz\] at the ISCO (high-frequency QPO scale).
+    #[func]
+    fn isco_orbital_frequency_hz(&self) -> f64 {
+        phys::orbital_frequency_hz(self.mass_solar, phys::isco_radius(self.spin), self.spin)
     }
 }

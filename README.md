@@ -85,7 +85,7 @@ pressure blowout that will become the game's loss condition.
 
 ---
 
-## Physics (honest scope)
+## Physics (verifiable scope)
 
 Every public function in `accretion-core` documents its primary source in the
 doc comment. Current Slice 0 coverage:

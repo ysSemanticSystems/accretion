@@ -16,6 +16,8 @@ fn golden_matches_astropy_oracle() {
     for case in doc["cases"].as_array().expect("cases array") {
         let exp = case["expected"].as_f64().expect("expected f64");
         let got = match case["fn"].as_str().expect("fn name") {
+            "sigma_sb" => phys::derived::SIGMA_SB,
+            "sigma_t" => phys::derived::SIGMA_T,
             "l_eddington" => phys::l_eddington(case["args"]["m_bh_msun"].as_f64().unwrap()),
             "disk_temperature" => phys::disk_temperature(
                 case["args"]["r_cm"].as_f64().unwrap(),

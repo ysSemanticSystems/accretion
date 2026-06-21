@@ -1,6 +1,6 @@
 # Contributing to accretion
 
-Thank you for helping build an honest accretion-disk game. The full operational
+Thank you for helping build a rigorous accretion-disk game. The full operational
 guide is **[AGENTS.md](AGENTS.md)** — read it before your first PR.
 
 ## Quick checklist

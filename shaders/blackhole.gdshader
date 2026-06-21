@@ -51,6 +51,9 @@ uniform vec4 disc_color : source_color = vec4(1.0, 0.0, 0.0, 1.0);
 // Driven from Rust (accretion_core::blackbody_rgb of the inner-edge temperature).
 uniform vec4 inner_color : source_color = vec4(1.0, 1.0, 0.95, 1.0);
 uniform float doppler_beaming_factor : hint_range(0.0, 200.0) = 66.0;
+// Bounded HDR bloom factor; driven from Rust as a tone-map of the inner-edge
+// temperature, so hotter disks visibly bloom brighter (presentation only).
+uniform float emission_strength : hint_range(0.1, 6.0) = 1.0;
 uniform float hue_radius : hint_range(0.0, 1.0) = 0.75;
 uniform float hue_shift_factor : hint_range(-1.0, 1.0) = -0.03;
 uniform float streak_intensity : hint_range(0.0, 1.0) = 0.5;
@@ -403,6 +406,7 @@ void fragment() {
     }
 
     disc_hit *= tex_col * disc_color.a * streaks * horizon_fade * radial_falloff;
+    final_disc_col *= emission_strength;
     vec3 col = mix(background_col, final_disc_col, disc_hit);
 
     ALBEDO = col;

@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Survival/progression loop.** Mass now evolves in (compressed) time via
+  `advance_mass` (`dM/dt = (1 - eta) Mdot`, Frank/King/Raine 2002); a disk-integrity
+  meter drains when super-Eddington and rebuilds when sub-Eddington, and reaching
+  zero triggers a disruption that blows the disk apart and resets the feed. Growth
+  reclassifies the hole (stellar → IMBH → SMBH) with milestone banners and a
+  next-goal progress bar.
+- **New physics in `accretion-core`** (each cited + golden/identity tested):
+  `salpeter_time_s` (Salpeter 1964), `integrity_rate` (Eddington 1926 effective
+  gravity `1 - lambda`), `isco_specific_energy` / `efficiency_from_spin` (Bardeen-
+  Press-Teukolsky 1972; Thorne 1974), `orbital_frequency_hz` (BPT 1972 QPO scale).
+- **Derived constants module** `derived.rs`: `SIGMA_SB = 2 pi^5 k_B^4 / (15 c^2 h^3)`
+  (exact under 2019 SI) and `SIGMA_T = (8 pi / 3)(alpha hbar / m_e c)^2`, computed
+  from fundamentals instead of tabulated, pinned by astropy-oracle golden tests.
+- Cinematic camera: damped orbit/zoom, idle auto-orbit, intro dolly.
+- Graphics driven from Rust: radial blackbody gradient (inner + outer color),
+  bounded HDR bloom tone-mapped from the inner-edge temperature, and spin-driven
+  inner-edge / event-horizon tightening; disk grows with mass class.
 - **README.md** — public landing page with architecture, controls, quick start, CI badge.
 - **LICENSE** (MPL-2.0), **CONTRIBUTING.md**, GitHub CI workflow, PR and issue templates.
 - Astropy-oracle pipeline: `scripts/gen_constants.py` → `constants.rs`,
@@ -21,6 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `constants.rs` now holds only FUNDAMENTAL constants (added `M_E`, `ALPHA`;
+  dropped tabulated `SIGMA_SB`/`SIGMA_T`); composites are derived in `derived.rs`.
+  Rule 11 / rule 02 updated for the two-layer (fundamental vs derived) provenance.
+- Fixed the disk shader sampling an unassigned `disc_texture` (now a procedural
+  `NoiseTexture2D`) so the accretion disk renders.
+- Reworded "honest" marketing phrasing to "rigorous / first-principles /
+  verifiable" in user-facing docs (the scientific-honesty rule and prime directive
+  are unchanged).
 - Physical constants are generated from astropy (no hand-written M_sun).
 - Golden tests use astropy oracle fixtures, not hand-pinned magnitudes.
 - `compatibility_minimum = 4.6` matches `api-4-6` gdext feature.
