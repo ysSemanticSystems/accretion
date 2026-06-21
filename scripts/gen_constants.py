@@ -9,14 +9,14 @@ import astropy
 import astropy.constants as c
 
 vals = {
-    "G": (c.G.cgs.value, "cm^3 g^-1 s^-2", "astropy.constants.G"),
-    "C_LIGHT": (c.c.cgs.value, "cm s^-1", "astropy.constants.c"),
-    "M_SUN": (c.M_sun.cgs.value, "g", "astropy.constants.M_sun"),
-    "M_P": (c.m_p.cgs.value, "g", "astropy.constants.m_p"),
-    "SIGMA_T": (c.sigma_T.cgs.value, "cm^2", "astropy.constants.sigma_T"),
-    "SIGMA_SB": (c.sigma_sb.cgs.value, "erg cm^-2 s^-1 K^-4", "astropy.constants.sigma_sb"),
-    "H_PLANCK": (c.h.cgs.value, "erg s", "astropy.constants.h"),
-    "K_BOLTZMANN": (c.k_B.cgs.value, "erg K^-1", "astropy.constants.k_B"),
+    "G": (float(c.G.cgs.value), "cm^3 g^-1 s^-2", "astropy.constants.G"),
+    "C_LIGHT": (float(c.c.cgs.value), "cm s^-1", "astropy.constants.c"),
+    "M_SUN": (float(c.M_sun.cgs.value), "g", "astropy.constants.M_sun"),
+    "M_P": (float(c.m_p.cgs.value), "g", "astropy.constants.m_p"),
+    "SIGMA_T": (float(c.sigma_T.cgs.value), "cm^2", "astropy.constants.sigma_T"),
+    "SIGMA_SB": (float(c.sigma_sb.cgs.value), "erg cm^-2 s^-1 K^-4", "astropy.constants.sigma_sb"),
+    "H_PLANCK": (float(c.h.cgs.value), "erg s", "astropy.constants.h"),
+    "K_BOLTZMANN": (float(c.k_B.cgs.value), "erg K^-1", "astropy.constants.k_B"),
 }
 
 out = [

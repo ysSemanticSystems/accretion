@@ -12,12 +12,12 @@ from pathlib import Path
 import astropy
 import astropy.constants as c
 
-G = c.G.cgs.value
-C = c.c.cgs.value
-M_SUN = c.M_sun.cgs.value
-M_P = c.m_p.cgs.value
-SIGMA_T = c.sigma_T.cgs.value
-SIGMA_SB = c.sigma_sb.cgs.value
+G = float(c.G.cgs.value)
+C = float(c.c.cgs.value)
+M_SUN = float(c.M_sun.cgs.value)
+M_P = float(c.m_p.cgs.value)
+SIGMA_T = float(c.sigma_T.cgs.value)
+SIGMA_SB = float(c.sigma_sb.cgs.value)
 
 
 def l_edd(m: float) -> float:
