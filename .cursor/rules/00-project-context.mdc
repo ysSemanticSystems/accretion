@@ -1,0 +1,58 @@
+---
+description: Repo-wide context for the accretion game. Always loaded.
+alwaysApply: true
+---
+
+# accretion - project context
+
+This is an **accretion-disk survival/management game**. You feed matter into a
+black hole and ride the Eddington limit; push the accretion rate past
+`L_Edd / (eta c^2)` and radiation pressure blows the disk apart (the loss
+condition). Progression is mass growth: the ISCO shrinks, the disk reddens and
+tightens.
+
+It is built like *scientific software*: numbers are honest, every formula cites
+a primary source, and the physics is independently testable. Ported from the
+discipline of the BlackHoleResearch project (`app.py` presentation-only;
+physics in pure modules), relocated to Rust + Godot.
+
+## Architecture (the invariant that makes this work)
+
+```
+crates/accretion-core/  pure Rust lib (CGS), ZERO Godot dependency, cargo-testable.
+                        All physics: l_eddington, mdot_from_luminosity,
+                        disk_temperature (Shakura-Sunyaev), isco_radius
+                        (Bardeen+1972), gravitational_radius_cm,
+                        blackbody_rgb (Planck -> CIE -> sRGB).
+crates/godot-ext/       thin gdext cdylib. Presentation binding ONLY, no physics.
+                        Exposes accretion-core to the scene tree (BlackHole node).
+*.gdshader              Tyler Kennedy lensing shader (MIT) + procedural sky.
+scenes/, scripts/       Godot scene + GDScript glue (presentation only).
+```
+
+## Prime directives (memorize)
+
+1. **Honesty over completeness** - never invent a value, unit, or uncertainty.
+2. **Cite every formula** - primary-source reference in every physics doc comment.
+3. **Physics lives in `accretion-core`** - `godot-ext`, shaders, and GDScript
+   present numbers; they do not compute them. See rule 10.
+4. **Tests precede expansion** - a new physics formula lands with a golden test
+   reproducing a textbook value to stated precision. See rule 05.
+5. **Single source of truth** - physical constants live once, in
+   `accretion-core` (CODATA / IAU), and are cited there.
+
+## Quick-reference map
+
+| Need | Path |
+|---|---|
+| New physics formula | `crates/accretion-core/src/lib.rs` (with citation + golden test) |
+| Expose a number to Godot | `crates/godot-ext/src/lib.rs` (one-line delegation) |
+| Visual / shader change | `shaders/*.gdshader` |
+| Scene / UI wiring | `scenes/Main.tscn`, `scripts/*.gd` |
+| Native lib wiring | `accretion.gdextension` |
+
+## Toolchain
+
+`cargo test` (was pytest), `cargo clippy` + `cargo fmt` (were ruff/mypy).
+Godot 4.7, gdext (godot crate 0.5.x, MPL-2.0). Build the native lib with
+`cargo build` before opening the Godot editor.

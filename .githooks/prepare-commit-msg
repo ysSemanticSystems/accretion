@@ -1,0 +1,3 @@
+#!/bin/sh
+# $1 = commit message file, $2 = source, $3 = sha (only $1 is needed)
+exec "$(dirname "$0")/strip-ai-attribution.sh" "$1"

@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = ["crates/accretion-core", "crates/godot-ext"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+repository = "https://github.com/ysSemanticSystems/accretion"
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = "thin"

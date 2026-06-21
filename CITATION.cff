@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "accretion: an accretion-disk survival game with a physics core in Rust"
+abstract: >-
+  An accretion-disk survival/management game. The physics core (Eddington
+  luminosity, Shakura-Sunyaev disk temperature, Kerr ISCO, blackbody color) is a
+  pure, unit-tested Rust crate with primary-source citations; Godot 4.7 provides
+  the lensing/HDR presentation. Companion to BlackHoleResearch.
+type: software
+authors:
+  - name: "ysSemanticSystems"
+version: 0.1.0
+date-released: 2026-06-20
+license: MPL-2.0
+repository-code: "https://github.com/ysSemanticSystems/accretion"
+keywords:
+  - black hole
+  - accretion disk
+  - Shakura-Sunyaev
+  - Eddington luminosity
+  - gravitational lensing
+  - Godot
+  - Rust
+references:
+  - type: article
+    authors:
+      - family-names: Shakura
+        given-names: "N. I."
+      - family-names: Sunyaev
+        given-names: "R. A."
+    title: "Black holes in binary systems. Observational appearance."
+    journal: "Astronomy and Astrophysics"
+    volume: 24
+    start: 337
+    year: 1973
+  - type: article
+    authors:
+      - family-names: Bardeen
+        given-names: "J. M."
+      - family-names: Press
+        given-names: "W. H."
+      - family-names: Teukolsky
+        given-names: "S. A."
+    title: "Rotating Black Holes: Locally Nonrotating Frames, Energy Extraction, and Scalar Synchrotron Radiation"
+    journal: "The Astrophysical Journal"
+    volume: 178
+    start: 347
+    year: 1972
+  - type: book
+    authors:
+      - family-names: Eddington
+        given-names: "A. S."
+    title: "The Internal Constitution of the Stars"
+    year: 1926

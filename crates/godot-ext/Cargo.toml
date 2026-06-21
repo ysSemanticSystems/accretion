@@ -1,0 +1,17 @@
+[package]
+name = "godot-ext"
+description = "Thin gdext binding: exposes accretion-core to Godot. Presentation only, no physics."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+accretion-core = { path = "../accretion-core" }
+# Pinned to prebuilt 4.6 bindings (no `godot` binary required on PATH at build
+# time). Loads under the Godot 4.7 runtime via forward binary-compat
+# (runtime >= API version). MPL-2.0.
+godot = { version = "=0.5.3", features = ["api-4-6"] }

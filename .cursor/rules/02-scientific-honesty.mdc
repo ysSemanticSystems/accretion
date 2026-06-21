@@ -1,0 +1,85 @@
+---
+description: Constants, units, uncertainty, and no-invented-values discipline.
+globs: crates/accretion-core/**/*.rs
+alwaysApply: false
+---
+
+# Scientific honesty
+
+The most important rule in this repo. A game built on physics quietly becomes
+physically nonsensical the moment a number is faked. Numbers are honest or they
+do not exist.
+
+## 1. Never invent a value
+
+If a quantity cannot be computed, a function returns one of:
+
+- a documented sentinel (`0.0` for "no emission inside the inner edge",
+  `f64::NAN` with a documented meaning);
+- `Option::None` for a genuinely optional output;
+- it does NOT silently return a plausible-looking number, a typical literature
+  value, or zero-without-meaning.
+
+## 2. Units are explicit and documented
+
+Every public physics function documents the unit of every input and output in
+its doc comment. SI is used internally end-to-end (kg, m, s, W, K). The only
+unit conversions happen at clearly marked boundaries (e.g. erg/s <-> W, g/s
+<-> kg/s), each with a named constant.
+
+```rust
+// GOOD: unit in the name / doc, conversion via a named constant.
+/// Eddington luminosity `L_Edd` [erg/s] for a black hole of `mass_msun`.
+pub fn l_eddington(mass_msun: f64) -> f64 { /* ... */ }
+
+// BAD: what unit is this? erg/s? W? per gram?
+pub fn ledd(m: f64) -> f64 { /* ... */ }
+```
+
+## 3. Every formula cites its primary source
+
+A new physics function or physical constant without a primary-source citation
+in its doc comment is rejected. Use the original paper where possible:
+
+- Eddington luminosity -> Eddington 1926.
+- Radiative efficiency / thin disk -> Novikov & Thorne 1973.
+- Disk temperature profile -> Shakura & Sunyaev 1973.
+- ISCO -> Bardeen, Press & Teukolsky 1972.
+- Colorimetry -> Planck 1901; CIE 1931; Wyman-Sloan-Shirley 2013; IEC 61966-2-1.
+
+## 4. Constants are single-sourced and cited
+
+Physical constants live once, as `pub const` in `accretion-core`, each tagged
+with its source (CODATA 2018 / IAU). Do not redefine `G`, `c`, `M_sun`, etc.
+anywhere else (not in `godot-ext`, not in a shader, not in GDScript).
+
+## 5. Hardcoded literature numbers are tech debt outside two places
+
+| Location | Allowed? |
+|---|---|
+| `accretion-core` constants (with citation) | yes |
+| test modules (as expected values for assertions) | yes |
+| `godot-ext`, shaders, GDScript | no |
+
+## 6. Surface game-affecting assumptions
+
+When a default choice changes results (radiative efficiency `eta`, spin,
+accretion rate), it is an explicit, documented parameter - not a magic number
+buried in a calculation.
+
+## 7. Document deliberately-missing physics
+
+If a ported formula omits a term, say so in the doc comment, name the term, and
+state the consequence. Current example: `disk_temperature` uses the bare
+Shakura-Sunyaev form and omits the inner-boundary factor
+`(1 - sqrt(r_in/r))^(1/4)`, so it is monotonic with no temperature peak. That
+omission is documented in the function and tracked as a fast-follow; do not
+silently "fix" it without a golden test for the new peak behavior.
+
+## Checklist before merging a number-producing change
+
+- [ ] Output unit documented (or explicitly dimensionless).
+- [ ] Primary-source citation present in the doc comment.
+- [ ] No invented / placeholder value on any code path.
+- [ ] No physical constant duplicated outside `accretion-core`.
+- [ ] A golden test asserts a hand-computed / textbook value (rule 05).
