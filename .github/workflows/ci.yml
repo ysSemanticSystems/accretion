@@ -29,5 +29,15 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
+      - name: Install Godot 4.7 (headless smoke test)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfontconfig1 libglu1-mesa
+          curl -L -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          chmod +x Godot_v4.7-stable_linux.x86_64
+          echo "GODOT_BIN=${{ github.workspace }}/Godot_v4.7-stable_linux.x86_64" >> "$GITHUB_ENV"
+
       - name: Full gate
         run: make check
