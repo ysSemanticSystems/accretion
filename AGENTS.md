@@ -1,16 +1,22 @@
 # AGENTS.md — Contributor & AI-Agent Guide
 
-> Read this **before** writing or modifying any code. The rules below apply to
-> humans and AI agents equally. Cursor loads this file and `.cursor/rules/`
-> automatically.
+> **Wiki is the source of truth.** Start at **[wiki/README.md](wiki/README.md)** before
+> any design or code change. This file is operational bootstrap only.
 
-`accretion` is an accretion-disk survival/management game built like scientific
-software: the physics is rigorous, every formula cites a primary source, and the
-core is independently testable. It is the game-side companion to
-[`ysSemanticSystems/BlackHoleResearch`](https://github.com/ysSemanticSystems/BlackHoleResearch),
-and inherits its discipline — relocated from Python/Streamlit to Rust/Godot.
+`accretion` is an accretion-disk game evolving toward solo spaceship exploration
+and resource collection — built like scientific software with rigorous physics in
+Rust and presentation in Godot 4.7.
 
-**Docs:** [README.md](README.md) (public face) · [CONTRIBUTING.md](CONTRIBUTING.md) · [CITATION.cff](CITATION.cff)
+**Docs:** [wiki/README.md](wiki/README.md) (canonical) · [README.md](README.md) (public) · [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Cold start
+
+1. Read [wiki/README.md](wiki/README.md) and [wiki/manifest.yaml](wiki/manifest.yaml)
+2. Read [wiki/game-design/locked-decisions.md](wiki/game-design/locked-decisions.md)
+3. Follow [wiki/workflow/cold-start-agents.md](wiki/workflow/cold-start-agents.md)
+4. Load task-relevant pages from the manifest (`layer`, `applies_to`, feature `id`)
+
+**Invariants** (full text in wiki, not here): [wiki/invariants/](wiki/invariants/)
 
 ## Setup
 
@@ -23,7 +29,7 @@ per-commit, and not inflated into the GitHub co-author graph.
 Build the native library before opening the editor:
 
 ```sh
-make check            # full gate: generators, invariants, test, clippy, build
+make check            # full gate: generators, invariants, wiki, test, clippy, build
 # or manually:
 cargo test            # physics golden tests (astropy oracle + analytic)
 cargo build           # produces target/debug/libgodot_ext.dylib
@@ -34,41 +40,22 @@ Physical constants and golden fixtures are **generated** from astropy:
 `python3 scripts/gen_constants.py` and `python3 scripts/gen_golden.py`.
 Do not hand-edit `constants.rs` or `golden.json`.
 
-## Prime directives (memorize)
-
-1. **Honesty over completeness** — never invent a value, unit, or uncertainty.
-2. **Cite every formula** — primary-source reference in every physics doc comment.
-3. **Physics lives in `crates/accretion-core`** — `godot-ext`, shaders, and
-   GDScript present numbers; they do not compute them (rule 10).
-4. **Tests precede expansion** — a new physics formula lands with a golden test
-   reproducing a textbook value to a stated precision (rule 05).
-5. **Single source of truth** — physical constants live once, in
-   `accretion-core` (CGS, CODATA/IAU), each cited.
-
 ## Repository map
 
 ```
-accretion/                      # repo root (Godot 4.7 project lives here)
-├── Cargo.toml                  # [workspace]
+accretion/
+├── wiki/                       # Source of truth (design, invariants, RFCs)
 ├── crates/
 │   ├── accretion-core/         # pure physics lib (CGS), cargo-testable
-│   │   └── src/
-│   │       ├── constants.rs    # fundamentals (generated)
-│   │       ├── derived.rs      # SIGMA_SB, SIGMA_T from fundamentals
-│   │       ├── eddington.rs    # L_Edd, lambda, mdot↔L
-│   │       ├── kerr.rs         # ISCO, efficiency, spin geometry
-│   │       ├── disk.rs         # Shakura–Sunyaev T(r)
-│   │       ├── evolution.rs    # mass/spin evolution, integrity
-│   │       └── colorimetry.rs  # Planck → CIE → sRGB
 │   └── godot-ext/              # cdylib gdext binding — presentation only
 ├── accretion.gdextension       # native lib wiring (api-4-6, loads under 4.7)
 ├── project.godot, icon.svg     # Godot project
-├── scenes/Main.tscn            # scene: lensing BH + disk + mass slider
-├── scripts/main.gd             # GDScript glue (presentation only)
+├── scenes/Main.tscn            # current BH survival slice
+├── scripts/                    # GDScript glue (presentation only)
 ├── shaders/                    # blackhole (Tyler Kennedy, MIT) + starfield sky
 ├── .githooks/                  # tracked AI-attribution strip hooks
 ├── scripts/setup-hooks.sh      # per-clone hook wiring
-├── .cursor/rules/              # persistent AI guidance (5 rules)
+├── .cursor/rules/              # thin pointers to wiki/
 ├── CHANGELOG.md, CITATION.cff  # repro metadata
 ├── README.md, CONTRIBUTING.md, LICENSE
 └── .github/                    # CI workflow, PR + issue templates
@@ -76,24 +63,29 @@ accretion/                      # repo root (Godot 4.7 project lives here)
 
 ## Workflow
 
-1. Write (or update) the golden test alongside the implementation.
-2. Run locally before pushing: `cargo test`, `cargo clippy --workspace -- -D
-   warnings`, `cargo fmt --check`.
-3. Update `CHANGELOG.md` under the appropriate version heading.
-4. Open one PR; fill the Provenance line (the single point of AI disclosure).
+1. Spec in wiki first ([wiki/workflow/concept-to-implementation.md](wiki/workflow/concept-to-implementation.md)).
+2. Write (or update) golden tests alongside physics implementation.
+3. Run locally before pushing: `make check`.
+4. Update wiki + `manifest.yaml` + `last_reviewed` for any scope/behavior change.
+5. Update `CHANGELOG.md` under `[Unreleased]` for user-visible changes.
+6. Open one PR; fill the Provenance line (the single point of AI disclosure).
 
 ## What gets a change rejected
 
+See [wiki/invariants/](wiki/invariants/) for full rules. Summary:
+
 - A new physics formula or constant without a primary-source citation.
-- A physical constant or formula in `godot-ext`, a shader, or GDScript (rule 10).
+- A physical constant or formula in `godot-ext`, a shader, or GDScript.
 - A physics change without a golden test.
-- `cargo clippy --workspace -- -D warnings` regresses.
+- Scope/behavior change without a wiki update.
+- Contradiction with [wiki/game-design/locked-decisions.md](wiki/game-design/locked-decisions.md).
+- `make check` regresses.
 
 ## GitHub visibility (maintainers)
 
 When publishing the repository, set the **About** description to:
 
-> Accretion-disk survival game — first-principles Rust physics, Godot 4.7 HDR lensing. Companion to BlackHoleResearch.
+> Accretion-disk explore game — ship flight, nav radar, tractor cargo; honest Rust physics, Godot 4.7 HDR. Companion to BlackHoleResearch.
 
 Suggested **Topics:** `black-hole`, `accretion-disk`, `godot`, `rust`, `astrophysics`,
 `shakura-sunyaev`, `gravitational-lensing`, `game`, `scientific-software`.
@@ -101,9 +93,3 @@ Suggested **Topics:** `black-hole`, `accretion-disk`, `godot`, `rust`, `astrophy
 Enable **Issues** and **Discussions** if you want community feedback. CI badge in
 README assumes the default branch is `main` and workflow file is
 `.github/workflows/ci.yml`.
-
-## Known deferred physics (stated plainly)
-
-- `disk_temperature` uses the **bare** Shakura-Sunyaev form (`T ∝ r^(-3/4)`,
-  no inner-boundary factor), so there is no temperature peak / dark inner gap
-  yet. The inner-boundary correction is a logged fast-follow.

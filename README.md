@@ -1,17 +1,20 @@
 # accretion
 
-**Ride the Eddington limit.** Feed a black hole, watch the disk bloom in HDR,
-and push the accretion rate until radiation pressure would tear it apart.
-
-An accretion-disk survival/management game built like scientific software: every
+**Explore, navigate, and collect** in space — or **ride the Eddington limit**
+at a black hole. An accretion-disk game built like scientific software: every
 formula cites a primary source, physical constants come from astropy, and the
-physics core is independently testable in Rust. Godot 4.7 handles the lensing
-shader and presentation only.
+physics core is independently testable in Rust. Godot 4.7 handles flight,
+navigation, lensing, and presentation.
+
+The default play scene is **`scenes/Ship.tscn`** (6DOF flight, tactical radar,
+tractor cargo). The black-hole survival slice lives in **`scenes/Main.tscn`**.
 
 Companion to
 [BlackHoleResearch](https://github.com/ysSemanticSystems/BlackHoleResearch)
 (the Streamlit FITS explorer); this repo is the game-side port of its accretion
 physics discipline into Rust + Godot.
+
+**Design spec:** [wiki/README.md](wiki/README.md) is the source of truth.
 
 [![CI](https://github.com/ysSemanticSystems/accretion/actions/workflows/ci.yml/badge.svg)](https://github.com/ysSemanticSystems/accretion/actions/workflows/ci.yml)
 ![Godot 4.7](https://img.shields.io/badge/Godot-4.7-blue)
@@ -48,6 +51,14 @@ hand-typed. See [AGENTS.md](AGENTS.md) and rule `11-constants-provenance`.
 
 ---
 
+## Documentation
+
+**[wiki/README.md](wiki/README.md)** is the source of truth for game design,
+architecture, physics invariants, and feature specs. Agents and contributors
+start there. [AGENTS.md](AGENTS.md) covers setup and workflow bootstrap.
+
+---
+
 ## Quick start
 
 **Requirements:** Rust (stable, Edition 2024), Python 3.11+ with astropy, Godot
@@ -63,6 +74,7 @@ pip install -r scripts/requirements.txt
 
 make check                        # generators, invariants, test, clippy, build, Godot smoke
 # Open the project in Godot 4.7 and run scenes/Main.tscn (F5)
+# Explore slice (default): scenes/Ship.tscn is the main scene — flight, nav, tractor
 ```
 
 **Before opening Godot**, run `make build` (or `make godot-smoke`). The native
@@ -79,6 +91,8 @@ defaults to `/Applications/Godot.app/Contents/MacOS/Godot`; override with
 
 ## Controls
 
+### Black-hole slice (`scenes/Main.tscn`)
+
 | Input | Action |
 |---|---|
 | **Mass slider** / `Q` `E` | Black-hole mass (log₁₀ M☉) — disk color comes from Rust `blackbody_rgb(T_inner)` |
@@ -87,8 +101,26 @@ defaults to `/Applications/Godot.app/Contents/MacOS/Godot`; override with
 | `1` `2` `3` | Presets: **Cyg X-1** (21 M☉), **Sgr A\*** (4×10⁶ M☉), **M87\*** (6.5×10⁹ M☉) |
 | **Drag** / **scroll** | Orbit camera / zoom |
 
-When **λ_Edd > 1** (super-Eddington), the HUD warns you — that's the radiation-
-pressure blowout that will become the game's loss condition.
+### Ship flight (`scenes/Ship.tscn` — F001)
+
+| Input | Action |
+|---|---|
+| **W** **S** | Thrust forward / back |
+| **A** **D** | Strafe |
+| **Space** **C** | Up / down |
+| **Q** **E** | Roll |
+| **Mouse** | Steer (captured) |
+| **Hold RMB** | Look orbit (camera only) |
+| **Shift** | Cruise speed band |
+| **Hold F** | Tractor beam (aim at debris) |
+| **L** | Toggle auto-level |
+| **Esc** | Release / capture mouse |
+
+**Navigation:** sector + position (top-left HUD), compass bearing to nearest debris,
+tactical radar (bottom-right). Cyan **home beacon** at origin — fly toward orange
+blips / compass bearing to reach debris (~100–400 km out). Hold **Shift** for cruise.
+
+The black-hole survival slice remains at `scenes/Main.tscn`.
 
 ---
 

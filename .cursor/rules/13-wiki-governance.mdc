@@ -1,0 +1,14 @@
+---
+description: Wiki source of truth — cold start for all sessions
+alwaysApply: true
+---
+
+# Wiki governance
+
+Read [wiki/README.md](../../wiki/README.md) and [wiki/manifest.yaml](../../wiki/manifest.yaml) before any design or code change.
+
+Obey [wiki/game-design/locked-decisions.md](../../wiki/game-design/locked-decisions.md) unless the user explicitly revises a lock AND the wiki is updated in the same session/PR.
+
+When behavior or scope changes, update the relevant wiki page in the same PR.
+
+Full boot sequence: [wiki/workflow/cold-start-agents.md](../../wiki/workflow/cold-start-agents.md)

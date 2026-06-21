@@ -1,0 +1,73 @@
+version: 1
+entrypoint: README.md
+cold_start:
+  - README.md
+  - game-design/locked-decisions.md
+  - architecture/overview.md
+pages:
+  - id: glossary
+    path: glossary.md
+    status: active
+  - id: project-context
+    path: invariants/project-context.md
+    status: active
+  - id: scientific-honesty
+    path: invariants/scientific-honesty.md
+    status: active
+  - id: testing-discipline
+    path: invariants/testing-discipline.md
+    status: active
+  - id: presentation-boundary
+    path: invariants/presentation-boundary.md
+    status: active
+  - id: constants-provenance
+    path: invariants/constants-provenance.md
+    status: active
+  - id: gdext-api-pinning
+    path: invariants/gdext-api-pinning.md
+    status: active
+  - id: commit-and-pr
+    path: invariants/commit-and-pr.md
+    status: active
+  - id: architecture-overview
+    path: architecture/overview.md
+    status: active
+  - id: architecture-layers
+    path: architecture/layers.md
+    status: active
+  - id: sector-streaming
+    path: architecture/sector-streaming.md
+    status: deferred
+  - id: vision
+    path: game-design/vision.md
+    status: active
+  - id: locked-decisions
+    path: game-design/locked-decisions.md
+    status: active
+  - id: navigation
+    path: game-design/navigation.md
+    status: active
+  - id: resource-loop
+    path: game-design/resource-loop.md
+    status: active
+  - id: distance-and-visibility
+    path: game-design/distance-and-visibility.md
+    status: active
+  - id: F001-third-person-flight
+    path: features/F001-third-person-flight.md
+    status: implemented
+  - id: F002-tractor-cargo
+    path: features/F002-tractor-cargo.md
+    status: implemented
+  - id: F003-navigation-radar
+    path: features/F003-navigation-radar.md
+    status: implemented
+  - id: concept-to-implementation
+    path: workflow/concept-to-implementation.md
+    status: active
+  - id: wiki-maintenance
+    path: workflow/wiki-maintenance.md
+    status: active
+  - id: cold-start-agents
+    path: workflow/cold-start-agents.md
+    status: active

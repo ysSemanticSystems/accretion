@@ -48,6 +48,7 @@ check: gen hooks
 	git diff --exit-code crates/accretion-core/src/constants.rs
 	git diff --exit-code crates/accretion-core/tests/fixtures/golden.json
 	sh scripts/check_invariants.sh
+	sh scripts/check_wiki.sh
 	cargo test --workspace
 	cargo clippy --workspace --all-targets -- -D warnings
 	$(MAKE) godot-smoke

@@ -1,11 +1,13 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "accretion: an accretion-disk survival game with a physics core in Rust"
+title: "accretion: accretion-disk game with a testable Rust physics core"
 abstract: >-
-  An accretion-disk survival/management game. The physics core (Eddington
-  luminosity, Shakura-Sunyaev disk temperature, Kerr ISCO, blackbody color) is a
-  pure, unit-tested Rust crate with primary-source citations; Godot 4.7 provides
-  the lensing/HDR presentation. Companion to BlackHoleResearch.
+  An accretion-disk game with a solo ship explore slice (flight, navigation
+  radar, tractor cargo) and a black-hole survival slice (Eddington limit, disk
+  integrity). The physics core (Eddington luminosity, Shakura-Sunyaev disk
+  temperature, Kerr ISCO, blackbody color) is a pure, unit-tested Rust crate with
+  primary-source citations; Godot 4.7 provides presentation. Companion to
+  BlackHoleResearch. Design spec: wiki/README.md.
 type: software
 authors:
   - name: "ysSemanticSystems"

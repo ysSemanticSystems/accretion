@@ -1,14 +1,11 @@
 ---
-description: gdext API level is explicit and equals the extension compatibility floor.
+description: gdext API pinning — canonical text in wiki
 globs: crates/godot-ext/**,accretion.gdextension
 alwaysApply: true
 ---
 
-# gdext API pinning (invariant)
+# gdext API pinning
 
-- `crates/godot-ext/Cargo.toml` MUST enable exactly one explicit `api-4-N` feature.
-  Default (no `api-*` feature) is forbidden — it is non-reproducible.
-- N is the highest `api-4-N` gdext publishes that is ≤ the installed Godot minor.
-- `accretion.gdextension` `compatibility_minimum` MUST equal `4.N`.
-  Check: feature `api-4-N` ⇔ `compatibility_minimum = 4.N`.
-- The `godot` dependency is pinned to an exact version (`=X.Y.Z`); `Cargo.lock` is committed.
+Canonical spec: [wiki/invariants/gdext-api-pinning.md](../../wiki/invariants/gdext-api-pinning.md)
+
+Enforced in `scripts/check_invariants.sh` (C5).

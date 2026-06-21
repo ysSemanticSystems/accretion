@@ -1,0 +1,174 @@
+[gd_scene load_steps=16 format=3 uid="uid://bqx7shipf00101"]
+
+[ext_resource type="Script" path="res://scripts/ship_scene.gd" id="1_root"]
+[ext_resource type="Script" path="res://scripts/ship_controller.gd" id="2_ship"]
+[ext_resource type="Script" path="res://scripts/chase_camera.gd" id="3_cam"]
+[ext_resource type="Shader" path="res://shaders/starfield_sky.gdshader" id="4_sky"]
+[ext_resource type="Script" path="res://scripts/cargo_hold.gd" id="5_cargo"]
+[ext_resource type="Script" path="res://scripts/tractor_beam.gd" id="6_tractor"]
+[ext_resource type="Script" path="res://scripts/debris_field.gd" id="7_field"]
+[ext_resource type="Script" path="res://scripts/navigation_system.gd" id="8_nav"]
+[ext_resource type="Script" path="res://scripts/navigation_radar.gd" id="9_radar"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_hull"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hull"]
+albedo_color = Color(0.55, 0.62, 0.72, 1)
+metallic = 0.85
+roughness = 0.35
+emission_enabled = true
+emission = Color(0.15, 0.45, 0.9, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sky"]
+shader = ExtResource("4_sky")
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ShaderMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.9
+glow_bloom = 0.15
+glow_hdr_threshold = 0.85
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_beam"]
+top_radius = 0.06
+bottom_radius = 0.06
+height = 1.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_home"]
+top_radius = 2.0
+bottom_radius = 2.0
+height = 120.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_home"]
+emission_enabled = true
+emission = Color(0.25, 0.75, 1, 1)
+emission_energy_multiplier = 2.5
+shading_mode = 0
+
+[node name="Ship" type="Node3D"]
+script = ExtResource("1_root")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 0, 0)
+light_energy = 0.55
+shadow_enabled = true
+
+[node name="HomeBeacon" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -60, 0)
+mesh = SubResource("CylinderMesh_home")
+surface_material_override/0 = SubResource("StandardMaterial3D_home")
+
+[node name="NavigationSystem" type="Node" parent="."]
+script = ExtResource("8_nav")
+
+[node name="CargoHold" type="Node" parent="."]
+script = ExtResource("5_cargo")
+
+[node name="DebrisField" type="Node3D" parent="."]
+script = ExtResource("7_field")
+
+[node name="ShipBody" type="Node3D" parent="."]
+script = ExtResource("2_ship")
+
+[node name="Hull" type="MeshInstance3D" parent="ShipBody"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_hull")
+surface_material_override/0 = SubResource("StandardMaterial3D_hull")
+
+[node name="TractorBeam" type="Node3D" parent="ShipBody"]
+script = ExtResource("6_tractor")
+
+[node name="BeamVisual" type="MeshInstance3D" parent="ShipBody/TractorBeam"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+visible = false
+mesh = SubResource("CylinderMesh_beam")
+
+[node name="ChaseCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 9)
+current = true
+script = ExtResource("3_cam")
+target_path = NodePath("../ShipBody")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="PanelContainer" parent="UI"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 500.0
+offset_bottom = 248.0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="UI/Panel"]
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="UI/Panel/Margin"]
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="UI/Panel/Margin/VBox"]
+theme_override_font_sizes/font_size = 16
+text = "Explore — flight · nav · tractor"
+
+[node name="SpeedLabel" type="Label" parent="UI/Panel/Margin/VBox"]
+text = "Speed 0 km/s"
+
+[node name="ModeLabel" type="Label" parent="UI/Panel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.65, 0.85, 1, 1)
+text = "Band: IMPULSE · Auto-level: ON"
+
+[node name="NavLabel" type="Label" parent="UI/Panel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.78, 0.82, 0.9, 1)
+text = "Sector (0, 0, 0)"
+
+[node name="CompassLabel" type="Label" parent="UI/Panel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.9, 0.75, 0.45, 1)
+text = "Compass: scanning…"
+
+[node name="CargoLabel" type="Label" parent="UI/Panel/Margin/VBox"]
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+text = "Cargo 0 / 500 u"
+
+[node name="TractorLabel" type="Label" parent="UI/Panel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.55, 0.95, 1, 1)
+text = "Tractor: hold F"
+
+[node name="HelpLabel" type="Label" parent="UI/Panel/Margin/VBox"]
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.75, 0.78, 0.82, 1)
+text = "Loading help…"
+
+[node name="RadarPanel" type="PanelContainer" parent="UI"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -220.0
+offset_right = -12.0
+offset_bottom = -12.0
+mouse_filter = 2
+
+[node name="Radar" type="Control" parent="UI/RadarPanel"]
+layout_mode = 2
+script = ExtResource("9_radar")
+nav_path = NodePath("../../NavigationSystem")
+
+[node name="RadarLabel" type="Label" parent="UI/RadarPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.9)
+text = "Tactical radar (sqrt-scaled · 2500 km range)"

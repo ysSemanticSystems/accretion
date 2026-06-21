@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`wiki/` source-of-truth documentation.** Game design, architecture, feature
+  RFCs (`F001` third-person flight), and migrated physics invariants live in
+  `wiki/` with `manifest.yaml` for machine indexing. `.cursor/rules/` are thin
+  pointers; `scripts/check_wiki.sh` (W1–W8) runs in `make check`. Start at
+  [wiki/README.md](wiki/README.md).
+- **F001 third-person flight (`scenes/Ship.tscn`).** Arcade 6DOF ship in the
+  starfield with spring chase camera, impulse/cruise speed bands, auto-level,
+  and hold-RMB look orbit. Run the scene directly in Godot 4.7 to fly.
+- **F002 tractor beam and cargo.** Hold **F** to pull orange debris from a
+  forward cone into cargo (500 u capacity, speed penalty when loaded). Twelve
+  loose volatiles spawn 100–400 u from origin in `Ship.tscn`.
+- **F003 navigation HUD + movement fixes.** Default play scene is `Ship.tscn`.
+  WASD/arrow thrust, reliable mouse steering, sector/position readout, compass,
+  tactical radar, home beacon, and distance-based debris visibility rings.
 - **Run lifecycle and replay value.** Each run starts at Cyg X-1 scale with a
   clear win (reach M87*) and lose (three super-Eddington disk disruptions).
   Live score, persisted high score (`user://accretion_best.run`), end-of-run

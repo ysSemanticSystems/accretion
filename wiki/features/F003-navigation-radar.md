@@ -1,0 +1,43 @@
+---
+id: F003-navigation-radar
+title: Navigation Radar and Compass
+status: implemented
+layer: features
+depends_on: [F001-third-person-flight, distance-and-visibility, navigation]
+blocks: []
+acceptance:
+  - "HUD shows sector grid coordinates and ship position in km updating while flying"
+  - "Compass row shows nearest debris true distance and bearing"
+  - "Tactical radar displays harvestable blips with sqrt-scaled layout to 2500 km"
+  - "Debris shows mesh within 500 km and emissive beacon marker beyond until 8000 km"
+  - "Home beacon at origin provides visual motion reference"
+implements:
+  - "scripts/world_scale.gd"
+  - "scripts/navigation_system.gd"
+  - "scripts/navigation_radar.gd"
+  - "scripts/ship_scene.gd"
+  - "scripts/harvestable_debris.gd"
+  - "scenes/Ship.tscn"
+last_reviewed: 2026-06-21
+---
+
+# F003 — Navigation radar and compass
+
+## Summary
+
+Map empty space for the player: know where you are, where debris is, and that
+you are actually moving. Spec detail: [distance-and-visibility.md](../game-design/distance-and-visibility.md).
+
+## Tuning
+
+| Constant | Value | Script |
+|---|---|---|
+| `UNITS_PER_KM` | 1 | `world_scale.gd` |
+| `SECTOR_EDGE_UNITS` | 1000 | `world_scale.gd` |
+| `RADAR_RANGE_UNITS` | 2500 | `world_scale.gd` |
+| `VISUAL_MESH_RADIUS_UNITS` | 500 | `world_scale.gd` |
+| `MARKER_BEACON_RADIUS_UNITS` | 8000 | `world_scale.gd` |
+
+## Controls
+
+No new bindings — read nav HUD while flying ([F001](F001-third-person-flight.md)).
