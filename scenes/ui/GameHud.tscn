@@ -41,7 +41,7 @@ script = ExtResource("6")
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 380.0
-offset_bottom = 200.0
+offset_bottom = 268.0
 mouse_filter = 2
 
 [node name="Margin" type="MarginContainer" parent="HudPanel"]
@@ -59,10 +59,25 @@ theme_override_colors/font_color = Color(0.95, 0.92, 0.86, 1)
 autowrap_mode = 3
 text = "Hold F near orange debris — it pulls into your hold"
 
+[node name="MilestoneLabel" type="Label" parent="HudPanel/Margin/VBox"]
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.78, 0.88, 0.95, 1)
+text = "M87* approach ○ ○ ○ ○ · next: Outer wake"
+
 [node name="CompassLabel" type="Label" parent="HudPanel/Margin/VBox"]
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.72, 0.82, 0.92, 1)
 text = "Scanning…"
+
+[node name="SectorLabel" type="Label" parent="HudPanel/Margin/VBox"]
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.62, 0.72, 0.82, 1)
+text = "Sector (0, 0, 0)"
+
+[node name="SpeedLabel" type="Label" parent="HudPanel/Margin/VBox"]
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.78, 0.88, 1)
+text = "Drive · IMPULSE"
 
 [node name="CargoRow" type="HBoxContainer" parent="HudPanel/Margin/VBox"]
 theme_override_constants/separation = 10

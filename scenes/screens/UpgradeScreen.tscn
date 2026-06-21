@@ -17,9 +17,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -260.0
-offset_top = -180.0
+offset_top = -200.0
 offset_right = 260.0
-offset_bottom = 180.0
+offset_bottom = 200.0
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
 theme_override_constants/margin_left = 16
@@ -36,6 +36,16 @@ text = "HOME DEPOT"
 
 [node name="BankLabel" type="Label" parent="Panel/Margin/VBox"]
 text = "Banked: 0 u"
+
+[node name="MilestoneLabel" type="Label" parent="Panel/Margin/VBox"]
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.82, 0.92, 1)
+text = "Outward ○ ○ ○ ○ · ring 0 → 4"
+
+[node name="ProgressLabel" type="Label" parent="Panel/Margin/VBox"]
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.65, 0.78, 0.72, 1)
+text = "Upgrades 0 / 6"
 
 [node name="Rows" type="VBoxContainer" parent="Panel/Margin/VBox"]
 theme_override_constants/separation = 6

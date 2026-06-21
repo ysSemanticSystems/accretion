@@ -64,9 +64,11 @@ func _try_deposit(mass: float) -> void:
 	if AudioManager:
 		AudioManager.play_sfx(_deposit_chunk())
 	RunTracker.note_banked(_progression.banked_mass, mass)
+	var root := get_parent()
+	if root != null and root.has_method("persist_run"):
+		root.persist_run()
 	if not _upgrade_shown_this_dock and _progression.banked_mass > 0.0:
 		_upgrade_shown_this_dock = true
-		var root := get_parent()
 		if root != null and root.has_method("open_upgrade_dock"):
 			root.call_deferred("open_upgrade_dock")
 

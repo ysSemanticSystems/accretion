@@ -1,18 +1,22 @@
 extends Node3D
-## Mid-field parallax dust + explore lighting from the distant BH.
+## Parallax dust + dual lighting: host star key, separate weak BH disk rim.
 
 const WorldScale = preload("res://scripts/world_scale.gd")
 
 @onready var dust: GPUParticles3D = $ParallaxDust
-@onready var disk_light: DirectionalLight3D = $DiskLight
+@onready var star_light: DirectionalLight3D = $StarLight
 @onready var fill_light: DirectionalLight3D = $FillLight
+@onready var bh_rim_light: DirectionalLight3D = $BhRimLight
 
 var _ship: Node3D
+var _world_env: WorldEnvironment
 
 
 func _ready() -> void:
 	if dust:
 		dust.emitting = true
+	_world_env = get_parent().get_node_or_null("WorldEnvironment") as WorldEnvironment
+	_sync_sky_directions(Vector3.ZERO)
 
 
 func _process(_delta: float) -> void:
@@ -22,20 +26,52 @@ func _process(_delta: float) -> void:
 		return
 	var ship_pos: Vector3 = _ship.global_position
 	var bh_pos: Vector3 = WorldScale.BH_WORLD_POSITION
-	var inward: Vector3 = (bh_pos - ship_pos).normalized()
-	# Warm key sits on the BH side and rakes outward, so the disk lights the
-	# BH-facing hull and rocks. Light position is only used to orient the beam.
-	if disk_light:
-		disk_light.global_position = ship_pos + inward * 300.0
-		disk_light.look_at(ship_pos, _safe_up(inward))
-	# Cool rim from above/behind separates the dark side from the void.
+	var star_pos: Vector3 = WorldScale.PRIMARY_STAR_POSITION
+
+	var star_dir: Vector3 = (star_pos - ship_pos).normalized()
+	if star_light:
+		star_light.global_position = ship_pos + star_dir * 500.0
+		star_light.look_at(ship_pos, _safe_up(star_dir))
+
+	# Cool fill from the nebula / opposite hemisphere — not the BH.
 	if fill_light:
-		var rim_offset: Vector3 = (-inward * 120.0) + Vector3.UP * 260.0
-		fill_light.global_position = ship_pos + rim_offset
+		var fill_dir: Vector3 = (-star_dir + Vector3.UP * 0.35).normalized()
+		fill_light.global_position = ship_pos + fill_dir * 400.0
 		fill_light.look_at(ship_pos, Vector3.UP)
+
+	# BH disk is self-lit in the shader; this rim only nudges hull when close.
+	var dist_bh: float = ship_pos.distance_to(bh_pos)
+	var bh_prox: float = clampf(
+		inverse_lerp(WorldScale.BH_OUTER_ZONE_UNITS, WorldScale.BH_INNER_ZONE_UNITS, dist_bh),
+		0.0,
+		1.0,
+	)
+	if bh_rim_light:
+		var inward: Vector3 = (bh_pos - ship_pos).normalized()
+		bh_rim_light.light_energy = lerpf(0.0, 0.65, bh_prox)
+		bh_rim_light.global_position = ship_pos + inward * 280.0
+		bh_rim_light.look_at(ship_pos, _safe_up(inward))
+
 	if dust:
 		dust.global_position = ship_pos
-		_update_bh_audio(ship_pos.distance_to(bh_pos))
+	_update_bh_audio(dist_bh)
+	_sync_sky_directions(ship_pos)
+
+
+func _sync_sky_directions(ship_pos: Vector3) -> void:
+	if _world_env == null or _world_env.environment == null:
+		return
+	var sky: Sky = _world_env.environment.sky
+	if sky == null:
+		return
+	var mat: Material = sky.sky_material
+	if mat == null or not mat is ShaderMaterial:
+		return
+	var sm: ShaderMaterial = mat as ShaderMaterial
+	var bh_dir: Vector3 = (WorldScale.BH_WORLD_POSITION - ship_pos).normalized()
+	var star_dir: Vector3 = (WorldScale.PRIMARY_STAR_POSITION - ship_pos).normalized()
+	sm.set_shader_parameter("disk_glow_dir", bh_dir)
+	sm.set_shader_parameter("primary_star_dir", star_dir)
 
 
 func _safe_up(forward: Vector3) -> Vector3:

@@ -22,11 +22,14 @@ shader_parameter/inner_color = Color(1, 0.95, 0.85, 1)
 shader_parameter/doppler_beaming_factor = 66.0
 shader_parameter/emission_strength = 1.2
 shader_parameter/qpo_phase_rate = 1.5
-shader_parameter/turbulence_intensity = 0.35
+shader_parameter/turbulence_intensity = 0.18
 shader_parameter/ray_steps = 192
 shader_parameter/step_size = 0.09
 shader_parameter/ss_radius = 0.12
 shader_parameter/g_const = 0.38
+shader_parameter/eht_shadow_scale = 2.6
+shader_parameter/view_shadow_strength = 0.85
+shader_parameter/interior_strength = 0.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_disc"]
 radius = 0.5

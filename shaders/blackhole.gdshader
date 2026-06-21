@@ -70,6 +70,12 @@ uniform int ray_steps : hint_range(32, 512) = 256;
 uniform float step_size : hint_range(0.001, 1.0) = 0.1;
 uniform float ss_radius : hint_range(0.0, 1.0) = 0.1;
 uniform float g_const : hint_range(0.0, 2.0) = 0.3;
+// Stylized EHT shadow radius = horizon_frac * disc_radius * this scale (presentation).
+uniform float eht_shadow_scale : hint_range(1.5, 4.0) = 2.6;
+// Screen-centre shadow when viewing the BH from far away (0 = off).
+uniform float view_shadow_strength : hint_range(0.0, 1.0) = 0.85;
+// Camera inside the capture sphere — stylized infall view (presentation).
+uniform float interior_strength : hint_range(0.0, 1.0) = 0.0;
 
 uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
 
@@ -252,14 +258,15 @@ vec3 calc_disc_color(vec3 base_color, vec3 planar_disc_pos, vec3 disc_dir, vec3 
     vec2 swirl_offset = turbulent_displacement_seamless(u * 2.0, v, turb_time, turbulence_scale * 0.5, turbulence_intensity * 0.3, turbulence_octaves);
     float swirl_noise = seamless_fbm_cylinder(u * 2.0 + swirl_offset.x, v + swirl_offset.y, turbulence_scale * 1.5, turb_time * 0.5, turbulence_octaves);
 
-    float combined_turb = mix(turb_noise, swirl_noise, 0.5);
-    float turb_intensity_mod = (combined_turb - 0.5) * 2.0 * turbulence_intensity;
+    float combined_turb = mix(turb_noise, swirl_noise, 0.35);
+    combined_turb = smoothstep(0.18, 0.82, combined_turb);
+    float turb_intensity_mod = (combined_turb - 0.5) * turbulence_intensity * 0.35;
 
-    float hot_spot = pow(max(0.0, combined_turb - 0.6) * 2.5, 2.0) * turbulence_intensity;
+    float hot_spot = pow(max(0.0, combined_turb - 0.72) * 3.0, 2.0) * turbulence_intensity * 0.45;
     // Keplerian hotspot orbiting at the ISCO (QPO-scale flicker; phase rate from Rust).
     float qpo_angle = v * PI * 2.0 + TIME * qpo_phase_rate;
     float qpo_spot = pow(max(0.0, cos(qpo_angle) * 0.5 + 0.5), 6.0) * (1.0 - radial_t);
-    hot_spot += qpo_spot * 0.35;
+    hot_spot += qpo_spot * 0.28;
 
     // inner_color is the Rust-computed blackbody color of the disc inner edge.
     vec3 temp_color = mix(inner_color.rgb, base_color, pow(radial_t, 0.6));
@@ -273,7 +280,11 @@ vec3 calc_disc_color(vec3 base_color, vec3 planar_disc_pos, vec3 disc_dir, vec3 
     float doppler_dist = (length(rotated_pos - camera_pos) - length(planar_disc_pos - camera_pos)) / safe_radius;
     float doppler_contribution = doppler_dist * disc_speed * doppler_beaming_factor * (1.0 - radial_t * 0.7);
 
-    float intensity = base_intensity + doppler_contribution + turb_intensity_mod + hot_spot * 1.5;
+    float intensity = base_intensity + doppler_contribution + turb_intensity_mod + hot_spot * 0.75;
+    // EHT-style azimuthal asymmetry (approaching side brighter; presentation stylized).
+    float phi = atan(planar_disc_pos.z, planar_disc_pos.x);
+    intensity += sin(phi + TIME * disc_speed * 0.04) * 0.14 * (1.0 - radial_t);
+
     intensity = clamp(intensity, -3.0, 3.0);
 
     vec3 new_color = hdr_intensity(temp_color, intensity);
@@ -287,11 +298,51 @@ vec3 calc_disc_color(vec3 base_color, vec3 planar_disc_pos, vec3 disc_dir, vec3 
     return new_color;
 }
 
+// EHT-inspired radial profile: dark shadow interior, bright photon ring, outer disc falloff.
+vec3 apply_eht_disc_profile(vec3 disc_col, float r_norm, float horizon_frac, out float disc_weight) {
+    float shadow_r = clamp(horizon_frac * eht_shadow_scale, 0.04, 0.92);
+    float hole = smoothstep(shadow_r * 0.88, shadow_r * 1.06, r_norm);
+    float ring_inner = shadow_r * 1.04;
+    float ring_outer = shadow_r * 1.42;
+    float photon_ring = smoothstep(ring_inner, ring_inner + shadow_r * 0.05, r_norm)
+        * (1.0 - smoothstep(ring_outer - shadow_r * 0.08, ring_outer, r_norm));
+    photon_ring = pow(photon_ring, 0.82);
+    disc_weight *= hole;
+    return disc_col * (0.28 + photon_ring * 3.4);
+}
+
+vec3 render_interior(vec3 ray_origin, vec3 ray_dir, float sphere_radius, vec2 screen_uv, float blend) {
+    vec3 fall_dir = normalize(centre - ray_origin);
+    vec2 centered = screen_uv - 0.5;
+    float r = length(centered);
+    float warp = blend * 2.2 / max(0.06, 1.0 - r * 1.05);
+    vec2 warped_uv = clamp(0.5 + centered * (1.0 + warp), vec2(0.002), vec2(0.998));
+    vec3 bg = texture(screen_texture, warped_uv).rgb;
+    vec3 redshift = vec3(1.35, 0.82, 0.42);
+    bg *= mix(vec3(1.0), redshift, blend * 0.72);
+    float tunnel = pow(max(dot(ray_dir, fall_dir), 0.0), mix(1.2, 5.0, blend));
+    float ring_echo = pow(clamp(r * 1.35, 0.0, 1.0), 1.1) * blend;
+    vec3 col = bg * mix(0.12, 0.5, tunnel);
+    col += vec3(1.0, 0.38, 0.1) * ring_echo * 1.35;
+    col += vec3(0.12, 0.06, 0.22) * (1.0 - tunnel) * blend * 0.9;
+    col *= mix(1.0, 0.25, pow(tunnel, 2.5) * blend);
+    return col;
+}
+
 void fragment() {
     vec3 ray_origin = CAMERA_POSITION_WORLD;
     vec3 ray_dir = normalize(frag_pos_ws - ray_origin);
 
     float sphere_radius = 0.5 * min(min(object_scale.x, object_scale.y), object_scale.z);
+    float cam_dist = length(ray_origin - centre);
+    float interior_t = max(interior_strength, clamp(1.0 - cam_dist / max(sphere_radius, 1e-4), 0.0, 1.0));
+    vec2 screen_uv = SCREEN_UV;
+
+    if (interior_t > 0.02) {
+        vec3 interior_col = render_interior(ray_origin, ray_dir, sphere_radius, screen_uv, interior_t);
+        ALBEDO = interior_col;
+        ALPHA = 1.0;
+    } else {
     vec2 outer_sphere = intersect_sphere(ray_origin, ray_dir, centre, sphere_radius);
     bool has_sphere = outer_sphere.x < MAX_FLOAT;
 
@@ -326,10 +377,16 @@ void fragment() {
             float prev_plane_dist = dot(prev_ray_pos - centre, disc_dir);
 
             float norm_dst = max(dst_to_centre / sphere_radius, 1e-4);
-            float force = g_const / (norm_dst * norm_dst);
+            float force = g_const / (norm_dst * norm_dst + 0.015);
             current_ray_dir = normalize(current_ray_dir + dir_to_centre * force * step_size);
+            float near_horizon = clamp(
+                (dst_to_centre - event_horizon_radius) / max(sphere_radius - event_horizon_radius, 1e-4),
+                0.0,
+                1.0
+            );
+            float adaptive_step = scaled_step * mix(0.28, 1.0, near_horizon);
 
-            current_ray_pos += current_ray_dir * scaled_step;
+            current_ray_pos += current_ray_dir * adaptive_step;
 
             float curr_dst_to_centre = length(current_ray_pos - centre);
 
@@ -379,9 +436,7 @@ void fragment() {
         float radial_dist = length(planar_disc_pos) / disc_radius;
         radial_falloff = 1.0 - smoothstep(0.85, 1.3, radial_dist);
     }
-    float tex_col = texture(disc_texture, uv).r;
-
-    vec2 screen_uv = SCREEN_UV;
+    float tex_col = mix(0.85, texture(disc_texture, uv).r, 0.65);
 
     vec3 distorted_ray_dir = has_sphere ? current_ray_dir : ray_dir;
     vec4 ray_camera_space = VIEW_MATRIX * vec4(distorted_ray_dir, 0.0);
@@ -394,7 +449,7 @@ void fragment() {
     float edge_fade_x = smoothstep(0.0, 0.15, min(screen_uv.x, 1.0 - screen_uv.x));
     float edge_fade_y = smoothstep(0.0, 0.15, min(screen_uv.y, 1.0 - screen_uv.y));
 
-    float lens_blend = has_sphere ? bend_blend * edge_fade_x * edge_fade_y : 0.0;
+    float lens_blend = has_sphere ? smoothstep(0.0, 0.22, ray_bend) : 0.0;
     distorted_screen_uv = mix(screen_uv, distorted_screen_uv, lens_blend);
 
     vec3 background_col = texture(screen_texture, distorted_screen_uv).rgb * (1.0 - black_hole_mask);
@@ -413,8 +468,27 @@ void fragment() {
 
     disc_hit *= tex_col * disc_color.a * streaks * horizon_fade * radial_falloff;
     final_disc_col *= emission_strength;
+
+    float horizon_frac = event_horizon_radius / max(disc_radius, 1e-6);
+    if (sample_pos.x < MAX_FLOAT) {
+        float r_norm = length(planar_disc_pos) / max(disc_radius, 1e-6);
+        final_disc_col = apply_eht_disc_profile(final_disc_col, r_norm, horizon_frac, disc_hit);
+    }
+
     vec3 col = mix(background_col, final_disc_col, disc_hit);
+
+    if (has_sphere && view_shadow_strength > 0.001) {
+        vec3 to_centre = normalize(centre - ray_origin);
+        float view_align = max(dot(ray_dir, to_centre), 0.0);
+        float dist_norm = length(centre - ray_origin) / max(sphere_radius * 4.0, 1.0);
+        float proximity_shadow = smoothstep(1.4, 0.35, dist_norm);
+        float angular_hole = smoothstep(0.88, 0.97, view_align)
+            * (1.0 - smoothstep(0.97, 0.998, view_align));
+        angular_hole *= view_shadow_strength * proximity_shadow;
+        col = mix(col, background_col * (1.0 - black_hole_mask), angular_hole);
+    }
 
     ALBEDO = col;
     ALPHA = 1.0;
+    }
 }

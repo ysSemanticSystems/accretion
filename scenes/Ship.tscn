@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://bqx7shipf00101"]
+[gd_scene load_steps=24 format=3 uid="uid://bqx7shipf00101"]
 
 [ext_resource type="Script" path="res://scripts/ship_scene.gd" id="1_root"]
 [ext_resource type="Script" path="res://scripts/ship_controller.gd" id="2_ship"]
@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://scripts/collect_feedback.gd" id="12_feedback"]
 [ext_resource type="Script" path="res://scripts/ship_visual.gd" id="13_visual"]
 [ext_resource type="PackedScene" path="res://scenes/DistantBlackHole.tscn" id="14_bh"]
+[ext_resource type="PackedScene" path="res://scenes/PrimaryStar.tscn" id="14b_star"]
 [ext_resource type="Script" path="res://scripts/space_ambience.gd" id="15_amb"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_beam"]
@@ -80,19 +81,27 @@ script = ExtResource("1_root")
 
 [node name="DistantBlackHole" parent="." instance=ExtResource("14_bh")]
 
+[node name="PrimaryStar" parent="." instance=ExtResource("14b_star")]
+
 [node name="SpaceAmbience" type="Node3D" parent="."]
 script = ExtResource("15_amb")
 
-[node name="DiskLight" type="DirectionalLight3D" parent="SpaceAmbience"]
-light_color = Color(1, 0.58, 0.26, 1)
-light_energy = 2.6
-light_specular = 0.9
+[node name="StarLight" type="DirectionalLight3D" parent="SpaceAmbience"]
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 2.35
+light_specular = 0.95
 shadow_enabled = false
 
 [node name="FillLight" type="DirectionalLight3D" parent="SpaceAmbience"]
-light_color = Color(0.5, 0.66, 1, 1)
-light_energy = 0.55
-light_specular = 0.4
+light_color = Color(0.45, 0.58, 0.92, 1)
+light_energy = 0.42
+light_specular = 0.35
+shadow_enabled = false
+
+[node name="BhRimLight" type="DirectionalLight3D" parent="SpaceAmbience"]
+light_color = Color(1, 0.52, 0.22, 1)
+light_energy = 0.0
+light_specular = 0.25
 shadow_enabled = false
 
 [node name="ParallaxDust" type="GPUParticles3D" parent="SpaceAmbience"]

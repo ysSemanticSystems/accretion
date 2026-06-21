@@ -1,18 +1,33 @@
 extends Control
-## Main menu — New Run, BH Lab, Settings, Quit. Spec: wiki/features/F008-game-shell.md
+## Main menu — New Run, Continue, BH Lab, Settings, Quit. Spec: wiki/features/F008-game-shell.md
 
 @onready var seed_label: Label = $Panel/Margin/VBox/SeedLabel
+@onready var continue_btn: Button = $Panel/Margin/VBox/Continue
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	seed_label.text = "Seed shown after New Run"
+	_refresh_stats()
 	if Settings:
 		scale = Vector2.ONE * Settings.hud_scale
 
 
+func _refresh_stats() -> void:
+	seed_label.text = SessionSave.profile_line()
+	continue_btn.visible = SessionSave.has_active_run
+	continue_btn.disabled = not SessionSave.has_active_run
+
+
+func _on_continue_pressed() -> void:
+	AudioManager.play_ui_click()
+	var shell := get_tree().root.get_node_or_null("Main")
+	if shell != null and shell.has_method("continue_run"):
+		shell.continue_run()
+
+
 func _on_new_run_pressed() -> void:
 	AudioManager.play_ui_click()
+	SessionSave.clear_active_run()
 	GameState.transition(GameState.State.PLAYING)
 
 

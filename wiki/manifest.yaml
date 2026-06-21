@@ -95,6 +95,12 @@ pages:
   - id: F011-explore-world-soul
     path: features/F011-explore-world-soul.md
     status: implemented
+  - id: F012-milestone-ladder-victory
+    path: features/F012-milestone-ladder-victory.md
+    status: implemented
+  - id: F013-black-hole-visual-physics
+    path: features/F013-black-hole-visual-physics.md
+    status: draft
   - id: concept-to-implementation
     path: workflow/concept-to-implementation.md
     status: active

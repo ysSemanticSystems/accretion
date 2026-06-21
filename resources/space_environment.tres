@@ -1,16 +1,21 @@
 [gd_resource type="Environment" format=3 uid="uid://spaceenv001"]
 
 [ext_resource type="Shader" uid="uid://vu2c1udlhs2g" path="res://shaders/starfield_sky.gdshader" id="1_sky"]
+[ext_resource type="Texture2D" uid="uid://dy5aeueu5w2k4" path="res://assets/visual/star_corona.png" id="2_corona"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_space"]
 shader = ExtResource("1_sky")
+shader_parameter/star_corona_texture = ExtResource("2_corona")
 shader_parameter/nebula_tint = Color(0.02, 0.025, 0.07, 1)
 shader_parameter/band_tint = Color(0.32, 0.14, 0.36, 1)
 shader_parameter/nebula_strength = 1.15
+shader_parameter/primary_star_dir = Vector3(0.72, 0.42, 0.55)
+shader_parameter/primary_star_color = Color(1, 0.96, 0.88, 1)
+shader_parameter/primary_star_strength = 1.15
 shader_parameter/disk_glow_dir = Vector3(0, 0.067, -1)
-shader_parameter/disk_glow_color = Color(1, 0.45, 0.14, 1)
+shader_parameter/disk_glow_color = Color(1, 0.38, 0.1, 1)
 shader_parameter/core_color = Color(1, 0.85, 0.62, 1)
-shader_parameter/disk_glow_strength = 0.95
+shader_parameter/disk_glow_strength = 0.38
 shader_parameter/star_density = 440.0
 shader_parameter/star_threshold = 0.996
 

@@ -35,6 +35,8 @@ shader_parameter/ray_steps = 256
 shader_parameter/step_size = 0.08
 shader_parameter/ss_radius = 0.12
 shader_parameter/g_const = 0.4
+shader_parameter/eht_shadow_scale = 2.6
+shader_parameter/view_shadow_strength = 0.35
 
 [sub_resource type="SphereMesh" id="SphereMesh_1"]
 radius = 0.5

@@ -85,6 +85,9 @@ func try_purchase_at_depot(require_depot: bool) -> bool:
 	GameEvents.toast.emit("%s → Lv %d" % [track_name(kind), _level_for(kind)])
 	RunTracker.note_upgrade(kind, _level_for(kind))
 	progression_changed.emit()
+	var root := get_parent()
+	if root != null and root.has_method("persist_run"):
+		root.persist_run()
 	return true
 
 
@@ -104,6 +107,37 @@ func track_cost(kind: int) -> float:
 func track_name(kind: int) -> String:
 	var names := ["Cargo Hold", "Tractor", "Cruise Drive"]
 	return names[kind] if kind >= 0 and kind < names.size() else "Upgrade"
+
+
+func total_upgrades() -> int:
+	return cargo_level + tractor_level + cruise_level
+
+
+func max_upgrades() -> int:
+	return (MAX_LEVEL + 1) * 3
+
+
+func is_fully_upgraded() -> bool:
+	return cargo_level >= MAX_LEVEL and tractor_level >= MAX_LEVEL and cruise_level >= MAX_LEVEL
+
+
+func export_state() -> Dictionary:
+	return {
+		"banked_mass": banked_mass,
+		"cargo_level": cargo_level,
+		"tractor_level": tractor_level,
+		"cruise_level": cruise_level,
+	}
+
+
+func restore_state(data: Dictionary) -> void:
+	banked_mass = float(data.get("banked_mass", 0.0))
+	cargo_level = int(data.get("cargo_level", 0))
+	tractor_level = int(data.get("tractor_level", 0))
+	cruise_level = int(data.get("cruise_level", 0))
+	_apply_all()
+	GameEvents.mass_banked.emit(banked_mass, 0.0)
+	progression_changed.emit()
 
 
 func cargo_capacity() -> float:

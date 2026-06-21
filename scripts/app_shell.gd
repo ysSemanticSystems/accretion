@@ -19,6 +19,7 @@ var _gameplay: Node
 var _backdrop: Node3D
 var _active_screen: Node
 var _settings_origin_state: GameState.State = GameState.State.MENU
+var _continue_requested := false
 
 
 func _ready() -> void:
@@ -28,6 +29,13 @@ func _ready() -> void:
 
 func _boot() -> void:
 	GameState.transition(GameState.State.MENU)
+
+
+func continue_run() -> void:
+	if not SessionSave.has_active_run:
+		return
+	_continue_requested = true
+	GameState.transition(GameState.State.PLAYING)
 
 
 func _on_state_changed(_from: GameState.State, to: GameState.State) -> void:
@@ -40,7 +48,8 @@ func _on_state_changed(_from: GameState.State, to: GameState.State) -> void:
 		GameState.State.PLAYING:
 			_show_backdrop(false)
 			_clear_screen()
-			_start_ship_run()
+			_start_ship_run(_continue_requested)
+			_continue_requested = false
 		GameState.State.LAB:
 			_show_backdrop(false)
 			_clear_screen()
@@ -68,6 +77,10 @@ func show_upgrade_dock(progression: Node) -> void:
 	_swap_screen(screen)
 	if screen.has_method("bind_progression"):
 		screen.bind_progression(progression)
+	if screen.has_method("bind_objectives") and _gameplay != null:
+		var objectives: Node = _gameplay.get_node_or_null("RunObjectives")
+		if objectives != null:
+			screen.bind_objectives(objectives)
 
 
 func close_settings() -> void:
@@ -77,6 +90,13 @@ func close_settings() -> void:
 func close_upgrade_dock() -> void:
 	get_tree().paused = false
 	_clear_screen()
+	if _gameplay != null and _gameplay.has_method("export_snapshot"):
+		SessionSave.save_active_run(_gameplay.export_snapshot())
+
+
+func save_active_run_from_gameplay() -> void:
+	if _gameplay != null and _gameplay.has_method("export_snapshot"):
+		SessionSave.save_active_run(_gameplay.export_snapshot())
 
 
 func _restore_after_settings(origin: GameState.State) -> void:
@@ -92,21 +112,32 @@ func _restore_after_settings(origin: GameState.State) -> void:
 			_clear_screen()
 
 
-func _start_ship_run() -> void:
+func _start_ship_run(resume: bool = false) -> void:
 	if _gameplay != null:
 		if is_instance_valid(_gameplay):
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			AudioManager.start_gameplay_audio()
 			return
 		_gameplay = null
-	var seed: int = int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
-	if seed == 0:
-		seed = 1
-	RunTracker.begin_run(seed)
+	var seed: int = 1
+	var snapshot: Dictionary = {}
+	if resume and SessionSave.has_active_run:
+		snapshot = SessionSave.active_snapshot()
+		seed = int(snapshot.get("seed", 1))
+	else:
+		SessionSave.clear_active_run()
+		seed = int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
+		if seed == 0:
+			seed = 1
+		RunTracker.begin_run(seed)
 	_gameplay = SHIP_SCENE.instantiate()
 	gameplay_host.add_child(_gameplay)
-	if _gameplay.has_method("configure_run"):
-		_gameplay.configure_run(seed)
+	if resume and not snapshot.is_empty():
+		if _gameplay.has_method("restore_run"):
+			_gameplay.restore_run(snapshot)
+	else:
+		if _gameplay.has_method("configure_run"):
+			_gameplay.configure_run(seed)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	AudioManager.start_gameplay_audio()
 

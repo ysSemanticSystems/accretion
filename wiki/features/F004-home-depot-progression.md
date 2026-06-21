@@ -45,8 +45,7 @@ range banks mass; banked mass buys ship upgrades. Compass switches between
 **Out of scope:**
 
 - Refinery, material tiers, mining laser
-- Persistent save (session bank optional v1; `user://` deferred)
-- Full upgrade menu UI
+- Full save slots beyond active-run Continue ([F012](F012-milestone-ladder-victory.md))
 
 ## Tuning (GDScript)
 
@@ -66,8 +65,8 @@ Upgrade axis for tractor: **range** (not cone width).
 
 ## Controls
 
-- **U** — cycle upgrade selection (cargo / tractor / cruise)
-- **Y** — purchase selected upgrade if affordable
+Dock at the home beacon and open the **upgrade screen** (↑↓ select track,
+Enter buy, Esc undock). No in-flight upgrade keys.
 
 ## Compass modes
 

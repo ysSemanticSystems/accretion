@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Exploration milestones (F012).** HUD tracks approach zones toward M87* (no win
+  state). Abandon opens an **Exploration Log** with closest approach stats.
+  `SessionSave` Continue flow on the main menu.
+
+- **Black hole visual physics pass (F013, in progress).** EHT-inspired shadow ring,
+  sky/mesh balance, host star key light separate from M87* self-lit disk, `star_corona.png`
+  billboard, sharper photon ring + Doppler asymmetry when close. Smoother disc turbulence,
+  higher-quality raymarch when near, stylized infall view inside the capture sphere;
+  debris/brackets/radar hidden inside that volume.
+
 - **Explore world soul (F011).** Distant accretion black hole on the inward skyline,
   warm disk lighting, nebula/disk sky glow, parallax dust, debris brackets with
   600→400 km cross-fade, bus-scale clustered belts, BH-proximity audio tint.

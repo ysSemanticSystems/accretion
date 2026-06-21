@@ -15,6 +15,7 @@ const GAME_HUD := preload("res://scenes/ui/GameHud.tscn")
 @onready var run_objectives: Node = $RunObjectives
 
 var _hud: CanvasLayer
+var _run_seed: int = 1
 
 
 func _ready() -> void:
@@ -25,6 +26,9 @@ func _ready() -> void:
 	_apply_settings_to_ship()
 	if Settings:
 		Settings.settings_changed.connect(_apply_settings_to_ship)
+	if ship.has_signal("speed_band_changed"):
+		ship.speed_band_changed.connect(_on_speed_band_changed)
+		_on_speed_band_changed(ship.speed_band)
 	_hud = GAME_HUD.instantiate()
 	add_child(_hud)
 	if _hud.has_method("bind_navigation"):
@@ -37,10 +41,58 @@ func _ready() -> void:
 
 
 func configure_run(seed: int) -> void:
+	_run_seed = seed
 	if run_state.has_method("set_run_seed"):
 		run_state.set_run_seed(seed)
 	if run_objectives.has_method("reset"):
 		run_objectives.reset()
+
+
+func restore_run(snapshot: Dictionary) -> void:
+	_run_seed = int(snapshot.get("seed", 1))
+	if run_state.has_method("set_run_seed"):
+		run_state.set_run_seed(_run_seed)
+	if progression.has_method("restore_state"):
+		progression.restore_state(snapshot.get("progression", {}))
+	if run_objectives.has_method("restore_state"):
+		run_objectives.restore_state(snapshot.get("objectives", {}))
+	if cargo.has_method("set_max_mass") and progression.has_method("cargo_capacity"):
+		cargo.set_max_mass(progression.cargo_capacity())
+	var held: float = float(snapshot.get("cargo_current", 0.0))
+	if cargo.has_method("try_add"):
+		cargo.clear_all()
+		cargo.try_add(held)
+	var pos := Vector3(
+		float(snapshot.get("ship_x", 0.0)),
+		float(snapshot.get("ship_y", 0.0)),
+		float(snapshot.get("ship_z", 0.0)),
+	)
+	ship.global_position = pos
+	RunTracker.begin_run(_run_seed)
+	RunTracker.elapsed_sec = float(snapshot.get("elapsed_sec", 0.0))
+	var obj: Dictionary = snapshot.get("objectives", {})
+	RunTracker.max_chebyshev = int(obj.get("max_sector_ring", obj.get("max_ring", 0)))
+	RunTracker.note_approach_zone(int(obj.get("max_approach_zone", 0)))
+	var closest: float = float(snapshot.get("closest_bh_km", -1.0))
+	if closest > 0.0:
+		RunTracker.note_bh_distance(closest)
+
+
+func export_snapshot() -> Dictionary:
+	var snap := {
+		"seed": _run_seed,
+		"ship_x": ship.global_position.x,
+		"ship_y": ship.global_position.y,
+		"ship_z": ship.global_position.z,
+		"cargo_current": cargo.current_mass if cargo != null else 0.0,
+		"elapsed_sec": RunTracker.elapsed_sec,
+	}
+	if progression.has_method("export_state"):
+		snap["progression"] = progression.export_state()
+	if run_objectives.has_method("export_state"):
+		snap["objectives"] = run_objectives.export_state()
+	snap["closest_bh_km"] = RunTracker.closest_bh_km
+	return snap
 
 
 func _apply_settings_to_ship() -> void:
@@ -96,3 +148,14 @@ func open_upgrade_dock() -> void:
 func _on_tractor_collected(_mass: float, _material_id: String, world_pos: Vector3) -> void:
 	if collect_feedback.has_method("play_at"):
 		collect_feedback.play_at(world_pos, _mass)
+
+
+func _on_speed_band_changed(band) -> void:
+	var label := "CRUISE" if int(band) == 1 else "IMPULSE"
+	GameEvents.speed_band_changed.emit(label)
+
+
+func persist_run() -> void:
+	if not GameState.is_playing():
+		return
+	SessionSave.save_active_run(export_snapshot())

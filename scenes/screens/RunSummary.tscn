@@ -32,7 +32,7 @@ theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Panel/Margin/VBox"]
 theme_override_font_sizes/font_size = 22
-text = "Run Summary"
+text = "Exploration Log"
 horizontal_alignment = 1
 
 [node name="Body" type="RichTextLabel" parent="Panel/Margin/VBox"]

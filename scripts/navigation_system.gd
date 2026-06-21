@@ -44,7 +44,9 @@ func navigation_objective() -> Dictionary:
 		return {}
 	if _cargo != null and _cargo.current_mass > 0.01:
 		return {"name": "depot", "pos": depot_position}
-	return _cached_nearest
+	if not _cached_nearest.is_empty():
+		return _cached_nearest
+	return {"name": "black_hole", "pos": WorldScale.BH_WORLD_POSITION}
 
 
 func ship_heading_deg() -> float:
@@ -58,7 +60,11 @@ func sector_label() -> String:
 	if ship == null:
 		return "sector ?"
 	var s: Vector3i = WorldScale.sector_coords(ship.global_position)
-	return "Sector (%d, %d, %d)" % [s.x, s.y, s.z]
+	var bh_km: float = WorldScale.distance_to_bh_km(ship.global_position)
+	return "Sector (%d, %d, %d) · M87* %s" % [
+		s.x, s.y, s.z,
+		WorldScale.format_distance(bh_km * WorldScale.UNITS_PER_KM),
+	]
 
 
 func position_label() -> String:

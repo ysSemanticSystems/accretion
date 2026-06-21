@@ -92,6 +92,12 @@ func _update_visibility() -> void:
 		_ship = get_tree().get_first_node_in_group("player_ship") as Node3D
 	if _ship == null:
 		return
+	if WorldScale.is_inside_bh_volume(_ship.global_position):
+		if _visual_root:
+			_visual_root.visible = false
+		if _beacon:
+			_beacon.visible = false
+		return
 	var dist: float = _ship.global_position.distance_to(global_position)
 	var beacon_strength: float = 0.0
 	if dist >= WorldScale.BEACON_FADE_OUT_UNITS:

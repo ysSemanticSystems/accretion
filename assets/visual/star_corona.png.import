@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6nd8aypcu1rm"
-path.s3tc="res://.godot/imported/Challenger_Purple.png-b5b75f51930856848928ddbb69dc3034.s3tc.ctex"
+uid="uid://dy5aeueu5w2k4"
+path.s3tc="res://.godot/imported/star_corona.png-f16721bf3e7e3547498c19e3b2496489.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/ships/challenger/textures/Challenger_Purple.png"
-dest_files=["res://.godot/imported/Challenger_Purple.png-b5b75f51930856848928ddbb69dc3034.s3tc.ctex"]
+source_file="res://assets/visual/star_corona.png"
+dest_files=["res://.godot/imported/star_corona.png-f16721bf3e7e3547498c19e3b2496489.s3tc.ctex"]
 
 [params]
 
@@ -24,7 +24,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -38,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

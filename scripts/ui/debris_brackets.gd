@@ -32,6 +32,8 @@ func _draw() -> void:
 		_ship = get_tree().get_first_node_in_group("player_ship") as Node3D
 	if _ship == null:
 		return
+	if WorldScale.is_inside_bh_volume(_ship.global_position):
+		return
 	var origin: Vector3 = _ship.global_position
 	var items: Array[Dictionary] = []
 	for node in get_tree().get_nodes_in_group("harvestable"):

@@ -49,10 +49,10 @@ without shortcuts. Not in current slice.
 - **Home depot + upgrades** ([F004](../features/F004-home-depot-progression.md))
 - **Seeded sector debris** ([F005](../features/F005-seeded-sector-debris.md))
 - **Navigation HUD** ([F003](../features/F003-navigation-radar.md)):
-  sector grid, position km (debug), **objective compass**, heading-up tactical radar
+  sector grid, **objective compass**, heading-up tactical radar, M87* approach ladder ([F012](../features/F012-milestone-ladder-victory.md))
 - **Home beacon** at origin — depot sink + motion parallax reference
+- **Distant accretion BH** on inward skyline ([F011](../features/F011-explore-world-soul.md)) — visual landmark in `Ship.tscn`
 - **Debris visibility rings** — mesh / beacon / radar-only per distance
-- Black hole remains a **future landmark** (not yet in `Ship.tscn`)
 - No wormhole or BH transit mechanics
 
 ### Compass modes (F004)

@@ -26,6 +26,9 @@ func set_nav(nav: Node) -> void:
 func _draw() -> void:
 	if _nav == null or _nav.ship == null:
 		return
+	var origin: Vector3 = _nav.ship.global_position
+	if WorldScale.is_inside_bh_volume(origin):
+		return
 	var center := size * 0.5
 	var max_range: float = WorldScale.RADAR_RANGE_UNITS
 	for ring_ratio in [0.33, 0.66, 1.0]:
@@ -43,7 +46,6 @@ func _draw() -> void:
 	var ship_basis: Basis = _nav.ship.global_transform.basis
 	var objective: Dictionary = _nav.navigation_objective() if _nav.has_method("navigation_objective") else {}
 	var objective_world: Vector3 = objective.get("pos", Vector3.INF)
-	var origin: Vector3 = _nav.ship.global_position
 
 	_draw_depot_blip(center, ship_basis, origin, max_range, objective)
 

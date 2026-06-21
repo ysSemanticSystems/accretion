@@ -21,6 +21,8 @@ shader_parameter/disc_speed = 1.2
 shader_parameter/disc_color = Color(0.8, 0.18, 0.05, 1)
 shader_parameter/inner_color = Color(1, 1, 0.95, 1)
 shader_parameter/emission_strength = 1.0
+shader_parameter/eht_shadow_scale = 2.6
+shader_parameter/view_shadow_strength = 0.4
 
 [sub_resource type="SphereMesh" id="SphereMesh_1"]
 radius = 0.5

@@ -6,9 +6,12 @@ const TRACK_EFFECTS := ["+100 hold", "+40 km range", "+25% cruise accel"]
 const MAX_PIPS := 3
 
 @onready var bank_label: Label = $Panel/Margin/VBox/BankLabel
+@onready var milestone_label: Label = $Panel/Margin/VBox/MilestoneLabel
+@onready var progress_label: Label = $Panel/Margin/VBox/ProgressLabel
 @onready var rows: VBoxContainer = $Panel/Margin/VBox/Rows
 
 var _progression: Node
+var _objectives: Node
 var _selected := 0
 
 
@@ -25,14 +28,47 @@ func bind_progression(progression: Node) -> void:
 		_refresh()
 
 
+func bind_objectives(objectives: Node) -> void:
+	_objectives = objectives
+	if is_node_ready():
+		_refresh()
+
+
 func _refresh() -> void:
 	if _progression == null:
 		return
 	bank_label.text = "Banked: %.0f u" % _progression.banked_mass
+	progress_label.text = "Upgrades %d / %d" % [
+		_progression.total_upgrades(),
+		_progression.max_upgrades(),
+	]
+	_update_milestone_label()
 	for child in rows.get_children():
 		child.queue_free()
 	for i in 3:
 		rows.add_child(_make_row(i))
+
+
+func _update_milestone_label() -> void:
+	const WorldScale = preload("res://scripts/world_scale.gd")
+	var max_zone := 0
+	var next_zone := 1
+	if _objectives != null:
+		max_zone = _objectives.max_approach_zone
+		next_zone = WorldScale.next_approach_zone(max_zone)
+	var zone_count := WorldScale.APPROACH_ZONE_COUNT
+	var parts: PackedStringArray = []
+	for zone in range(1, zone_count + 1):
+		if zone <= max_zone:
+			parts.append("●")
+		elif zone == next_zone:
+			parts.append("◐")
+		else:
+			parts.append("○")
+	milestone_label.text = "M87* approach %s · next: %s" % [
+		" ".join(parts),
+		WorldScale.approach_zone_label(next_zone),
+	]
 
 
 func _make_row(kind: int) -> Label:
@@ -42,7 +78,7 @@ func _make_row(kind: int) -> Label:
 	var pips := ""
 	for p in MAX_PIPS:
 		pips += "●" if p < level else "○"
-	var prefix := "▣ " if kind == _selected else "  "
+	var prefix := "> " if kind == _selected else "  "
 	var cost_text := "maxed" if cost == INF else "%.0f u" % cost
 	var row := Label.new()
 	row.text = "%s%s  %s  %s  %s" % [

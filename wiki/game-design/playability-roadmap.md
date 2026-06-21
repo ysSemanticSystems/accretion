@@ -13,18 +13,18 @@ Master plan integrating external playability critique into wiki-first RFCs and
 implementation waves. **Consequences before features** — close the loop, fix real
 bugs, add feel, then enable replay.
 
-## Validated findings
+## Validated findings (historical — addressed in code)
 
-| Finding | Code anchor | Wave |
+| Finding | Code anchor | Status |
 |---|---|---|
-| Cruise band dead (cap-only, terminal ~43 km/s) | `ship_controller.gd` thrust/drag | F001 v2 (PR2) |
-| Roll cancelled by auto-level | `Basis.looking_at` in `_apply_auto_level` | F001 v2 (PR2) |
-| Wiki/code tuning drift | F001 table vs `mouse_sensitivity`, `auto_level_strength` | F001 v2 (PR2) |
-| No speed cues; position km as motion proof | `distance-and-visibility.md`, `chase_camera.gd` | F006 (PR3) |
-| Flat radar drops Y; world-fixed not heading-up | `navigation_radar.gd` | F003 amend (PR5) |
-| Field mass 336 < 500 cap; no sink | `debris_field.gd`, `cargo_hold.gd` | F004 + F005 (PR1, PR6) |
-| Silent collection; dead Area3D | `tractor_beam.gd`, `harvestable_debris.tscn` | F002 amend (PR4) |
-| Static finite field | `debris_field.gd` spawn once | F005 (PR6) |
+| Cruise band dead (cap-only, terminal ~43 km/s) | `ship_controller.gd` thrust/drag | Fixed F001 v2 |
+| Roll cancelled by auto-level | `ship_controller.gd` | Fixed F001 v3 (roll-only) |
+| Wiki/code tuning drift | F001 table vs exports | Tracked in F001 |
+| No speed cues; position km as motion proof | `chase_camera.gd`, HUD | F006 + F010 |
+| Flat radar drops Y; world-fixed not heading-up | `navigation_radar.gd` | Fixed F003 |
+| Field mass 336 < 500 cap; no sink | `debris_field.gd`, F004 depot | Fixed PR1+PR6 |
+| Silent collection; dead Area3D | `tractor_beam.gd` | Fixed F002 |
+| Static finite field | `debris_field.gd` spawn once | Fixed F005 |
 
 ## Feature map
 
@@ -39,6 +39,7 @@ bugs, add feel, then enable replay.
 | [F008](../features/F008-game-shell.md) | Game shell + menus | PR8 |
 | [F009](../features/F009-settings-audio.md) | Settings + audio buses | PR8 |
 | [F010](../features/F010-hud-component.md) | Event-driven HUD | PR8 |
+| [F012](../features/F012-milestone-ladder-victory.md) | Exploration milestones + Continue | PR9 |
 
 ## PR sequencing (continued)
 

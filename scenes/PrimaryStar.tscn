@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://bu4wkbskhayy"]
+
+[ext_resource type="Script" path="res://scripts/primary_star.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/star_billboard.gdshader" id="2_shader"]
+[ext_resource type="Texture2D" path="res://assets/visual/star_corona.png" id="3_tex"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_star"]
+render_priority = 1
+shader = ExtResource("2_shader")
+shader_parameter/corona_texture = ExtResource("3_tex")
+shader_parameter/star_color = Color(1, 0.96, 0.88, 1)
+shader_parameter/corona_boost = 1.4
+
+[sub_resource type="QuadMesh" id="QuadMesh_star"]
+size = Vector2(2, 2)
+
+[node name="PrimaryStar" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Billboard" type="MeshInstance3D" parent="."]
+material_override = SubResource("ShaderMaterial_star")
+mesh = SubResource("QuadMesh_star")

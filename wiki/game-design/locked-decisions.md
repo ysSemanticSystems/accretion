@@ -32,7 +32,7 @@ is updated in the same session/PR. Agents and implementers must not contradict t
 |---|---|
 | BH phase ratio | **100% explore + resource collection** for now |
 | Accretion survival | **Deferred** — do not wire disk feeding / Eddington loop into ship gameplay yet |
-| Black hole interaction | **Visual landmark only** — distant lensing disk, no traversal mechanics yet |
+| Black hole interaction | **Approach and study the accretion disk** — fly inward through lensing zones; milestones are exploration feedback only. No win state. Full insertion prestige remains future. |
 | Universe count | **TBD** — do not design multi-universe prestige until BH/wormhole navigation requires it |
 | **Home depot** | **Origin beacon is v1 collection sink** until onboard refinery ships ([F004](../features/F004-home-depot-progression.md)) |
 

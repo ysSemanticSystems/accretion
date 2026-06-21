@@ -5,11 +5,13 @@ extends Control
 
 var _target := Vector3.ZERO
 var _kind := ""
+var _dist: float = INF
 
 
-func set_target(world_pos: Vector3, kind: String) -> void:
+func set_target(world_pos: Vector3, kind: String, dist: float = INF) -> void:
 	_target = world_pos
 	_kind = kind
+	_dist = dist
 	queue_redraw()
 
 
@@ -37,6 +39,17 @@ func _draw() -> void:
 	arrow.rotation = dir.angle() + PI * 0.5
 	var color := Color(0.35, 0.85, 1.0) if _kind == "depot" else Color(1.0, 0.65, 0.25)
 	arrow.modulate = color
+	if _dist < INF:
+		arrow.text = _fmt_dist(_dist)
+	else:
+		arrow.text = "▲"
+
+
+func _fmt_dist(units: float) -> String:
+	const WorldScale = preload("res://scripts/world_scale.gd")
+	if units >= 1000.0:
+		return "%.0f km" % (units / WorldScale.UNITS_PER_KM)
+	return "%.0f u" % units
 
 
 func _clamp_to_edge(p: Vector2, rect: Rect2) -> Vector2:

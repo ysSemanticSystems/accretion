@@ -43,6 +43,8 @@ func _run() -> int:
 	failures.append_array(_test_shader_qpo_fix())
 	failures.append_array(_test_settings_apply_runtime())
 	failures.append_array(await _test_bh_lab_flow())
+	failures.append_array(_test_approach_zone_constants())
+	failures.append_array(_test_session_save_roundtrip())
 	if failures.is_empty():
 		print("[presentation_tests] OK (%d scenes, shell + gameplay regressions)" % SCENE_PATHS.size())
 		return 0
@@ -299,6 +301,17 @@ func _test_visibility_constants() -> Array[String]:
 		failures.append("VISUAL_MESH_RADIUS should not exceed BEACON_FADE_OUT")
 	if WorldScale.BH_WORLD_POSITION.z >= 0.0:
 		failures.append("BH_WORLD_POSITION should lie inward (-Z)")
+	if WorldScale.BH_VISUAL_SPHERE_RADIUS <= 0.0:
+		failures.append("BH_VISUAL_SPHERE_RADIUS must be positive")
+	if not WorldScale.is_inside_bh_volume(WorldScale.BH_WORLD_POSITION):
+		failures.append("BH centre should read as inside capture volume")
+	var outside: Vector3 = WorldScale.BH_WORLD_POSITION + Vector3(
+		WorldScale.BH_VISUAL_SPHERE_RADIUS + 500.0, 0.0, 0.0
+	)
+	if WorldScale.is_inside_bh_volume(outside):
+		failures.append("outside capture sphere should not read as inside")
+	if WorldScale.bh_interior_blend(WorldScale.BH_WORLD_POSITION) < 0.99:
+		failures.append("BH centre should have full interior blend")
 	return failures
 
 
@@ -368,4 +381,51 @@ func _test_bh_lab_flow() -> Array[String]:
 	shell.queue_free()
 	GameState.state = prior_state
 	get_tree().paused = false
+	return failures
+
+
+func _test_approach_zone_constants() -> Array[String]:
+	var failures: Array[String] = []
+	const WorldScale = preload("res://scripts/world_scale.gd")
+	if WorldScale.APPROACH_ZONE_COUNT != 4:
+		failures.append("APPROACH_ZONE_COUNT expected 4")
+	if WorldScale.APPROACH_ZONE_DISTANCES.size() != 4:
+		failures.append("APPROACH_ZONE_DISTANCES expected 4 thresholds")
+	if WorldScale.distance_to_bh_km(Vector3.ZERO) <= 0.0:
+		failures.append("distance_to_bh_km at origin should be positive")
+	var star_dir: Vector3 = (
+		WorldScale.PRIMARY_STAR_POSITION - WorldScale.BH_WORLD_POSITION
+	).normalized()
+	if absf(star_dir.dot((WorldScale.BH_WORLD_POSITION - Vector3.ZERO).normalized())) > 0.92:
+		failures.append("primary star should not share bearing with M87*")
+	return failures
+
+
+func _test_session_save_roundtrip() -> Array[String]:
+	var failures: Array[String] = []
+	SessionSave.clear_active_run()
+	if SessionSave.has_active_run:
+		failures.append("SessionSave still has active run after clear")
+	var snap := {
+		"seed": 4242,
+		"ship_x": 12.0,
+		"ship_y": 3.0,
+		"ship_z": -50.0,
+		"cargo_current": 120.0,
+		"elapsed_sec": 99.5,
+		"progression": {"banked_mass": 200.0, "cargo_level": 1},
+		"objectives": {
+			"max_approach_zone": 2,
+			"max_sector_ring": 1,
+		},
+	}
+	SessionSave.save_active_run(snap)
+	if not SessionSave.has_active_run:
+		failures.append("SessionSave did not mark active run after save")
+	var loaded: Dictionary = SessionSave.active_snapshot()
+	if int(loaded.get("seed", -1)) != 4242:
+		failures.append("SessionSave round-trip seed mismatch")
+	if float(loaded.get("cargo_current", 0.0)) != 120.0:
+		failures.append("SessionSave round-trip cargo mismatch")
+	SessionSave.clear_active_run()
 	return failures

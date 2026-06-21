@@ -6,14 +6,14 @@ layer: features
 depends_on: [F001-third-person-flight, distance-and-visibility, F004-home-depot-progression]
 blocks: []
 acceptance:
-  - "HUD shows sector grid coordinates and ship position in km updating while flying"
+  - "HUD shows sector grid coordinates updating while flying"
   - "Compass tracks navigation objective: depot when cargo loaded, nearest debris when empty"
   - "Tactical radar displays harvestable blips with sqrt-scaled layout to 2500 km"
   - "Cyan depot beacon on radar; objective blip highlighted (depot when loaded, debris when empty)"
   - "Range rings at 33%, 66%, and 100% of radar radius"
   - "Radar blips show altitude stalks (signed Y offset from ship)"
   - "Radar disc is heading-up (ship local XZ projection rotated with ship yaw)"
-  - "Debris shows mesh within 500 km and emissive beacon marker beyond until 8000 km"
+  - "Debris shows PBR mesh within 500 km and beacon marker beyond until 8000 km"
   - "Home beacon at origin provides visual motion reference"
 implements:
   - "scripts/world_scale.gd"
