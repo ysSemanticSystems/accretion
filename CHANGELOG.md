@@ -5,6 +5,25 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Astropy-oracle pipeline: `scripts/gen_constants.py` → `constants.rs`,
+  `scripts/gen_golden.py` → `golden.json`; `scripts/check_invariants.sh` and
+  `make check` gate (C1–C6).
+- Rules `11-constants-provenance`, `12-gdext-api-pinning`.
+- Playable controls: keyboard (Q/E mass, Z/X feed, A/D spin, 1/2/3 presets),
+  mouse orbit + scroll zoom, RichText telemetry HUD, super-Eddington warning.
+- `r_s()`, `r_isco()`, `luminosity_from_mdot()`, `eddington_ratio()` in core.
+
+### Changed
+
+- Physical constants are generated from astropy (no hand-written M_sun).
+- Golden tests use astropy oracle fixtures, not hand-pinned magnitudes.
+- `compatibility_minimum = 4.6` matches `api-4-6` gdext feature.
+- HUD shows human-readable masses, luminosities, temperatures (not raw `%e`).
+
 ## [0.1.0] - 2026-06-20
 
 Slice 0: prove the architecture end to end — pure Rust physics core, thin gdext

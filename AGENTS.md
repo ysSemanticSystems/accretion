@@ -21,10 +21,16 @@ per-commit, and not inflated into the GitHub co-author graph.
 Build the native library before opening the editor:
 
 ```sh
-cargo test            # physics golden tests
+make check            # full gate: generators, invariants, test, clippy, build
+# or manually:
+cargo test            # physics golden tests (astropy oracle + analytic)
 cargo build           # produces target/debug/libgodot_ext.dylib
 # then open the Godot 4.7 project and run scenes/Main.tscn
 ```
+
+Physical constants and golden fixtures are **generated** from astropy:
+`python3 scripts/gen_constants.py` and `python3 scripts/gen_golden.py`.
+Do not hand-edit `constants.rs` or `golden.json`.
 
 ## Prime directives (memorize)
 

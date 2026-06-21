@@ -47,13 +47,24 @@ results (ISCO = 6 at spin 0) get tight tolerances.
 
 ## The current golden set (exit criteria for Slice 0)
 
-- `l_eddington(10 M_sun) ~ 1.26e39 erg/s` (textbook, ~1%).
-- Schwarzschild ISCO ratio `r_isco / (GM/c^2) == 6` (exact).
-- Shakura-Sunyaev scaling `T(2r) / T(r) == 2^(-3/4)` (within 1e-9).
-- A pinned `disk_temperature` value at a documented `(M, Mdot, r)` triple.
+- `golden.json` oracle cases for `l_eddington` and `disk_temperature` (astropy-generated).
+- Schwarzschild ISCO ratio `r_isco / R_g == 6` (exact analytic).
+- Shakura-Sunyaev scaling `T(2r)/T(r) == 2^(-3/4)` (exact analytic).
 
-The gate is `cargo test` green plus `cargo clippy --workspace -- -D warnings`
-clean.
+The gate is `make check` (or `cargo test` + `scripts/check_invariants.sh`) green plus
+`cargo clippy --workspace -- -D warnings` clean.
+
+## Physics-test radii (invariant)
+
+- Radii in physics tests are named multiples of a physical scale via `r_s(m)` or
+  `r_isco(m, a)`. Bare length literals are forbidden in `crates/accretion-core/tests/`.
+  Check: `! grep -rEn '[0-9]+\.?[0-9]*[eE][+-]?[0-9]+' crates/accretion-core/tests --include='*.rs'`
+- Any test radius MUST be ≥ `r_isco(m, a)` unless the test's purpose is the sub-ISCO
+  regime, stated in a comment.
+
+## Workspace boundary (invariant)
+
+- `cargo tree -p accretion-core` MUST NOT contain `godot`. Enforced in `make check`.
 
 ## Things to avoid in tests
 

@@ -1,0 +1,46 @@
+{
+  "source": "astropy 6.0.1",
+  "cases": [
+    {
+      "fn": "l_eddington",
+      "args": {
+        "m_bh_msun": 10.0
+      },
+      "expected": 1.2570651798467907e+39
+    },
+    {
+      "fn": "l_eddington",
+      "args": {
+        "m_bh_msun": 1000000.0
+      },
+      "expected": 1.2570651798467905e+44
+    },
+    {
+      "fn": "l_eddington",
+      "args": {
+        "m_bh_msun": 6500000000.0
+      },
+      "expected": 8.170923669004139e+47
+    },
+    {
+      "fn": "disk_temperature",
+      "args": {
+        "m_bh_msun": 10.0,
+        "mdot_gs": 1e+18,
+        "r_cm": 29532500.761002492
+      },
+      "radius": "10.0*R_S",
+      "expected": 3227157.4536428344
+    },
+    {
+      "fn": "disk_temperature",
+      "args": {
+        "m_bh_msun": 10.0,
+        "mdot_gs": 1e+18,
+        "r_cm": 59065001.522004984
+      },
+      "radius": "20.0*R_S",
+      "expected": 1918879.3025530614
+    }
+  ]
+}

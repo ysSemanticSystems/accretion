@@ -82,4 +82,14 @@ silently "fix" it without a golden test for the new peak behavior.
 - [ ] Primary-source citation present in the doc comment.
 - [ ] No invented / placeholder value on any code path.
 - [ ] No physical constant duplicated outside `accretion-core`.
-- [ ] A golden test asserts a hand-computed / textbook value (rule 05).
+- [ ] A golden test asserts against the astropy oracle or an analytic identity (rule 05).
+
+## Golden values (invariant)
+
+- Every numeric golden test value comes from an independent oracle: `scripts/gen_golden.py`
+  computing the quantity with astropy. Never assert against a value produced by the Rust
+  code under test (tautological), and never hand-type a magnitude.
+- `crates/accretion-core/tests/fixtures/golden.json` is generated; regeneration is
+  byte-identical or the build fails.
+- Tolerance is explicit and stated in the test (`<= 1e-9 * |expected|`). Analytic
+  identities (e.g. T(2r)/T(r) = 2^-3/4) are tested exactly, with no oracle.
